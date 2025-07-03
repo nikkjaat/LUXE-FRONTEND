@@ -4,6 +4,7 @@ import { Search, ShoppingCart, User, Menu, X, Heart, LogOut, Settings, Store } f
 import { useAuth } from '../../context/AuthContext';
 import { useCart } from '../../context/CartContext';
 import { useWishlist } from '../../context/WishlistContext';
+import NotificationDropdown from '../NotificationDropdown';
 import styles from './Header.module.css';
 
 const Header = () => {
@@ -70,6 +71,9 @@ const Header = () => {
 
           {/* Right Actions */}
           <div className={styles.actions}>
+            {/* Notifications */}
+            {user && <NotificationDropdown />}
+
             {user?.role === 'user' && (
               <Link to="/wishlist" className={styles.actionButton}>
                 <Heart />
