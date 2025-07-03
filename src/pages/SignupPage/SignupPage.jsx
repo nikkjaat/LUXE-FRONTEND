@@ -18,7 +18,7 @@ const SignupPage = () => {
   const { signup, isLoading } = useAuth();
   const navigate = useNavigate();
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
     
@@ -27,7 +27,7 @@ const SignupPage = () => {
     }
   };
 
-  const calculatePasswordStrength = (password: string) => {
+  const calculatePasswordStrength = (password) => {
     let strength = 0;
     if (password.length >= 8) strength++;
     if (/[A-Z]/.test(password)) strength++;
@@ -37,7 +37,7 @@ const SignupPage = () => {
     setPasswordStrength(strength);
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
     

@@ -3,7 +3,7 @@ import { Search, Filter, Grid, List, ArrowRight } from 'lucide-react';
 import styles from './CategoriesPage.module.css';
 
 const CategoriesPage = () => {
-  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
+  const [viewMode, setViewMode] = useState('grid');
   const [searchTerm, setSearchTerm] = useState('');
 
   const categories = [

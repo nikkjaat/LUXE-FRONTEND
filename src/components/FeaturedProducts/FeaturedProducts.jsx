@@ -51,7 +51,7 @@ const FeaturedProducts = () => {
     }
   ];
 
-  const handleAddToCart = (product: any) => {
+  const handleAddToCart = (product) => {
     addToCart({
       id: product.id,
       name: product.name,
@@ -60,7 +60,7 @@ const FeaturedProducts = () => {
     });
   };
 
-  const handleWishlistToggle = (product: any) => {
+  const handleWishlistToggle = (product) => {
     if (isInWishlist(product.id)) {
       removeFromWishlist(product.id);
     } else {

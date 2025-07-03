@@ -43,7 +43,7 @@ const ProfilePage = () => {
     }
   ];
 
-  const getStatusColor = (status: string) => {
+  const getStatusColor = (status) => {
     switch (status) {
       case 'Delivered': return 'bg-green-100 text-green-800';
       case 'Processing': return 'bg-yellow-100 text-yellow-800';

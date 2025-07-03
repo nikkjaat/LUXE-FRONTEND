@@ -5,7 +5,7 @@ import { useWishlist } from '../../context/WishlistContext';
 import styles from './ShopPage.module.css';
 
 const ShopPage = () => {
-  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
+  const [viewMode, setViewMode] = useState('grid');
   const [searchTerm, setSearchTerm] = useState('');
   const [sortBy, setSortBy] = useState('featured');
   const [priceRange, setPriceRange] = useState([0, 1000]);
@@ -138,7 +138,7 @@ const ShopPage = () => {
     }
   });
 
-  const handleAddToCart = (product: any) => {
+  const handleAddToCart = (product) => {
     addToCart({
       id: product.id,
       name: product.name,
@@ -147,7 +147,7 @@ const ShopPage = () => {
     });
   };
 
-  const handleWishlistToggle = (product: any) => {
+  const handleWishlistToggle = (product) => {
     if (isInWishlist(product.id)) {
       removeFromWishlist(product.id);
     } else {

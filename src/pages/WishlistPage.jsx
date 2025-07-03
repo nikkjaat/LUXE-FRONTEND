@@ -8,7 +8,7 @@ const WishlistPage = () => {
   const { items, removeFromWishlist } = useWishlist();
   const { addToCart } = useCart();
 
-  const handleAddToCart = (item: any) => {
+  const handleAddToCart = (item) => {
     addToCart({
       id: item.id,
       name: item.name,
