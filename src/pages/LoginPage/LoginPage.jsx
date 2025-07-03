@@ -1,12 +1,13 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Mail, Lock, Eye, EyeOff, ArrowRight, Sparkles } from 'lucide-react';
+import { Mail, Lock, Eye, EyeOff, ArrowRight, Sparkles, User, Shield, Store } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import styles from './LoginPage.module.css';
 
 const LoginPage = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [role, setRole] = useState('user');
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const { login, isLoading } = useAuth();
@@ -17,12 +18,26 @@ const LoginPage = () => {
     setError('');
     
     try {
-      await login(email, password);
-      navigate('/');
+      await login(email, password, role);
+      
+      // Redirect based on role
+      if (role === 'admin') {
+        navigate('/admin/dashboard');
+      } else if (role === 'vendor') {
+        navigate('/vendor/dashboard');
+      } else {
+        navigate('/');
+      }
     } catch (err) {
       setError('Invalid email or password');
     }
   };
+
+  const roleOptions = [
+    { value: 'user', label: 'Customer', icon: User, color: 'bg-blue-500' },
+    { value: 'vendor', label: 'Vendor', icon: Store, color: 'bg-green-500' },
+    { value: 'admin', label: 'Admin', icon: Shield, color: 'bg-purple-500' }
+  ];
 
   return (
     <div className={styles.page}>
@@ -49,6 +64,32 @@ const LoginPage = () => {
                 {error}
               </div>
             )}
+
+            {/* Role Selection */}
+            <div className="mb-6">
+              <label className="block text-sm font-medium text-gray-700 mb-3">
+                Login as
+              </label>
+              <div className="grid grid-cols-3 gap-3">
+                {roleOptions.map((option) => (
+                  <button
+                    key={option.value}
+                    type="button"
+                    onClick={() => setRole(option.value)}
+                    className={`p-3 rounded-lg border-2 transition-all ${
+                      role === option.value
+                        ? 'border-blue-500 bg-blue-50'
+                        : 'border-gray-200 hover:border-gray-300'
+                    }`}
+                  >
+                    <div className={`${option.color} w-8 h-8 rounded-full flex items-center justify-center mx-auto mb-2`}>
+                      <option.icon className="h-4 w-4 text-white" />
+                    </div>
+                    <span className="text-sm font-medium text-gray-700">{option.label}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
 
             <div className={styles.formFields}>
               <div className={styles.fieldGroup}>
@@ -94,6 +135,16 @@ const LoginPage = () => {
                     {showPassword ? <EyeOff className={styles.toggleIcon} /> : <Eye className={styles.toggleIcon} />}
                   </button>
                 </div>
+              </div>
+            </div>
+
+            {/* Demo Credentials */}
+            <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 mb-4">
+              <h4 className="text-sm font-medium text-gray-900 mb-2">Demo Credentials</h4>
+              <div className="text-xs text-gray-600 space-y-1">
+                <p><strong>Admin:</strong> admin@luxe.com / admin123</p>
+                <p><strong>Vendor:</strong> vendor@luxe.com / vendor123</p>
+                <p><strong>User:</strong> user@luxe.com / user123</p>
               </div>
             </div>
 
@@ -157,12 +208,20 @@ const LoginPage = () => {
             </div>
           </div>
 
-          <p className={styles.signupPrompt}>
-            Don't have an account?{' '}
-            <Link to="/signup" className={styles.signupLink}>
-              Sign up now
-            </Link>
-          </p>
+          <div className="space-y-2 text-center">
+            <p className={styles.signupPrompt}>
+              Don't have an account?{' '}
+              <Link to="/signup" className={styles.signupLink}>
+                Sign up as customer
+              </Link>
+            </p>
+            <p className={styles.signupPrompt}>
+              Want to sell products?{' '}
+              <Link to="/vendor/signup" className={styles.signupLink}>
+                Become a vendor
+              </Link>
+            </p>
+          </div>
         </div>
       </div>
     </div>
