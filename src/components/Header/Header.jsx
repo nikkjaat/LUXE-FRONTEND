@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Search, ShoppingCart, User, Menu, X, Heart, LogOut, Settings, Store } from 'lucide-react';
+import { Search, ShoppingCart, User, Menu, X, Heart, LogOut, Settings, Store, Sparkles, Users } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { useCart } from '../../context/CartContext';
 import { useWishlist } from '../../context/WishlistContext';
 import NotificationDropdown from '../NotificationDropdown';
+import SmartSearch from '../SmartSearch';
 import styles from './Header.module.css';
 
 const Header = () => {
@@ -19,6 +20,10 @@ const Header = () => {
     logout();
     setIsUserMenuOpen(false);
     navigate('/');
+  };
+
+  const handleSearch = (query) => {
+    navigate(`/shop?search=${encodeURIComponent(query)}`);
   };
 
   const getDashboardLink = () => {
@@ -47,6 +52,14 @@ const Header = () => {
             <Link to="/" className={styles.navLink}>Home</Link>
             <Link to="/shop" className={styles.navLink}>Shop</Link>
             <Link to="/categories" className={styles.navLink}>Categories</Link>
+            <Link to="/ar-showroom" className={styles.navLink}>
+              <Sparkles className="h-4 w-4 inline mr-1" />
+              AR Showroom
+            </Link>
+            <Link to="/social" className={styles.navLink}>
+              <Users className="h-4 w-4 inline mr-1" />
+              Social
+            </Link>
             {!user && (
               <Link to="/vendor/signup" className={styles.navLink}>
                 <Store className="h-4 w-4 inline mr-1" />
@@ -57,16 +70,9 @@ const Header = () => {
             <a href="#" className={styles.navLink}>Contact</a>
           </nav>
 
-          {/* Search Bar */}
+          {/* Smart Search Bar */}
           <div className={styles.searchContainer}>
-            <div className={styles.searchWrapper}>
-              <input
-                type="text"
-                placeholder="Search products..."
-                className={styles.searchInput}
-              />
-              <Search className={styles.searchIcon} />
-            </div>
+            <SmartSearch onSearch={handleSearch} />
           </div>
 
           {/* Right Actions */}
@@ -111,14 +117,24 @@ const Header = () => {
                       {getDashboardLabel()}
                     </Link>
                     {user.role === 'admin' && (
-                      <Link
-                        to="/admin/vendor-applications"
-                        className={styles.dropdownItem}
-                        onClick={() => setIsUserMenuOpen(false)}
-                      >
-                        <Store className="h-4 w-4 mr-2" />
-                        Vendor Applications
-                      </Link>
+                      <>
+                        <Link
+                          to="/admin/vendor-applications"
+                          className={styles.dropdownItem}
+                          onClick={() => setIsUserMenuOpen(false)}
+                        >
+                          <Store className="h-4 w-4 mr-2" />
+                          Vendor Applications
+                        </Link>
+                        <Link
+                          to="/admin/promotions"
+                          className={styles.dropdownItem}
+                          onClick={() => setIsUserMenuOpen(false)}
+                        >
+                          <Sparkles className="h-4 w-4 mr-2" />
+                          Promotions
+                        </Link>
+                      </>
                     )}
                     {user.role === 'vendor' && (
                       <Link
@@ -174,6 +190,8 @@ const Header = () => {
               <Link to="/" className={styles.mobileNavLink}>Home</Link>
               <Link to="/shop" className={styles.mobileNavLink}>Shop</Link>
               <Link to="/categories" className={styles.mobileNavLink}>Categories</Link>
+              <Link to="/ar-showroom" className={styles.mobileNavLink}>AR Showroom</Link>
+              <Link to="/social" className={styles.mobileNavLink}>Social</Link>
               {!user && (
                 <Link to="/vendor/signup" className={styles.mobileNavLink}>
                   Become a Vendor
