@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { Search, TrendingUp, Clock, X } from 'lucide-react';
+import React, { useState, useEffect, useRef } from 'react';
+import { Search, TrendingUp, Clock, X, Mic, MicOff } from 'lucide-react';
 import { useAI } from '../context/AIContext';
 import VoiceSearch from './VoiceSearch';
 import VisualSearch from './VisualSearch';
@@ -8,12 +8,28 @@ const SmartSearch = ({ onSearch }) => {
   const [query, setQuery] = useState('');
   const [suggestions, setSuggestions] = useState([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
+  const [voiceText, setVoiceText] = useState('');
   const [recentSearches, setRecentSearches] = useState([
     'leather handbag',
     'designer watch',
     'silk scarf'
   ]);
   const { getSmartSearchSuggestions } = useAI();
+  const searchRef = useRef(null);
+
+  // Close suggestions when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (searchRef.current && !searchRef.current.contains(event.target)) {
+        setShowSuggestions(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
 
   useEffect(() => {
     if (query.length > 2) {
@@ -25,12 +41,20 @@ const SmartSearch = ({ onSearch }) => {
     }
   }, [query, getSmartSearchSuggestions]);
 
+  // Update query when voice text changes
+  useEffect(() => {
+    if (voiceText) {
+      setQuery(voiceText);
+    }
+  }, [voiceText]);
+
   const handleSearch = (searchQuery) => {
     const finalQuery = searchQuery || query;
     if (finalQuery.trim()) {
       onSearch(finalQuery);
       setRecentSearches(prev => [finalQuery, ...prev.filter(s => s !== finalQuery)].slice(0, 5));
       setQuery('');
+      setVoiceText('');
       setShowSuggestions(false);
     }
   };
@@ -41,12 +65,12 @@ const SmartSearch = ({ onSearch }) => {
   };
 
   const handleVoiceSearch = (transcript) => {
+    setVoiceText(transcript);
     setQuery(transcript);
     handleSearch(transcript);
   };
 
   const handleVisualSearchResults = (results) => {
-    // Handle visual search results
     console.log('Visual search results:', results);
   };
 
@@ -59,7 +83,7 @@ const SmartSearch = ({ onSearch }) => {
   };
 
   return (
-    <div className="relative w-full max-w-2xl">
+    <div className="relative w-full" ref={searchRef}>
       <div className="relative">
         <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
           <Search className="h-5 w-5 text-gray-400" />
@@ -70,18 +94,42 @@ const SmartSearch = ({ onSearch }) => {
           onChange={(e) => setQuery(e.target.value)}
           onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
           onFocus={() => setShowSuggestions(true)}
-          className="block w-full pl-10 pr-20 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-lg"
-          placeholder="Search products, brands, categories..."
+          className="block w-full pl-10 pr-20 py-2 md:py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm md:text-lg"
+          placeholder="Search..."
         />
-        <div className="absolute inset-y-0 right-0 flex items-center pr-3 space-x-2">
-          <VoiceSearch onSearch={handleVoiceSearch} />
-          <VisualSearch onResults={handleVisualSearchResults} />
+        
+        {/* Voice Text Display */}
+        {voiceText && (
+          <div className="absolute top-full left-0 right-0 mt-1 bg-blue-50 border border-blue-200 rounded-lg p-2 z-50">
+            <div className="flex items-center justify-between">
+              <span className="text-sm text-blue-800">Voice: "{voiceText}"</span>
+              <button
+                onClick={() => {
+                  setVoiceText('');
+                  setQuery('');
+                }}
+                className="text-blue-600 hover:text-blue-800"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+          </div>
+        )}
+        
+        <div className="absolute inset-y-0 right-0 flex items-center pr-3 space-x-1">
+          <div className="hidden md:flex items-center space-x-1">
+            <VoiceSearch onSearch={handleVoiceSearch} onTranscript={setVoiceText} />
+            <VisualSearch onResults={handleVisualSearchResults} />
+          </div>
           {query && (
             <button
-              onClick={() => setQuery('')}
+              onClick={() => {
+                setQuery('');
+                setVoiceText('');
+              }}
               className="text-gray-400 hover:text-gray-600"
             >
-              <X className="h-5 w-5" />
+              <X className="h-4 w-4" />
             </button>
           )}
         </div>
@@ -103,7 +151,7 @@ const SmartSearch = ({ onSearch }) => {
                   className="w-full flex items-center px-3 py-2 hover:bg-gray-100 rounded-lg text-left"
                 >
                   {getSuggestionIcon(suggestion.type)}
-                  <span className="ml-3 flex-1">{suggestion.text}</span>
+                  <span className="ml-3 flex-1 text-sm">{suggestion.text}</span>
                   <span className="text-xs text-gray-500">
                     {suggestion.count} items
                   </span>
@@ -125,7 +173,7 @@ const SmartSearch = ({ onSearch }) => {
                   className="w-full flex items-center px-3 py-2 hover:bg-gray-100 rounded-lg text-left"
                 >
                   <Clock className="h-4 w-4 text-gray-400" />
-                  <span className="ml-3">{search}</span>
+                  <span className="ml-3 text-sm">{search}</span>
                 </button>
               ))}
             </div>
@@ -143,7 +191,7 @@ const SmartSearch = ({ onSearch }) => {
                 className="w-full flex items-center px-3 py-2 hover:bg-gray-100 rounded-lg text-left"
               >
                 <TrendingUp className="h-4 w-4 text-orange-500" />
-                <span className="ml-3">{trend}</span>
+                <span className="ml-3 text-sm">{trend}</span>
               </button>
             ))}
           </div>

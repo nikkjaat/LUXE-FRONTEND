@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Mic, MicOff, Volume2 } from 'lucide-react';
 
-const VoiceSearch = ({ onSearch }) => {
+const VoiceSearch = ({ onSearch, onTranscript }) => {
   const [isListening, setIsListening] = useState(false);
   const [transcript, setTranscript] = useState('');
   const [recognition, setRecognition] = useState(null);
@@ -24,6 +24,11 @@ const VoiceSearch = ({ onSearch }) => {
         const transcriptResult = event.results[current][0].transcript;
         setTranscript(transcriptResult);
         
+        // Send interim results to parent
+        if (onTranscript) {
+          onTranscript(transcriptResult);
+        }
+        
         if (event.results[current].isFinal) {
           onSearch(transcriptResult);
           setTranscript('');
@@ -37,11 +42,12 @@ const VoiceSearch = ({ onSearch }) => {
       recognitionInstance.onerror = (event) => {
         console.error('Speech recognition error:', event.error);
         setIsListening(false);
+        setTranscript('');
       };
 
       setRecognition(recognitionInstance);
     }
-  }, [onSearch]);
+  }, [onSearch, onTranscript]);
 
   const startListening = () => {
     if (recognition) {
@@ -67,36 +73,24 @@ const VoiceSearch = ({ onSearch }) => {
   };
 
   return (
-    <div className="flex items-center space-x-2">
+    <div className="flex items-center space-x-1">
       <button
         onClick={isListening ? stopListening : startListening}
-        className={`p-2 rounded-full transition-all duration-300 ${
+        className={`p-1.5 rounded-full transition-all duration-300 ${
           isListening
             ? 'bg-red-500 text-white animate-pulse'
             : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
         }`}
         title={isListening ? 'Stop listening' : 'Start voice search'}
       >
-        {isListening ? <MicOff className="h-5 w-5" /> : <Mic className="h-5 w-5" />}
+        {isListening ? <MicOff className="h-4 w-4" /> : <Mic className="h-4 w-4" />}
       </button>
-
-      {transcript && (
-        <div className="flex items-center space-x-2 bg-blue-50 px-3 py-2 rounded-lg">
-          <span className="text-sm text-blue-800">{transcript}</span>
-          <button
-            onClick={() => speak(transcript)}
-            className="text-blue-600 hover:text-blue-800"
-          >
-            <Volume2 className="h-4 w-4" />
-          </button>
-        </div>
-      )}
 
       {isListening && (
         <div className="flex items-center space-x-1">
-          <div className="w-2 h-2 bg-red-500 rounded-full animate-bounce"></div>
-          <div className="w-2 h-2 bg-red-500 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
-          <div className="w-2 h-2 bg-red-500 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+          <div className="w-1 h-1 bg-red-500 rounded-full animate-bounce"></div>
+          <div className="w-1 h-1 bg-red-500 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
+          <div className="w-1 h-1 bg-red-500 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
         </div>
       )}
     </div>
