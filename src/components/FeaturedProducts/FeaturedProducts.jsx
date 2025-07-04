@@ -1,5 +1,6 @@
 import React from 'react';
 import { Star, Heart, ShoppingCart } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import { useCart } from '../../context/CartContext';
 import { useWishlist } from '../../context/WishlistContext';
 import styles from './FeaturedProducts.module.css';
@@ -81,7 +82,7 @@ const FeaturedProducts = () => {
         <div className={styles.grid}>
           {products.map((product) => (
             <div key={product.id} className={styles.productCard}>
-              <div className={styles.imageContainer}>
+              <Link to={`/product/${product.id}`} className={styles.imageContainer}>
                 <img
                   src={product.image}
                   alt={product.name}
@@ -90,15 +91,16 @@ const FeaturedProducts = () => {
                 <div className={styles.badge}>
                   {product.badge}
                 </div>
-                <button
-                  onClick={() => handleWishlistToggle(product)}
-                  className={`${styles.wishlistButton} ${
-                    isInWishlist(product.id) ? styles.active : styles.inactive
-                  }`}
-                >
-                  <Heart className={`${styles.wishlistIcon} ${isInWishlist(product.id) ? styles.filled : ''}`} />
-                </button>
-              </div>
+              </Link>
+              
+              <button
+                onClick={() => handleWishlistToggle(product)}
+                className={`${styles.wishlistButton} ${
+                  isInWishlist(product.id) ? styles.active : styles.inactive
+                }`}
+              >
+                <Heart className={`${styles.wishlistIcon} ${isInWishlist(product.id) ? styles.filled : ''}`} />
+              </button>
 
               <div className={styles.content}>
                 <div className={styles.rating}>
@@ -115,7 +117,9 @@ const FeaturedProducts = () => {
                   <span className={styles.reviewCount}>({product.reviews})</span>
                 </div>
 
-                <h3 className={styles.productName}>{product.name}</h3>
+                <Link to={`/product/${product.id}`}>
+                  <h3 className={styles.productName}>{product.name}</h3>
+                </Link>
                 
                 <div className={styles.priceContainer}>
                   <div className={styles.priceGroup}>

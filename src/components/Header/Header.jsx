@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Search, ShoppingCart, User, Menu, X, Heart, LogOut, Settings, Store, Sparkles, Users } from 'lucide-react';
+import { Search, ShoppingCart, User, Menu, X, Heart, LogOut, Settings, Store, Sparkles, Users, Phone, Info } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { useCart } from '../../context/CartContext';
 import { useWishlist } from '../../context/WishlistContext';
@@ -15,6 +15,21 @@ const Header = () => {
   const { totalItems } = useCart();
   const { items: wishlistItems } = useWishlist();
   const navigate = useNavigate();
+  const userMenuRef = useRef(null);
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (userMenuRef.current && !userMenuRef.current.contains(event.target)) {
+        setIsUserMenuOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
 
   const handleLogout = () => {
     logout();
@@ -66,8 +81,6 @@ const Header = () => {
                 Become a Vendor
               </Link>
             )}
-            <a href="#" className={styles.navLink}>About</a>
-            <a href="#" className={styles.navLink}>Contact</a>
           </nav>
 
           {/* Smart Search Bar */}
@@ -92,7 +105,7 @@ const Header = () => {
             )}
 
             {user ? (
-              <div className={styles.userMenu}>
+              <div className={styles.userMenu} ref={userMenuRef}>
                 <button
                   onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
                   className={styles.userButton}
@@ -146,6 +159,16 @@ const Header = () => {
                         Add Product
                       </Link>
                     )}
+                    <div className={styles.dropdownDivider}></div>
+                    <a href="#about" className={styles.dropdownItem} onClick={() => setIsUserMenuOpen(false)}>
+                      <Info className="h-4 w-4 mr-2" />
+                      About
+                    </a>
+                    <a href="#contact" className={styles.dropdownItem} onClick={() => setIsUserMenuOpen(false)}>
+                      <Phone className="h-4 w-4 mr-2" />
+                      Contact
+                    </a>
+                    <div className={styles.dropdownDivider}></div>
                     <button
                       onClick={handleLogout}
                       className={styles.dropdownButton}
@@ -197,8 +220,8 @@ const Header = () => {
                   Become a Vendor
                 </Link>
               )}
-              <a href="#" className={styles.mobileNavLink}>About</a>
-              <a href="#" className={styles.mobileNavLink}>Contact</a>
+              <a href="#about" className={styles.mobileNavLink}>About</a>
+              <a href="#contact" className={styles.mobileNavLink}>Contact</a>
             </div>
           </div>
         )}

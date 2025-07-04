@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { ArrowLeft, Star, Heart, ShoppingCart, Share2, Truck, Shield, RotateCcw } from 'lucide-react';
+import { ArrowLeft, Star, Heart, ShoppingCart, Share2, Truck, Shield, RotateCcw, Sparkles } from 'lucide-react';
 import { useProducts } from '../context/ProductContext';
 import { useCart } from '../context/CartContext';
 import { useWishlist } from '../context/WishlistContext';
 import ProductReviews from '../components/ProductReviews';
 import ComparisonTool from '../components/ComparisonTool';
+import ARTryOn from '../components/ARTryOn';
 
 const ProductDetailPage = () => {
   const { id } = useParams();
@@ -16,6 +17,7 @@ const ProductDetailPage = () => {
   const [selectedImage, setSelectedImage] = useState(0);
   const [quantity, setQuantity] = useState(1);
   const [showComparison, setShowComparison] = useState(false);
+  const [showAR, setShowAR] = useState(false);
 
   const product = products.find(p => p.id === id);
   const relatedProducts = products.filter(p => p.category === product?.category && p.id !== id).slice(0, 4);
@@ -34,6 +36,7 @@ const ProductDetailPage = () => {
   }
 
   const images = [product.image, product.image, product.image]; // Mock multiple images
+  const isARCompatible = ['accessories', 'jewelry', 'watches'].includes(product.category);
 
   const handleAddToCart = () => {
     addToCart({
@@ -145,6 +148,19 @@ const ProductDetailPage = () => {
               </p>
             </div>
 
+            {/* AR Try-On Button */}
+            {isARCompatible && (
+              <div className="border-t border-gray-200 pt-6">
+                <button
+                  onClick={() => setShowAR(!showAR)}
+                  className="w-full bg-gradient-to-r from-purple-600 to-pink-600 text-white py-3 px-6 rounded-lg hover:from-purple-700 hover:to-pink-700 transition-all flex items-center justify-center mb-4"
+                >
+                  <Sparkles className="h-5 w-5 mr-2" />
+                  Try with AR
+                </button>
+              </div>
+            )}
+
             {/* Quantity and Actions */}
             <div className="border-t border-gray-200 pt-6 space-y-4">
               <div className="flex items-center space-x-4">
@@ -228,6 +244,13 @@ const ProductDetailPage = () => {
             </div>
           </div>
         </div>
+
+        {/* AR Try-On Section */}
+        {showAR && isARCompatible && (
+          <div className="mb-12">
+            <ARTryOn product={product} />
+          </div>
+        )}
 
         {/* Reviews Section */}
         <ProductReviews productId={product.id} />

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Bell, X, Check, Package, User, Gift, AlertCircle } from 'lucide-react';
 import { useNotifications } from '../context/NotificationContext';
 import { useAuth } from '../context/AuthContext';
@@ -7,9 +7,24 @@ const NotificationDropdown = () => {
   const [isOpen, setIsOpen] = useState(false);
   const { getUserNotifications, getUnreadCount, markAsRead, markAllAsRead } = useNotifications();
   const { user } = useAuth();
+  const dropdownRef = useRef(null);
 
   const notifications = getUserNotifications(user?.role === 'admin' ? 'admin' : user?.vendorId || 'user');
   const unreadCount = getUnreadCount(user?.role === 'admin' ? 'admin' : user?.vendorId || 'user');
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setIsOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
 
   const getNotificationIcon = (type) => {
     switch (type) {
@@ -21,7 +36,7 @@ const NotificationDropdown = () => {
   };
 
   return (
-    <div className="relative">
+    <div className="relative" ref={dropdownRef}>
       <button
         onClick={() => setIsOpen(!isOpen)}
         className="relative p-2 text-gray-600 hover:text-gray-900 transition-colors"
