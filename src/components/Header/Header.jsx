@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Search, ShoppingCart, User, Menu, X, Heart, LogOut, Settings, Store, Sparkles, Users, Phone, Info, Bell, Camera } from 'lucide-react';
+import { Search, ShoppingCart, User, Menu, X, Heart, LogOut, Settings, Store, Sparkles, Users, Phone, Info, Bell } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { useCart } from '../../context/CartContext';
 import { useWishlist } from '../../context/WishlistContext';
@@ -86,10 +86,10 @@ const Header = () => {
     }
   };
 
-  const handleUserMenuClick = (action) => {
+  const handleUserMenuClick = (path) => {
     setIsUserMenuOpen(false);
-    if (typeof action === 'function') {
-      action();
+    if (path) {
+      navigate(path);
     }
   };
 
@@ -118,7 +118,7 @@ const Header = () => {
               </Link>
             </div>
 
-            {/* Desktop Navigation */}
+            {/* Desktop Navigation - Always visible on desktop */}
             <nav className={`${styles.desktopNav} ${isSearchOpen ? styles.hidden : ''}`}>
               <Link to="/" className={styles.navLink}>
                 <span>Home</span>
@@ -145,14 +145,9 @@ const Header = () => {
               )}
             </nav>
 
-            {/* Desktop Search Container */}
-            <div className={`${styles.searchContainer} ${isSearchOpen ? styles.hidden : ''}`}>
-              <SmartSearch onSearch={handleSearch} />
-            </div>
-
             {/* Desktop Actions */}
             <div className={styles.desktopActions}>
-              {/* Search Button for Tablet */}
+              {/* Search Button - Shows on laptop/tablet when search is closed */}
               <button
                 onClick={() => setIsSearchOpen(true)}
                 className={`${styles.searchButton} ${isSearchOpen ? styles.hidden : ''}`}
@@ -161,11 +156,11 @@ const Header = () => {
                 <Search className="h-5 w-5" />
               </button>
 
-              {/* Wishlist - Desktop Only for Users */}
+              {/* Wishlist - Show on all screens for users */}
               {user?.role === 'user' && (
                 <Link 
                   to="/wishlist" 
-                  className={`${styles.actionButton} ${styles.desktopOnly} ${isSearchOpen ? styles.hidden : ''}`}
+                  className={`${styles.actionButton} ${isSearchOpen ? styles.hidden : ''}`}
                   aria-label="Wishlist"
                 >
                   <Heart className="h-5 w-5" />
@@ -177,11 +172,11 @@ const Header = () => {
                 </Link>
               )}
 
-              {/* Cart - Users Only */}
+              {/* Cart - Show on all screens for users */}
               {user?.role === 'user' && (
                 <Link 
                   to="/cart" 
-                  className={styles.actionButton}
+                  className={`${styles.actionButton} ${isSearchOpen ? styles.hidden : ''}`}
                   aria-label="Shopping Cart"
                 >
                   <ShoppingCart className="h-5 w-5" />
@@ -250,34 +245,6 @@ const Header = () => {
                         )}
                       </div>
 
-                      {/* User-specific items */}
-                      {user?.role === 'user' && (
-                        <>
-                          <Link
-                            to="/wishlist"
-                            className={`${styles.dropdownItem} ${styles.mobileTabletOnly}`}
-                            onClick={() => handleUserMenuClick()}
-                          >
-                            <Heart className="h-4 w-4" />
-                            <span>Wishlist</span>
-                            {wishlistItems.length > 0 && (
-                              <span className={styles.itemCount}>{wishlistItems.length}</span>
-                            )}
-                          </Link>
-                          <Link
-                            to="/cart"
-                            className={`${styles.dropdownItem} ${styles.mobileOnly}`}
-                            onClick={() => handleUserMenuClick()}
-                          >
-                            <ShoppingCart className="h-4 w-4" />
-                            <span>Cart</span>
-                            {totalItems > 0 && (
-                              <span className={styles.itemCount}>{totalItems}</span>
-                            )}
-                          </Link>
-                        </>
-                      )}
-
                       {/* Admin-specific items */}
                       {user.role === 'admin' && (
                         <>
@@ -334,162 +301,7 @@ const Header = () => {
                       <div className={styles.dropdownDivider}></div>
 
                       <button
-                        onClick={() => handleUserMenuClick(handleLogout)}
-                        className={styles.dropdownButton}
-                      >
-                        <LogOut className="h-4 w-4" />
-                        <span>Logout</span>
-                      </button>
-                    </div>
-                  )}
-                </div>
-              ) : (
-                <Link to="/login" className={styles.actionButton} aria-label="Login">
-                  <User className="h-5 w-5" />
-                </Link>
-              )}
-            </div>
-
-            {/* Mobile Actions */}
-            <div className={styles.mobileActions}>
-              {/* User Menu */}
-              {user ? (
-                <div className={styles.userMenu} ref={userMenuRef}>
-                  <button
-                    onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
-                    className={styles.mobileUserButton}
-                    aria-label="User Menu"
-                  >
-                    <div className={styles.avatarContainer}>
-                      <img
-                        src={user.avatar}
-                        alt={user.name}
-                        className={styles.avatar}
-                      />
-                      {unreadCount > 0 && (
-                        <span className={styles.notificationDot}></span>
-                      )}
-                    </div>
-                  </button>
-
-                  {isUserMenuOpen && (
-                    <div className={styles.mobileDropdown}>
-                      <div className={styles.dropdownHeader}>
-                        <img
-                          src={user.avatar}
-                          alt={user.name}
-                          className={styles.dropdownAvatar}
-                        />
-                        <div className={styles.dropdownUserInfo}>
-                          <span className={styles.dropdownUserName}>{user.name}</span>
-                          <span className={styles.dropdownUserRole}>
-                            {user.role === 'admin' ? 'Administrator' : 
-                             user.role === 'vendor' ? 'Vendor' : 'Customer'}
-                          </span>
-                        </div>
-                      </div>
-
-                      <div className={styles.dropdownDivider}></div>
-
-                      <Link
-                        to={getDashboardLink()}
-                        className={styles.dropdownItem}
-                        onClick={() => handleUserMenuClick()}
-                      >
-                        <Settings className="h-4 w-4" />
-                        <span>{getDashboardLabel()}</span>
-                      </Link>
-
-                      <div className={styles.dropdownItem}>
-                        <Bell className="h-4 w-4" />
-                        <span>Notifications</span>
-                        {unreadCount > 0 && (
-                          <span className={styles.notificationCount}>{unreadCount}</span>
-                        )}
-                      </div>
-
-                      {user?.role === 'user' && (
-                        <>
-                          <Link
-                            to="/wishlist"
-                            className={styles.dropdownItem}
-                            onClick={() => handleUserMenuClick()}
-                          >
-                            <Heart className="h-4 w-4" />
-                            <span>Wishlist</span>
-                            {wishlistItems.length > 0 && (
-                              <span className={styles.itemCount}>{wishlistItems.length}</span>
-                            )}
-                          </Link>
-                          <Link
-                            to="/cart"
-                            className={styles.dropdownItem}
-                            onClick={() => handleUserMenuClick()}
-                          >
-                            <ShoppingCart className="h-4 w-4" />
-                            <span>Cart</span>
-                            {totalItems > 0 && (
-                              <span className={styles.itemCount}>{totalItems}</span>
-                            )}
-                          </Link>
-                        </>
-                      )}
-
-                      {user.role === 'admin' && (
-                        <>
-                          <Link
-                            to="/admin/vendor-applications"
-                            className={styles.dropdownItem}
-                            onClick={() => handleUserMenuClick()}
-                          >
-                            <Store className="h-4 w-4" />
-                            <span>Vendor Applications</span>
-                          </Link>
-                          <Link
-                            to="/admin/promotions"
-                            className={styles.dropdownItem}
-                            onClick={() => handleUserMenuClick()}
-                          >
-                            <Sparkles className="h-4 w-4" />
-                            <span>Promotions</span>
-                          </Link>
-                        </>
-                      )}
-
-                      {user.role === 'vendor' && (
-                        <Link
-                          to="/vendor/add-product"
-                          className={styles.dropdownItem}
-                          onClick={() => handleUserMenuClick()}
-                        >
-                          <Store className="h-4 w-4" />
-                          <span>Add Product</span>
-                        </Link>
-                      )}
-
-                      <div className={styles.dropdownDivider}></div>
-
-                      <a 
-                        href="#about" 
-                        className={styles.dropdownItem}
-                        onClick={() => handleUserMenuClick()}
-                      >
-                        <Info className="h-4 w-4" />
-                        <span>About</span>
-                      </a>
-                      <a 
-                        href="#contact" 
-                        className={styles.dropdownItem}
-                        onClick={() => handleUserMenuClick()}
-                      >
-                        <Phone className="h-4 w-4" />
-                        <span>Contact</span>
-                      </a>
-
-                      <div className={styles.dropdownDivider}></div>
-
-                      <button
-                        onClick={() => handleUserMenuClick(handleLogout)}
+                        onClick={handleLogout}
                         className={styles.dropdownButton}
                       >
                         <LogOut className="h-4 w-4" />
@@ -504,7 +316,7 @@ const Header = () => {
                 </Link>
               )}
 
-              {/* Mobile Menu Button */}
+              {/* Mobile Menu Button - Show on tablet/mobile */}
               <button
                 className={styles.mobileMenuButton}
                 onClick={() => setIsMenuOpen(!isMenuOpen)}
@@ -515,7 +327,7 @@ const Header = () => {
             </div>
           </div>
 
-          {/* Mobile Search Bar */}
+          {/* Mobile Search Bar - Only on mobile */}
           <div className={styles.mobileSearchBar}>
             <div className={styles.mobileSearchContainer}>
               <SmartSearch onSearch={handleSearch} />
@@ -523,7 +335,7 @@ const Header = () => {
           </div>
         </div>
 
-        {/* Mobile Navigation Menu */}
+        {/* Mobile/Tablet Navigation Menu */}
         {isMenuOpen && (
           <div className={styles.mobileMenuOverlay} onClick={() => setIsMenuOpen(false)}>
             <div 
@@ -579,7 +391,7 @@ const Header = () => {
         )}
       </header>
 
-      {/* Search Overlay for Tablet */}
+      {/* Search Overlay for Laptop/Tablet */}
       {isSearchOpen && (
         <div className={styles.searchOverlay} onClick={() => setIsSearchOpen(false)}>
           <div 
