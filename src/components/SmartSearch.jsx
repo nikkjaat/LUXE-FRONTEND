@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Search, TrendingUp, Clock, X, Mic, MicOff, Camera } from 'lucide-react';
+import { Search, TrendingUp, Clock, X, Mic, Camera } from 'lucide-react';
 import { useAI } from '../context/AIContext';
 import VoiceSearch from './VoiceSearch';
 import VisualSearch from './VisualSearch';
@@ -21,7 +21,9 @@ const SmartSearch = ({ onSearch, autoFocus = false }) => {
   // Auto focus when requested
   useEffect(() => {
     if (autoFocus && inputRef.current) {
-      inputRef.current.focus();
+      setTimeout(() => {
+        inputRef.current.focus();
+      }, 100);
     }
   }, [autoFocus]);
 
@@ -103,8 +105,8 @@ const SmartSearch = ({ onSearch, autoFocus = false }) => {
           onChange={(e) => setQuery(e.target.value)}
           onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
           onFocus={() => setShowSuggestions(true)}
-          className="block w-full pl-10 pr-20 py-2 md:py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm md:text-lg"
-          placeholder="Search..."
+          className="block w-full pl-10 pr-20 py-2.5 md:py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm md:text-base transition-all duration-200 bg-gray-50 focus:bg-white"
+          placeholder="Search for products..."
         />
         
         {/* Voice Text Display */}
@@ -126,14 +128,17 @@ const SmartSearch = ({ onSearch, autoFocus = false }) => {
         )}
         
         <div className="absolute inset-y-0 right-0 flex items-center pr-3 space-x-1">
-          {/* Voice and Visual Search - Show on mobile and when space allows */}
+          {/* Voice and Visual Search */}
           <div className="flex items-center space-x-1">
             <VoiceSearch onSearch={handleVoiceSearch} onTranscript={setVoiceText} />
             <div className="hidden sm:block">
               <VisualSearch onResults={handleVisualSearchResults} />
             </div>
             <div className="block sm:hidden">
-              <button className="p-1.5 rounded-full bg-gray-100 text-gray-600 hover:bg-gray-200 transition-colors">
+              <button 
+                className="p-1.5 rounded-full bg-gray-100 text-gray-600 hover:bg-gray-200 transition-colors"
+                aria-label="Visual Search"
+              >
                 <Camera className="h-4 w-4" />
               </button>
             </div>
@@ -144,7 +149,8 @@ const SmartSearch = ({ onSearch, autoFocus = false }) => {
                 setQuery('');
                 setVoiceText('');
               }}
-              className="text-gray-400 hover:text-gray-600"
+              className="text-gray-400 hover:text-gray-600 p-1"
+              aria-label="Clear search"
             >
               <X className="h-4 w-4" />
             </button>
@@ -154,7 +160,7 @@ const SmartSearch = ({ onSearch, autoFocus = false }) => {
 
       {/* Search Suggestions */}
       {showSuggestions && (
-        <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-200 rounded-lg shadow-lg z-50 max-h-96 overflow-y-auto">
+        <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-200 rounded-xl shadow-lg z-50 max-h-96 overflow-y-auto">
           {/* AI Suggestions */}
           {suggestions.length > 0 && (
             <div className="p-2">
@@ -165,7 +171,7 @@ const SmartSearch = ({ onSearch, autoFocus = false }) => {
                 <button
                   key={index}
                   onClick={() => handleSuggestionClick(suggestion)}
-                  className="w-full flex items-center px-3 py-2 hover:bg-gray-100 rounded-lg text-left"
+                  className="w-full flex items-center px-3 py-2.5 hover:bg-gray-50 rounded-lg text-left transition-colors"
                 >
                   {getSuggestionIcon(suggestion.type)}
                   <span className="ml-3 flex-1 text-sm">{suggestion.text}</span>
@@ -187,7 +193,7 @@ const SmartSearch = ({ onSearch, autoFocus = false }) => {
                 <button
                   key={index}
                   onClick={() => handleSearch(search)}
-                  className="w-full flex items-center px-3 py-2 hover:bg-gray-100 rounded-lg text-left"
+                  className="w-full flex items-center px-3 py-2.5 hover:bg-gray-50 rounded-lg text-left transition-colors"
                 >
                   <Clock className="h-4 w-4 text-gray-400" />
                   <span className="ml-3 text-sm">{search}</span>
@@ -205,7 +211,7 @@ const SmartSearch = ({ onSearch, autoFocus = false }) => {
               <button
                 key={index}
                 onClick={() => handleSearch(trend)}
-                className="w-full flex items-center px-3 py-2 hover:bg-gray-100 rounded-lg text-left"
+                className="w-full flex items-center px-3 py-2.5 hover:bg-gray-50 rounded-lg text-left transition-colors"
               >
                 <TrendingUp className="h-4 w-4 text-orange-500" />
                 <span className="ml-3 text-sm">{trend}</span>
