@@ -11,12 +11,14 @@ import styles from './Header.module.css';
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
   const { user, logout } = useAuth();
   const { totalItems } = useCart();
   const { items: wishlistItems } = useWishlist();
   const navigate = useNavigate();
   const userMenuRef = useRef(null);
   const mobileMenuRef = useRef(null);
+  const searchOverlayRef = useRef(null);
 
   // Close dropdowns when clicking outside
   useEffect(() => {
@@ -29,6 +31,11 @@ const Header = () => {
       // Close mobile menu if clicking outside
       if (mobileMenuRef.current && !mobileMenuRef.current.contains(event.target)) {
         setIsMenuOpen(false);
+      }
+
+      // Close search overlay if clicking outside
+      if (searchOverlayRef.current && !searchOverlayRef.current.contains(event.target)) {
+        setIsSearchOpen(false);
       }
     };
 
@@ -46,6 +53,7 @@ const Header = () => {
 
   const handleSearch = (query) => {
     navigate(`/shop?search=${encodeURIComponent(query)}`);
+    setIsSearchOpen(false);
   };
 
   const handleMobileNavClick = (path) => {
@@ -68,271 +76,297 @@ const Header = () => {
   };
 
   return (
-    <header className={styles.header}>
-      <div className={styles.container}>
-        <div className={styles.nav}>
-          {/* Logo */}
-          <div className={styles.logo}>
-            <Link to="/" className={styles.logoLink}>LUXE</Link>
-          </div>
+    <>
+      <header className={styles.header}>
+        <div className={styles.container}>
+          <div className={styles.nav}>
+            {/* Logo */}
+            <div className={styles.logo}>
+              <Link to="/" className={styles.logoLink}>LUXE</Link>
+            </div>
 
-          {/* Desktop Navigation */}
-          <nav className={styles.desktopNav}>
-            <Link to="/" className={styles.navLink}>Home</Link>
-            <Link to="/shop" className={styles.navLink}>Shop</Link>
-            <Link to="/categories" className={styles.navLink}>Categories</Link>
-            <Link to="/ar-showroom" className={styles.navLink}>
-              <Sparkles className="h-4 w-4 inline mr-1" />
-              AR Showroom
-            </Link>
-            <Link to="/social" className={styles.navLink}>
-              <Users className="h-4 w-4 inline mr-1" />
-              Social
-            </Link>
-            {!user && (
-              <Link to="/vendor/signup" className={styles.navLink}>
-                <Store className="h-4 w-4 inline mr-1" />
-                Become a Vendor
+            {/* Desktop Navigation - Hidden when search is open */}
+            <nav className={`${styles.desktopNav} ${isSearchOpen ? styles.hidden : ''}`}>
+              <Link to="/" className={styles.navLink}>Home</Link>
+              <Link to="/shop" className={styles.navLink}>Shop</Link>
+              <Link to="/categories" className={styles.navLink}>Categories</Link>
+              <Link to="/ar-showroom" className={styles.navLink}>
+                <Sparkles className="h-4 w-4 inline mr-1" />
+                AR Showroom
               </Link>
-            )}
-          </nav>
-
-          {/* Desktop Search Bar */}
-          <div className={styles.searchContainer}>
-            <SmartSearch onSearch={handleSearch} />
-          </div>
-
-          {/* Desktop Actions */}
-          <div className={styles.desktopActions}>
-            {/* Notifications */}
-            {user && <NotificationDropdown />}
-
-            {user?.role === 'user' && (
-              <Link to="/wishlist" className={styles.actionButton}>
-                <Heart />
-                {wishlistItems.length > 0 && (
-                  <span className={`${styles.badge} ${styles.wishlistBadge}`}>
-                    {wishlistItems.length}
-                  </span>
-                )}
+              <Link to="/social" className={styles.navLink}>
+                <Users className="h-4 w-4 inline mr-1" />
+                Social
               </Link>
-            )}
+              {!user && (
+                <Link to="/vendor/signup" className={styles.navLink}>
+                  <Store className="h-4 w-4 inline mr-1" />
+                  Become a Vendor
+                </Link>
+              )}
+            </nav>
 
-            {user ? (
-              <div className={styles.userMenu} ref={userMenuRef}>
-                <button
-                  onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
-                  className={styles.userButton}
-                >
-                  <img
-                    src={user.avatar}
-                    alt={user.name}
-                    className={styles.avatar}
-                  />
-                  <span className="hidden md:block ml-2 text-sm font-medium">
-                    {user.role === 'admin' ? 'Admin' : user.role === 'vendor' ? 'Vendor' : 'User'}
-                  </span>
-                </button>
-                {isUserMenuOpen && (
-                  <div className={styles.dropdown}>
-                    <Link
-                      to={getDashboardLink()}
-                      className={styles.dropdownItem}
-                      onClick={() => setIsUserMenuOpen(false)}
-                    >
-                      <Settings className="h-4 w-4 mr-2" />
-                      {getDashboardLabel()}
-                    </Link>
-                    {user.role === 'admin' && (
-                      <>
-                        <Link
-                          to="/admin/vendor-applications"
-                          className={styles.dropdownItem}
-                          onClick={() => setIsUserMenuOpen(false)}
-                        >
-                          <Store className="h-4 w-4 mr-2" />
-                          Vendor Applications
-                        </Link>
-                        <Link
-                          to="/admin/promotions"
-                          className={styles.dropdownItem}
-                          onClick={() => setIsUserMenuOpen(false)}
-                        >
-                          <Sparkles className="h-4 w-4 mr-2" />
-                          Promotions
-                        </Link>
-                      </>
-                    )}
-                    {user.role === 'vendor' && (
-                      <Link
-                        to="/vendor/add-product"
-                        className={styles.dropdownItem}
-                        onClick={() => setIsUserMenuOpen(false)}
-                      >
-                        <Store className="h-4 w-4 mr-2" />
-                        Add Product
-                      </Link>
-                    )}
-                    <div className={styles.dropdownDivider}></div>
-                    <a href="#about" className={styles.dropdownItem} onClick={() => setIsUserMenuOpen(false)}>
-                      <Info className="h-4 w-4 mr-2" />
-                      About
-                    </a>
-                    <a href="#contact" className={styles.dropdownItem} onClick={() => setIsUserMenuOpen(false)}>
-                      <Phone className="h-4 w-4 mr-2" />
-                      Contact
-                    </a>
-                    <div className={styles.dropdownDivider}></div>
-                    <button
-                      onClick={handleLogout}
-                      className={styles.dropdownButton}
-                    >
-                      <LogOut className={styles.logoutIcon} />
-                      Logout
-                    </button>
-                  </div>
-                )}
-              </div>
-            ) : (
-              <Link to="/login" className={styles.actionButton}>
-                <User />
-              </Link>
-            )}
-
-            {user?.role === 'user' && (
-              <Link to="/cart" className={styles.actionButton}>
-                <ShoppingCart />
-                {totalItems > 0 && (
-                  <span className={`${styles.badge} ${styles.cartBadge}`}>
-                    {totalItems}
-                  </span>
-                )}
-              </Link>
-            )}
-          </div>
-
-          {/* Mobile Actions */}
-          <div className={styles.mobileActions}>
-            {/* Mobile Search */}
-            <div className={styles.mobileSearchContainer}>
+            {/* Desktop Search Container - Hidden when search overlay is open */}
+            <div className={`${styles.searchContainer} ${isSearchOpen ? styles.hidden : ''}`}>
               <SmartSearch onSearch={handleSearch} />
             </div>
 
-            {/* Mobile User Menu */}
-            {user ? (
-              <div className={styles.userMenu} ref={userMenuRef}>
-                <button
-                  onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
-                  className={styles.mobileUserButton}
-                >
-                  <img
-                    src={user.avatar}
-                    alt={user.name}
-                    className={styles.avatar}
-                  />
-                </button>
-                {isUserMenuOpen && (
-                  <div className={styles.mobileDropdown}>
-                    <Link
-                      to={getDashboardLink()}
-                      className={styles.dropdownItem}
-                      onClick={() => setIsUserMenuOpen(false)}
-                    >
-                      <Settings className="h-4 w-4 mr-2" />
-                      {getDashboardLabel()}
-                    </Link>
-                    
-                    {/* Mobile-specific items */}
-                    {user?.role === 'user' && (
-                      <>
+            {/* Desktop Actions */}
+            <div className={styles.desktopActions}>
+              {/* Search Icon - Only visible on laptop/tablet */}
+              <button
+                onClick={() => setIsSearchOpen(true)}
+                className={`${styles.searchButton} ${isSearchOpen ? styles.hidden : ''}`}
+              >
+                <Search className="h-5 w-5" />
+              </button>
+
+              {user?.role === 'user' && (
+                <Link to="/wishlist" className={`${styles.actionButton} ${isSearchOpen ? styles.hidden : ''}`}>
+                  <Heart />
+                  {wishlistItems.length > 0 && (
+                    <span className={`${styles.badge} ${styles.wishlistBadge}`}>
+                      {wishlistItems.length}
+                    </span>
+                  )}
+                </Link>
+              )}
+
+              {user ? (
+                <div className={styles.userMenu} ref={userMenuRef}>
+                  <button
+                    onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
+                    className={styles.userButton}
+                  >
+                    <img
+                      src={user.avatar}
+                      alt={user.name}
+                      className={styles.avatar}
+                    />
+                  </button>
+                  {isUserMenuOpen && (
+                    <div className={styles.dropdown}>
+                      <Link
+                        to={getDashboardLink()}
+                        className={styles.dropdownItem}
+                        onClick={() => setIsUserMenuOpen(false)}
+                      >
+                        <Settings className="h-4 w-4 mr-2" />
+                        {getDashboardLabel()}
+                      </Link>
+
+                      {/* Notifications in dropdown for laptop/tablet */}
+                      <div className={styles.dropdownNotifications}>
+                        <div className={styles.dropdownItem}>
+                          <Bell className="h-4 w-4 mr-2" />
+                          <span>Notifications</span>
+                          <NotificationDropdown />
+                        </div>
+                      </div>
+
+                      {user?.role === 'user' && (
                         <Link
                           to="/wishlist"
-                          className={styles.dropdownItem}
+                          className={`${styles.dropdownItem} ${styles.mobileOnly}`}
                           onClick={() => setIsUserMenuOpen(false)}
                         >
                           <Heart className="h-4 w-4 mr-2" />
                           Wishlist ({wishlistItems.length})
                         </Link>
-                        <Link
-                          to="/cart"
-                          className={styles.dropdownItem}
-                          onClick={() => setIsUserMenuOpen(false)}
-                        >
-                          <ShoppingCart className="h-4 w-4 mr-2" />
-                          Cart ({totalItems})
-                        </Link>
-                      </>
-                    )}
+                      )}
 
-                    {/* Notifications for mobile */}
-                    <div className={styles.dropdownItem}>
-                      <Bell className="h-4 w-4 mr-2" />
-                      Notifications
-                    </div>
-
-                    {user.role === 'admin' && (
-                      <>
+                      {user.role === 'admin' && (
+                        <>
+                          <Link
+                            to="/admin/vendor-applications"
+                            className={styles.dropdownItem}
+                            onClick={() => setIsUserMenuOpen(false)}
+                          >
+                            <Store className="h-4 w-4 mr-2" />
+                            Vendor Applications
+                          </Link>
+                          <Link
+                            to="/admin/promotions"
+                            className={styles.dropdownItem}
+                            onClick={() => setIsUserMenuOpen(false)}
+                          >
+                            <Sparkles className="h-4 w-4 mr-2" />
+                            Promotions
+                          </Link>
+                        </>
+                      )}
+                      {user.role === 'vendor' && (
                         <Link
-                          to="/admin/vendor-applications"
+                          to="/vendor/add-product"
                           className={styles.dropdownItem}
                           onClick={() => setIsUserMenuOpen(false)}
                         >
                           <Store className="h-4 w-4 mr-2" />
-                          Vendor Applications
+                          Add Product
                         </Link>
-                        <Link
-                          to="/admin/promotions"
-                          className={styles.dropdownItem}
-                          onClick={() => setIsUserMenuOpen(false)}
-                        >
-                          <Sparkles className="h-4 w-4 mr-2" />
-                          Promotions
-                        </Link>
-                      </>
-                    )}
-                    {user.role === 'vendor' && (
+                      )}
+                      <div className={styles.dropdownDivider}></div>
+                      <a href="#about" className={styles.dropdownItem} onClick={() => setIsUserMenuOpen(false)}>
+                        <Info className="h-4 w-4 mr-2" />
+                        About
+                      </a>
+                      <a href="#contact" className={styles.dropdownItem} onClick={() => setIsUserMenuOpen(false)}>
+                        <Phone className="h-4 w-4 mr-2" />
+                        Contact
+                      </a>
+                      <div className={styles.dropdownDivider}></div>
+                      <button
+                        onClick={handleLogout}
+                        className={styles.dropdownButton}
+                      >
+                        <LogOut className={styles.logoutIcon} />
+                        Logout
+                      </button>
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <Link to="/login" className={styles.actionButton}>
+                  <User />
+                </Link>
+              )}
+
+              {user?.role === 'user' && (
+                <Link to="/cart" className={styles.actionButton}>
+                  <ShoppingCart />
+                  {totalItems > 0 && (
+                    <span className={`${styles.badge} ${styles.cartBadge}`}>
+                      {totalItems}
+                    </span>
+                  )}
+                </Link>
+              )}
+            </div>
+
+            {/* Mobile Actions */}
+            <div className={styles.mobileActions}>
+              {/* Mobile User Menu */}
+              {user ? (
+                <div className={styles.userMenu} ref={userMenuRef}>
+                  <button
+                    onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
+                    className={styles.mobileUserButton}
+                  >
+                    <img
+                      src={user.avatar}
+                      alt={user.name}
+                      className={styles.avatar}
+                    />
+                  </button>
+                  {isUserMenuOpen && (
+                    <div className={styles.mobileDropdown}>
                       <Link
-                        to="/vendor/add-product"
+                        to={getDashboardLink()}
                         className={styles.dropdownItem}
                         onClick={() => setIsUserMenuOpen(false)}
                       >
-                        <Store className="h-4 w-4 mr-2" />
-                        Add Product
+                        <Settings className="h-4 w-4 mr-2" />
+                        {getDashboardLabel()}
                       </Link>
-                    )}
-                    <div className={styles.dropdownDivider}></div>
-                    <a href="#about" className={styles.dropdownItem} onClick={() => setIsUserMenuOpen(false)}>
-                      <Info className="h-4 w-4 mr-2" />
-                      About
-                    </a>
-                    <a href="#contact" className={styles.dropdownItem} onClick={() => setIsUserMenuOpen(false)}>
-                      <Phone className="h-4 w-4 mr-2" />
-                      Contact
-                    </a>
-                    <div className={styles.dropdownDivider}></div>
-                    <button
-                      onClick={handleLogout}
-                      className={styles.dropdownButton}
-                    >
-                      <LogOut className={styles.logoutIcon} />
-                      Logout
-                    </button>
-                  </div>
-                )}
-              </div>
-            ) : (
-              <Link to="/login" className={styles.actionButton}>
-                <User />
-              </Link>
-            )}
+                      
+                      {/* Mobile-specific items */}
+                      {user?.role === 'user' && (
+                        <>
+                          <Link
+                            to="/wishlist"
+                            className={styles.dropdownItem}
+                            onClick={() => setIsUserMenuOpen(false)}
+                          >
+                            <Heart className="h-4 w-4 mr-2" />
+                            Wishlist ({wishlistItems.length})
+                          </Link>
+                          <Link
+                            to="/cart"
+                            className={styles.dropdownItem}
+                            onClick={() => setIsUserMenuOpen(false)}
+                          >
+                            <ShoppingCart className="h-4 w-4 mr-2" />
+                            Cart ({totalItems})
+                          </Link>
+                        </>
+                      )}
 
-            {/* Mobile menu button */}
-            <button
-              className={styles.mobileMenuButton}
-              onClick={() => setIsMenuOpen(!isMenuOpen)}
-            >
-              {isMenuOpen ? <X /> : <Menu />}
-            </button>
+                      {/* Notifications for mobile */}
+                      <div className={styles.dropdownItem}>
+                        <Bell className="h-4 w-4 mr-2" />
+                        Notifications
+                        <NotificationDropdown />
+                      </div>
+
+                      {user.role === 'admin' && (
+                        <>
+                          <Link
+                            to="/admin/vendor-applications"
+                            className={styles.dropdownItem}
+                            onClick={() => setIsUserMenuOpen(false)}
+                          >
+                            <Store className="h-4 w-4 mr-2" />
+                            Vendor Applications
+                          </Link>
+                          <Link
+                            to="/admin/promotions"
+                            className={styles.dropdownItem}
+                            onClick={() => setIsUserMenuOpen(false)}
+                          >
+                            <Sparkles className="h-4 w-4 mr-2" />
+                            Promotions
+                          </Link>
+                        </>
+                      )}
+                      {user.role === 'vendor' && (
+                        <Link
+                          to="/vendor/add-product"
+                          className={styles.dropdownItem}
+                          onClick={() => setIsUserMenuOpen(false)}
+                        >
+                          <Store className="h-4 w-4 mr-2" />
+                          Add Product
+                        </Link>
+                      )}
+                      <div className={styles.dropdownDivider}></div>
+                      <a href="#about" className={styles.dropdownItem} onClick={() => setIsUserMenuOpen(false)}>
+                        <Info className="h-4 w-4 mr-2" />
+                        About
+                      </a>
+                      <a href="#contact" className={styles.dropdownItem} onClick={() => setIsUserMenuOpen(false)}>
+                        <Phone className="h-4 w-4 mr-2" />
+                        Contact
+                      </a>
+                      <div className={styles.dropdownDivider}></div>
+                      <button
+                        onClick={handleLogout}
+                        className={styles.dropdownButton}
+                      >
+                        <LogOut className={styles.logoutIcon} />
+                        Logout
+                      </button>
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <Link to="/login" className={styles.actionButton}>
+                  <User />
+                </Link>
+              )}
+
+              {/* Mobile menu button */}
+              <button
+                className={styles.mobileMenuButton}
+                onClick={() => setIsMenuOpen(!isMenuOpen)}
+              >
+                {isMenuOpen ? <X /> : <Menu />}
+              </button>
+            </div>
+          </div>
+
+          {/* Mobile Search Bar - Always visible on mobile */}
+          <div className={styles.mobileSearchBar}>
+            <SmartSearch onSearch={handleSearch} />
           </div>
         </div>
 
@@ -386,8 +420,30 @@ const Header = () => {
             </div>
           </div>
         )}
-      </div>
-    </header>
+      </header>
+
+      {/* Search Overlay for Laptop/Tablet */}
+      {isSearchOpen && (
+        <div className={styles.searchOverlay}>
+          <div className={styles.searchOverlayContent} ref={searchOverlayRef}>
+            <div className={styles.searchOverlayHeader}>
+              <div className={styles.searchOverlayLogo}>
+                <Link to="/" className={styles.logoLink}>LUXE</Link>
+              </div>
+              <div className={styles.searchOverlaySearch}>
+                <SmartSearch onSearch={handleSearch} autoFocus />
+              </div>
+              <button
+                onClick={() => setIsSearchOpen(false)}
+                className={styles.searchOverlayClose}
+              >
+                <X className="h-6 w-6" />
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </>
   );
 };
 

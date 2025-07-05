@@ -1,10 +1,10 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Search, TrendingUp, Clock, X, Mic, MicOff } from 'lucide-react';
+import { Search, TrendingUp, Clock, X, Mic, MicOff, Camera } from 'lucide-react';
 import { useAI } from '../context/AIContext';
 import VoiceSearch from './VoiceSearch';
 import VisualSearch from './VisualSearch';
 
-const SmartSearch = ({ onSearch }) => {
+const SmartSearch = ({ onSearch, autoFocus = false }) => {
   const [query, setQuery] = useState('');
   const [suggestions, setSuggestions] = useState([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
@@ -16,6 +16,14 @@ const SmartSearch = ({ onSearch }) => {
   ]);
   const { getSmartSearchSuggestions } = useAI();
   const searchRef = useRef(null);
+  const inputRef = useRef(null);
+
+  // Auto focus when requested
+  useEffect(() => {
+    if (autoFocus && inputRef.current) {
+      inputRef.current.focus();
+    }
+  }, [autoFocus]);
 
   // Close suggestions when clicking outside
   useEffect(() => {
@@ -89,6 +97,7 @@ const SmartSearch = ({ onSearch }) => {
           <Search className="h-5 w-5 text-gray-400" />
         </div>
         <input
+          ref={inputRef}
           type="text"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
@@ -117,9 +126,17 @@ const SmartSearch = ({ onSearch }) => {
         )}
         
         <div className="absolute inset-y-0 right-0 flex items-center pr-3 space-x-1">
-          <div className="hidden md:flex items-center space-x-1">
+          {/* Voice and Visual Search - Show on mobile and when space allows */}
+          <div className="flex items-center space-x-1">
             <VoiceSearch onSearch={handleVoiceSearch} onTranscript={setVoiceText} />
-            <VisualSearch onResults={handleVisualSearchResults} />
+            <div className="hidden sm:block">
+              <VisualSearch onResults={handleVisualSearchResults} />
+            </div>
+            <div className="block sm:hidden">
+              <button className="p-1.5 rounded-full bg-gray-100 text-gray-600 hover:bg-gray-200 transition-colors">
+                <Camera className="h-4 w-4" />
+              </button>
+            </div>
           </div>
           {query && (
             <button
