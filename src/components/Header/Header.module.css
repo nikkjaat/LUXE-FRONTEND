@@ -95,6 +95,49 @@
   transform: translateY(0);
 }
 
+/* Always Visible Buttons - AR Showroom and Social */
+.alwaysVisibleButtons {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.alwaysVisibleButton {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: #374151;
+  font-weight: 500;
+  text-decoration: none;
+  padding: 0.5rem 0.75rem;
+  border-radius: 0.75rem;
+  transition: all 0.3s ease;
+  position: relative;
+  background: rgba(30, 58, 138, 0.05);
+  border: 1px solid rgba(30, 58, 138, 0.1);
+}
+
+.alwaysVisibleButton:hover {
+  color: #1e3a8a;
+  background: rgba(30, 58, 138, 0.1);
+  transform: translateY(-1px);
+  border-color: rgba(30, 58, 138, 0.2);
+}
+
+.alwaysVisibleButtonText {
+  display: none;
+}
+
+@media (min-width: 640px) {
+  .alwaysVisibleButtonText {
+    display: inline;
+  }
+  
+  .alwaysVisibleButton {
+    padding: 0.5rem 1rem;
+  }
+}
+
 /* Mobile Search Bar */
 .mobileSearchBar {
   display: block;
@@ -548,6 +591,10 @@
   .logoText {
     font-size: 1.5rem;
   }
+  
+  .searchBarBelowHeader {
+    top: 3.5rem;
+  }
 }
 
 @media (max-width: 768px) {
@@ -573,7 +620,15 @@
   }
   
   .searchBarBelowHeader {
-    top: 3.5rem;
+    top: 3rem;
+  }
+  
+  .alwaysVisibleButton {
+    padding: 0.5rem;
+  }
+  
+  .alwaysVisibleButtons {
+    gap: 0.25rem;
   }
 }
 
@@ -591,8 +646,8 @@
     padding: 0.5rem;
   }
   
-  .searchBarBelowHeader {
-    top: 3rem;
+  .alwaysVisibleButton {
+    padding: 0.375rem;
   }
 }
 

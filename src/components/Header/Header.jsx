@@ -118,7 +118,7 @@ const Header = () => {
               </Link>
             </div>
 
-            {/* Desktop Navigation - Always visible on desktop */}
+            {/* Desktop Navigation - Only show on large screens */}
             <nav className={styles.desktopNav}>
               <Link to="/" className={styles.navLink}>
                 <span>Home</span>
@@ -129,14 +129,6 @@ const Header = () => {
               <Link to="/categories" className={styles.navLink}>
                 <span>Categories</span>
               </Link>
-              <Link to="/ar-showroom" className={styles.navLink}>
-                <Sparkles className="h-4 w-4" />
-                <span>AR Showroom</span>
-              </Link>
-              <Link to="/social" className={styles.navLink}>
-                <Users className="h-4 w-4" />
-                <span>Social</span>
-              </Link>
               {!user && (
                 <Link to="/vendor/signup" className={styles.navLink}>
                   <Store className="h-4 w-4" />
@@ -144,6 +136,18 @@ const Header = () => {
                 </Link>
               )}
             </nav>
+
+            {/* Always Visible Buttons - AR Showroom and Social */}
+            <div className={styles.alwaysVisibleButtons}>
+              <Link to="/ar-showroom" className={styles.alwaysVisibleButton}>
+                <Sparkles className="h-4 w-4" />
+                <span className={styles.alwaysVisibleButtonText}>AR Showroom</span>
+              </Link>
+              <Link to="/social" className={styles.alwaysVisibleButton}>
+                <Users className="h-4 w-4" />
+                <span className={styles.alwaysVisibleButtonText}>Social</span>
+              </Link>
+            </div>
 
             {/* Desktop Actions */}
             <div className={styles.desktopActions}>
