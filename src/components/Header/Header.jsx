@@ -11,7 +11,7 @@ import styles from './Header.module.css';
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
-  const [showSearchBarBelow , setShowSearchBarBelow ] = useState(false);
+  const [showSearchBarBelow, setShowSearchBarBelow] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
   
   const { user, logout } = useAuth();
@@ -22,7 +22,7 @@ const Header = () => {
   
   const userMenuRef = useRef(null);
   const mobileMenuRef = useRef(null);
-  const searchOverlayRef = useRef(null);
+  const searchBarRef = useRef(null);
 
   // Get notifications and unread count
   useEffect(() => {
@@ -43,7 +43,7 @@ const Header = () => {
         setIsMenuOpen(false);
       }
 
-      if (searchOverlayRef.current && !searchOverlayRef.current.contains(event.target)) {
+      if (searchBarRef.current && !searchBarRef.current.contains(event.target)) {
         setShowSearchBarBelow(false);
       }
     };
@@ -54,7 +54,7 @@ const Header = () => {
     };
   }, []);
 
-  // Handle escape key for search overlay
+  // Handle escape key for search bar
   useEffect(() => {
     const handleEscape = (event) => {
       if (event.key === 'Escape' && showSearchBarBelow) {
@@ -119,7 +119,7 @@ const Header = () => {
             </div>
 
             {/* Desktop Navigation - Always visible on desktop */}
-            <nav className={`${styles.desktopNav} ${showSearchBarBelow ? styles.hidden : ''}`}>
+            <nav className={styles.desktopNav}>
               <Link to="/" className={styles.navLink}>
                 <span>Home</span>
               </Link>
@@ -147,10 +147,10 @@ const Header = () => {
 
             {/* Desktop Actions */}
             <div className={styles.desktopActions}>
-              {/* Search Button - Shows on laptop/tablet when search is closed */}
+              {/* Search Button - Shows on laptop/tablet */}
               <button
-                onClick={() => setShowSearchBarBelow(true)}
-                className={`${styles.searchButton} ${showSearchBarBelow ? styles.hidden : ''}`}
+                onClick={() => setShowSearchBarBelow(!showSearchBarBelow)}
+                className={styles.searchButton}
                 aria-label="Search"
               >
                 <Search className="h-5 w-5" />
@@ -160,7 +160,7 @@ const Header = () => {
               {user?.role === 'user' && (
                 <Link 
                   to="/wishlist" 
-                  className={`${styles.actionButton} ${showSearchBarBelow ? styles.hidden : ''}`}
+                  className={styles.actionButton}
                   aria-label="Wishlist"
                 >
                   <Heart className="h-5 w-5" />
@@ -176,7 +176,7 @@ const Header = () => {
               {user?.role === 'user' && (
                 <Link 
                   to="/cart" 
-                  className={`${styles.actionButton} ${showSearchBarBelow ? styles.hidden : ''}`}
+                  className={styles.actionButton}
                   aria-label="Shopping Cart"
                 >
                   <ShoppingCart className="h-5 w-5" />
@@ -230,20 +230,24 @@ const Header = () => {
                       <Link
                         to={getDashboardLink()}
                         className={styles.dropdownItem}
-                        onClick={() => handleUserMenuClick()}
+                        onClick={() => setIsUserMenuOpen(false)}
                       >
                         <Settings className="h-4 w-4" />
                         <span>{getDashboardLabel()}</span>
                       </Link>
 
                       {/* Notifications */}
-                      <div className={styles.dropdownItem}>
+                      <Link
+                        to="/notifications"
+                        className={styles.dropdownItem}
+                        onClick={() => setIsUserMenuOpen(false)}
+                      >
                         <Bell className="h-4 w-4" />
                         <span>Notifications</span>
                         {unreadCount > 0 && (
                           <span className={styles.notificationCount}>{unreadCount}</span>
                         )}
-                      </div>
+                      </Link>
 
                       {/* Admin-specific items */}
                       {user.role === 'admin' && (
@@ -251,7 +255,7 @@ const Header = () => {
                           <Link
                             to="/admin/vendor-applications"
                             className={styles.dropdownItem}
-                            onClick={() => handleUserMenuClick()}
+                            onClick={() => setIsUserMenuOpen(false)}
                           >
                             <Store className="h-4 w-4" />
                             <span>Vendor Applications</span>
@@ -259,7 +263,7 @@ const Header = () => {
                           <Link
                             to="/admin/promotions"
                             className={styles.dropdownItem}
-                            onClick={() => handleUserMenuClick()}
+                            onClick={() => setIsUserMenuOpen(false)}
                           >
                             <Sparkles className="h-4 w-4" />
                             <span>Promotions</span>
@@ -272,7 +276,7 @@ const Header = () => {
                         <Link
                           to="/vendor/add-product"
                           className={styles.dropdownItem}
-                          onClick={() => handleUserMenuClick()}
+                          onClick={() => setIsUserMenuOpen(false)}
                         >
                           <Store className="h-4 w-4" />
                           <span>Add Product</span>
@@ -281,22 +285,22 @@ const Header = () => {
 
                       <div className={styles.dropdownDivider}></div>
 
-                      <a 
-                        href="#about" 
+                      <Link 
+                        to="/about" 
                         className={styles.dropdownItem}
-                        onClick={() => handleUserMenuClick()}
+                        onClick={() => setIsUserMenuOpen(false)}
                       >
                         <Info className="h-4 w-4" />
                         <span>About</span>
-                      </a>
-                      <a 
-                        href="#contact" 
+                      </Link>
+                      <Link 
+                        to="/contact" 
                         className={styles.dropdownItem}
-                        onClick={() => handleUserMenuClick()}
+                        onClick={() => setIsUserMenuOpen(false)}
                       >
                         <Phone className="h-4 w-4" />
                         <span>Contact</span>
-                      </a>
+                      </Link>
 
                       <div className={styles.dropdownDivider}></div>
 
@@ -362,20 +366,6 @@ const Header = () => {
                 >
                   <span>Categories</span>
                 </button>
-                <button 
-                  onClick={() => handleMobileNavClick('/ar-showroom')} 
-                  className={styles.mobileNavLink}
-                >
-                  <Sparkles className="h-4 w-4" />
-                  <span>AR Showroom</span>
-                </button>
-                <button 
-                  onClick={() => handleMobileNavClick('/social')} 
-                  className={styles.mobileNavLink}
-                >
-                  <Users className="h-4 w-4" />
-                  <span>Social</span>
-                </button>
                 {!user && (
                   <button 
                     onClick={() => handleMobileNavClick('/vendor/signup')} 
@@ -391,7 +381,23 @@ const Header = () => {
         )}
       </header>
 
-     
+      {/* Search Bar Below Header */}
+      {showSearchBarBelow && (
+        <div className={styles.searchBarBelowHeader} ref={searchBarRef}>
+          <div className={styles.searchBarContainer}>
+            <div className={styles.searchBarContent}>
+              <SmartSearch onSearch={handleSearch} autoFocus />
+              <button
+                onClick={() => setShowSearchBarBelow(false)}
+                className={styles.closeSearchBarButton}
+                aria-label="Close Search"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 };

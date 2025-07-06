@@ -66,11 +66,6 @@
   transition: all 0.3s ease;
 }
 
-.desktopNav.hidden {
-  opacity: 0;
-  pointer-events: none;
-}
-
 @media (min-width: 1024px) {
   .desktopNav {
     display: flex;
@@ -117,6 +112,61 @@
   position: relative;
 }
 
+/* Search Bar Below Header */
+.searchBarBelowHeader {
+  background: rgba(255, 255, 255, 0.98);
+  backdrop-filter: blur(20px);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+  position: sticky;
+  top: 4rem;
+  z-index: 45;
+  animation: slideDown 0.3s ease-out;
+}
+
+.searchBarContainer {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 1rem;
+}
+
+@media (min-width: 640px) {
+  .searchBarContainer {
+    padding: 0 1.5rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .searchBarContainer {
+    padding: 0 2rem;
+  }
+}
+
+.searchBarContent {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem 0;
+}
+
+.closeSearchBarButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.75rem;
+  color: #374151;
+  background: rgba(55, 65, 81, 0.05);
+  border: none;
+  border-radius: 0.75rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  flex-shrink: 0;
+}
+
+.closeSearchBarButton:hover {
+  color: #1e3a8a;
+  background: rgba(30, 58, 138, 0.1);
+}
+
 /* Desktop Actions */
 .desktopActions {
   display: flex;
@@ -144,18 +194,7 @@
   transform: translateY(-1px);
 }
 
-.searchButton.hidden {
-  opacity: 0;
-  pointer-events: none;
-}
-
-@media (min-width: 768px) and (max-width: 1023px) {
-  .searchButton {
-    display: flex;
-  }
-}
-
-@media (min-width: 1024px) {
+@media (min-width: 768px) {
   .searchButton {
     display: flex;
   }
@@ -181,11 +220,6 @@
   color: #1e3a8a;
   background: rgba(30, 58, 138, 0.1);
   transform: translateY(-1px);
-}
-
-.actionButton.hidden {
-  opacity: 0;
-  pointer-events: none;
 }
 
 /* Badges */
@@ -462,61 +496,6 @@
   background: rgba(30, 58, 138, 0.1);
 }
 
-/* Search Overlay */
-.searchOverlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0, 0, 0, 0.5);
-  z-index: 60;
-  animation: fadeIn 0.3s ease-out;
-}
-
-.searchOverlayContent {
-  background: white;
-  height: 100%;
-  animation: slideDown 0.3s ease-out;
-}
-
-.searchOverlayHeader {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 1rem 2rem;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
-  height: 4rem;
-}
-
-.searchOverlayLogo {
-  flex-shrink: 0;
-}
-
-.searchOverlaySearch {
-  flex: 1;
-  max-width: 40rem;
-  margin: 0 2rem;
-}
-
-.searchOverlayClose {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 0.75rem;
-  color: #374151;
-  background: rgba(55, 65, 81, 0.05);
-  border: none;
-  border-radius: 0.75rem;
-  cursor: pointer;
-  transition: all 0.3s ease;
-}
-
-.searchOverlayClose:hover {
-  color: #1e3a8a;
-  background: rgba(30, 58, 138, 0.1);
-}
-
 /* Animations */
 @keyframes fadeIn {
   from {
@@ -560,11 +539,6 @@
   }
 }
 
-/* Hide elements when search is open */
-.hidden {
-  display: none !important;
-}
-
 /* Responsive Design */
 @media (max-width: 1024px) {
   .mainNav {
@@ -597,6 +571,10 @@
   .mobileSearchBar {
     padding: 0.5rem 0;
   }
+  
+  .searchBarBelowHeader {
+    top: 3.5rem;
+  }
 }
 
 @media (max-width: 480px) {
@@ -611,6 +589,10 @@
   .actionButton,
   .mobileMenuButton {
     padding: 0.5rem;
+  }
+  
+  .searchBarBelowHeader {
+    top: 3rem;
   }
 }
 
