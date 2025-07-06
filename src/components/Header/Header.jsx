@@ -11,7 +11,7 @@ import styles from './Header.module.css';
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
-  const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const [showSearchBarBelow , setShowSearchBarBelow ] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
   
   const { user, logout } = useAuth();
@@ -44,7 +44,7 @@ const Header = () => {
       }
 
       if (searchOverlayRef.current && !searchOverlayRef.current.contains(event.target)) {
-        setIsSearchOpen(false);
+        setShowSearchBarBelow(false);
       }
     };
 
@@ -57,8 +57,8 @@ const Header = () => {
   // Handle escape key for search overlay
   useEffect(() => {
     const handleEscape = (event) => {
-      if (event.key === 'Escape' && isSearchOpen) {
-        setIsSearchOpen(false);
+      if (event.key === 'Escape' && showSearchBarBelow) {
+        setShowSearchBarBelow(false);
       }
     };
 
@@ -66,7 +66,7 @@ const Header = () => {
     return () => {
       document.removeEventListener('keydown', handleEscape);
     };
-  }, [isSearchOpen]);
+  }, [showSearchBarBelow]);
 
   const handleLogout = () => {
     logout();
@@ -76,7 +76,7 @@ const Header = () => {
 
   const handleSearch = (query) => {
     navigate(`/shop?search=${encodeURIComponent(query)}`);
-    setIsSearchOpen(false);
+    setShowSearchBarBelow(false);
   };
 
   const handleMobileNavClick = (path) => {
@@ -119,7 +119,7 @@ const Header = () => {
             </div>
 
             {/* Desktop Navigation - Always visible on desktop */}
-            <nav className={`${styles.desktopNav} ${isSearchOpen ? styles.hidden : ''}`}>
+            <nav className={`${styles.desktopNav} ${showSearchBarBelow ? styles.hidden : ''}`}>
               <Link to="/" className={styles.navLink}>
                 <span>Home</span>
               </Link>
@@ -149,8 +149,8 @@ const Header = () => {
             <div className={styles.desktopActions}>
               {/* Search Button - Shows on laptop/tablet when search is closed */}
               <button
-                onClick={() => setIsSearchOpen(true)}
-                className={`${styles.searchButton} ${isSearchOpen ? styles.hidden : ''}`}
+                onClick={() => setShowSearchBarBelow(true)}
+                className={`${styles.searchButton} ${showSearchBarBelow ? styles.hidden : ''}`}
                 aria-label="Search"
               >
                 <Search className="h-5 w-5" />
@@ -160,7 +160,7 @@ const Header = () => {
               {user?.role === 'user' && (
                 <Link 
                   to="/wishlist" 
-                  className={`${styles.actionButton} ${isSearchOpen ? styles.hidden : ''}`}
+                  className={`${styles.actionButton} ${showSearchBarBelow ? styles.hidden : ''}`}
                   aria-label="Wishlist"
                 >
                   <Heart className="h-5 w-5" />
@@ -176,7 +176,7 @@ const Header = () => {
               {user?.role === 'user' && (
                 <Link 
                   to="/cart" 
-                  className={`${styles.actionButton} ${isSearchOpen ? styles.hidden : ''}`}
+                  className={`${styles.actionButton} ${showSearchBarBelow ? styles.hidden : ''}`}
                   aria-label="Shopping Cart"
                 >
                   <ShoppingCart className="h-5 w-5" />
@@ -391,34 +391,7 @@ const Header = () => {
         )}
       </header>
 
-      {/* Search Overlay for Laptop/Tablet */}
-      {isSearchOpen && (
-        <div className={styles.searchOverlay} onClick={() => setIsSearchOpen(false)}>
-          <div 
-            className={styles.searchOverlayContent} 
-            ref={searchOverlayRef}
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className={styles.searchOverlayHeader}>
-              <div className={styles.searchOverlayLogo}>
-                <Link to="/" className={styles.logoLink}>
-                  <span className={styles.logoText}>LUXE</span>
-                </Link>
-              </div>
-              <div className={styles.searchOverlaySearch}>
-                <SmartSearch onSearch={handleSearch} autoFocus />
-              </div>
-              <button
-                onClick={() => setIsSearchOpen(false)}
-                className={styles.searchOverlayClose}
-                aria-label="Close Search"
-              >
-                <X className="h-6 w-6" />
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+     
     </>
   );
 };
