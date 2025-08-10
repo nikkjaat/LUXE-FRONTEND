@@ -1,0 +1,216 @@
+import React from "react";
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { useAuth } from "./context/AuthContext";
+import Header from "./components/Header/Header";
+import Hero from "./components/Hero/Hero";
+import FeaturedProducts from "./components/FeaturedProducts/FeaturedProducts";
+import Categories from "./components/Categories/Categories";
+import Testimonials from "./components/Testimonials";
+import Newsletter from "./components/Newsletter/Newsletter";
+import Footer from "./components/Footer/Footer";
+import LoginPage from "./pages/LoginPage/LoginPage";
+import SignupPage from "./pages/SignupPage/SignupPage";
+import VendorSignupPage from "./pages/VendorSignupPage";
+import CartPage from "./pages/CartPage/CartPage";
+import ProfilePage from "./pages/ProfilePage";
+import WishlistPage from "./pages/WishlistPage";
+import CategoriesPage from "./pages/CategoriesPage/CategoriesPage";
+import ShopPage from "./pages/ShopPage/ShopPage";
+import ProductDetailPage from "./pages/ProductDetailPage";
+import SocialPage from "./pages/SocialPage";
+import ARShowroom from "./pages/ARShowroom";
+import UnauthorizedPage from "./pages/UnauthorizedPage";
+import AdminDashboard from "./pages/admin/AdminDashboard";
+import VendorApplications from "./pages/admin/VendorApplications";
+import PromotionManagement from "./pages/admin/PromotionManagement";
+import VendorDashboard from "./pages/vendor/VendorDashboard";
+import AddProduct from "./pages/vendor/AddProduct";
+import RoleBasedRoute from "./components/RoleBasedRoute";
+import PromotionBanner from "./components/PromotionBanner";
+import LiveChat from "./components/LiveChat";
+import { CartProvider } from "./context/CartContext";
+import { WishlistProvider } from "./context/WishlistContext";
+import { ProductProvider } from "./context/ProductContext";
+import { VendorProvider } from "./context/VendorContext";
+import { NotificationProvider } from "./context/NotificationContext";
+import { PromotionProvider } from "./context/PromotionContext";
+import { ReviewProvider } from "./context/ReviewContext";
+import { AnalyticsProvider } from "./context/AnalyticsContext";
+import { AIProvider } from "./context/AIContext";
+import { SocialProvider } from "./context/SocialContext";
+import { ARProvider } from "./context/ARContext";
+import { AuthProvider } from "./context/AuthContext";
+
+function HomePage() {
+  return (
+    <>
+      <Hero />
+      <FeaturedProducts />
+      <Categories />
+      <Testimonials />
+      <Newsletter />
+    </>
+  );
+}
+
+function AppContent() {
+  const { isLoading } = useAuth();
+
+  // Show loading screen while checking authentication
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-16 h-16 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-gray-600 text-lg">Loading LUXE...</p>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <AIProvider>
+      <SocialProvider>
+        <ARProvider>
+          <NotificationProvider>
+            <PromotionProvider>
+              <ReviewProvider>
+                <AnalyticsProvider>
+                  <ProductProvider>
+                    <VendorProvider>
+                      <CartProvider>
+                        <WishlistProvider>
+                          <Router>
+                            <div className="min-h-screen bg-white">
+                              <PromotionBanner />
+                              <Header />
+                              <Routes>
+                                {/* Public Routes */}
+                                <Route path="/" element={<HomePage />} />
+                                <Route path="/login" element={<LoginPage />} />
+                                <Route
+                                  path="/signup"
+                                  element={<SignupPage />}
+                                />
+                                <Route
+                                  path="/vendor/signup"
+                                  element={<VendorSignupPage />}
+                                />
+                                <Route path="/shop" element={<ShopPage />} />
+                                <Route
+                                  path="/product/:id"
+                                  element={<ProductDetailPage />}
+                                />
+                                <Route
+                                  path="/categories"
+                                  element={<CategoriesPage />}
+                                />
+                                <Route
+                                  path="/social"
+                                  element={<SocialPage />}
+                                />
+                                <Route
+                                  path="/ar-showroom"
+                                  element={<ARShowroom />}
+                                />
+                                <Route
+                                  path="/unauthorized"
+                                  element={<UnauthorizedPage />}
+                                />
+
+                                {/* User Routes */}
+                                <Route
+                                  path="/cart"
+                                  element={
+                                    <RoleBasedRoute allowedRoles={["customer"]}>
+                                      <CartPage />
+                                    </RoleBasedRoute>
+                                  }
+                                />
+                                <Route
+                                  path="/profile"
+                                  element={
+                                    <RoleBasedRoute allowedRoles={["customer"]}>
+                                      <ProfilePage />
+                                    </RoleBasedRoute>
+                                  }
+                                />
+                                <Route
+                                  path="/wishlist"
+                                  element={
+                                    <RoleBasedRoute allowedRoles={["customer"]}>
+                                      <WishlistPage />
+                                    </RoleBasedRoute>
+                                  }
+                                />
+
+                                {/* Admin Routes */}
+                                <Route
+                                  path="/admin/dashboard"
+                                  element={
+                                    <RoleBasedRoute allowedRoles={["admin"]}>
+                                      <AdminDashboard />
+                                    </RoleBasedRoute>
+                                  }
+                                />
+                                <Route
+                                  path="/admin/vendor-applications"
+                                  element={
+                                    <RoleBasedRoute allowedRoles={["admin"]}>
+                                      <VendorApplications />
+                                    </RoleBasedRoute>
+                                  }
+                                />
+                                <Route
+                                  path="/admin/promotions"
+                                  element={
+                                    <RoleBasedRoute allowedRoles={["admin"]}>
+                                      <PromotionManagement />
+                                    </RoleBasedRoute>
+                                  }
+                                />
+
+                                {/* Vendor Routes */}
+                                <Route
+                                  path="/vendor/dashboard"
+                                  element={
+                                    <RoleBasedRoute allowedRoles={["vendor"]}>
+                                      <VendorDashboard />
+                                    </RoleBasedRoute>
+                                  }
+                                />
+                                <Route
+                                  path="/vendor/add-product"
+                                  element={
+                                    <RoleBasedRoute allowedRoles={["vendor"]}>
+                                      <AddProduct />
+                                    </RoleBasedRoute>
+                                  }
+                                />
+                              </Routes>
+                              <Footer />
+                              <LiveChat />
+                            </div>
+                          </Router>
+                        </WishlistProvider>
+                      </CartProvider>
+                    </VendorProvider>
+                  </ProductProvider>
+                </AnalyticsProvider>
+              </ReviewProvider>
+            </PromotionProvider>
+          </NotificationProvider>
+        </ARProvider>
+      </SocialProvider>
+    </AIProvider>
+  );
+}
+function App() {
+  return (
+    <AuthProvider>
+      <AppContent />
+    </AuthProvider>
+  );
+}
+
+export default App;
