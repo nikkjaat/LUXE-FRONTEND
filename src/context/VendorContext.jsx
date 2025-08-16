@@ -21,7 +21,6 @@ export const VendorProvider = ({ children }) => {
   const getVendors = async () => {
     try {
       const response = await apiService.getVendors();
-      console.log(response);
       setVendors(response.data); // assuming backend returns array
     } catch (error) {
       console.error("Error fetching vendors:", error);
@@ -30,7 +29,6 @@ export const VendorProvider = ({ children }) => {
 
   // get vendors applications
   const getVendorApplications = async () => {
-    console.log("Click");
     try {
       const response = await apiService.getVendorApplications();
       setVendorApplications(response.data); // assuming backend returns array
