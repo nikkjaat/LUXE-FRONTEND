@@ -192,7 +192,7 @@ const LoginPage = () => {
 
             <button
               type="submit"
-              disabled={isLoading}
+              disabled={loading}
               className={styles.submitButton}
             >
               {loading ? (

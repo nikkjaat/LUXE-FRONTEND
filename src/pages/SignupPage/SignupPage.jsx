@@ -24,7 +24,8 @@ const SignupPage = () => {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [error, setError] = useState("");
   const [passwordStrength, setPasswordStrength] = useState(0);
-  const { signup, isLoading, isAuthenticated } = useAuth();
+  const [isLoading, setIsLoading] = useState(false);
+  const { signup, isAuthenticated } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -57,6 +58,7 @@ const SignupPage = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setIsLoading(true);
     setError("");
 
     if (formData.password !== formData.confirmPassword) {
@@ -71,8 +73,10 @@ const SignupPage = () => {
 
     try {
       await signup(formData.name, formData.email, formData.password);
+      setIsLoading(false);
       navigate("/");
     } catch (err) {
+      setIsLoading(false);
       setError("Failed to create account");
     }
   };

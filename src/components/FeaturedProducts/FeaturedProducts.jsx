@@ -1,63 +1,33 @@
-import React from 'react';
-import { Star, Heart, ShoppingCart } from 'lucide-react';
-import { Link } from 'react-router-dom';
-import { useCart } from '../../context/CartContext';
-import { useWishlist } from '../../context/WishlistContext';
-import styles from './FeaturedProducts.module.css';
+import React, { useEffect, useState } from "react";
+import { Star, Heart, ShoppingCart } from "lucide-react";
+import { Link } from "react-router-dom";
+import { useCart } from "../../context/CartContext";
+import { useWishlist } from "../../context/WishlistContext";
+import { useProducts } from "../../context/ProductContext";
+import styles from "./FeaturedProducts.module.css";
 
 const FeaturedProducts = () => {
   const { addToCart } = useCart();
   const { addToWishlist, removeFromWishlist, isInWishlist } = useWishlist();
+  const { products, getProducts } = useProducts();
 
-  const products = [
-    {
-      id: '1',
-      name: 'Premium Leather Handbag',
-      price: 299,
-      originalPrice: 399,
-      rating: 4.8,
-      reviews: 124,
-      image: 'https://images.pexels.com/photos/1152077/pexels-photo-1152077.jpeg?auto=compress&cs=tinysrgb&w=400',
-      badge: 'Best Seller'
-    },
-    {
-      id: '2',
-      name: 'Designer Watch Collection',
-      price: 599,
-      originalPrice: 799,
-      rating: 4.9,
-      reviews: 89,
-      image: 'https://images.pexels.com/photos/190819/pexels-photo-190819.jpeg?auto=compress&cs=tinysrgb&w=400',
-      badge: 'Limited Edition'
-    },
-    {
-      id: '3',
-      name: 'Silk Scarf Set',
-      price: 149,
-      originalPrice: 199,
-      rating: 4.7,
-      reviews: 203,
-      image: 'https://images.pexels.com/photos/1458671/pexels-photo-1458671.jpeg?auto=compress&cs=tinysrgb&w=400',
-      badge: 'New Arrival'
-    },
-    {
-      id: '4',
-      name: 'Artisan Jewelry Box',
-      price: 189,
-      originalPrice: 249,
-      rating: 4.6,
-      reviews: 67,
-      image: 'https://images.pexels.com/photos/1454171/pexels-photo-1454171.jpeg?auto=compress&cs=tinysrgb&w=400',
-      badge: 'Exclusive'
-    }
-  ];
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        await getProducts({ featured: true, limit: 4 });
+      } catch (error) {
+        console.error("Failed to fetch featured products:", error);
+      }
+    };
+    fetchProducts();
+  }, []);
 
   const handleAddToCart = (product) => {
     addToCart({
       id: product.id,
       name: product.name,
       price: product.price,
-      image: product.image
+      image: product.image,
     });
   };
 
@@ -69,37 +39,141 @@ const FeaturedProducts = () => {
     }
   };
 
+  const ProductImageSlider = ({ images, name, badge }) => {
+    const [currentImageIndex, setCurrentImageIndex] = useState(0);
+    const [progress, setProgress] = useState(0);
+    const [isTransitioning, setIsTransitioning] = useState(false);
+    const [isPaused, setIsPaused] = useState(false);
+
+    useEffect(() => {
+      if (images.length <= 1) return;
+
+      let progressInterval;
+      let imageInterval;
+
+      if (!isPaused) {
+        // Progress bar animation
+        progressInterval = setInterval(() => {
+          setProgress((prev) => {
+            if (prev >= 100) {
+              return 0;
+            }
+            return prev + 100 / 30; // 30 steps for 3 seconds (100ms intervals)
+          });
+        }, 100);
+
+        // Image change every 3 seconds
+        imageInterval = setInterval(() => {
+          setIsTransitioning(true);
+
+          setTimeout(() => {
+            setCurrentImageIndex(
+              (prevIndex) => (prevIndex + 1) % images.length
+            );
+            setProgress(0);
+            setIsTransitioning(false);
+          }, 300); // 300ms fade transition
+        }, 3000);
+      }
+
+      return () => {
+        clearInterval(progressInterval);
+        clearInterval(imageInterval);
+      };
+    }, [images.length, isPaused]);
+
+    const handleMouseEnter = () => {
+      setIsPaused(true);
+    };
+
+    const handleMouseLeave = () => {
+      setIsPaused(false);
+      // Reset progress when resuming
+      setProgress(0);
+    };
+
+    if (!images || images.length === 0) {
+      return <div className={styles.imageContainer}></div>;
+    }
+
+    return (
+      <div className={styles.imageContainer}>
+        <div
+          className={styles.imageWrapper}
+          onMouseEnter={handleMouseEnter}
+          onMouseLeave={handleMouseLeave}
+        >
+          <img
+            src={images[currentImageIndex].url}
+            alt={name}
+            className={`${styles.productImage} ${
+              isTransitioning ? styles.fadeOut : styles.fadeIn
+            }`}
+          />
+          {badge && <div className={styles.badge}>{badge}</div>}
+        </div>
+
+        {/* Progress Bar - only show if there are multiple images */}
+        {images.length > 1 && (
+          <div className={styles.progressContainer}>
+            <div
+              className={`${styles.progressBar} ${
+                isPaused ? styles.paused : ""
+              }`}
+              style={{ width: `${progress}%` }}
+            ></div>
+          </div>
+        )}
+
+        {/* Image Indicators */}
+        {images.length > 1 && (
+          <div className={styles.indicators}>
+            {images.map((_, index) => (
+              <div
+                key={index}
+                className={`${styles.indicator} ${
+                  index === currentImageIndex ? styles.active : ""
+                }`}
+              />
+            ))}
+          </div>
+        )}
+      </div>
+    );
+  };
+
   return (
     <section className={styles.section}>
       <div className={styles.container}>
         <div className={styles.header}>
           <h2 className={styles.title}>Featured Products</h2>
           <p className={styles.description}>
-            Discover our handpicked selection of premium products that embody luxury and sophistication
+            Discover our handpicked selection of premium products that embody
+            luxury and sophistication
           </p>
         </div>
 
         <div className={styles.grid}>
           {products.map((product) => (
             <div key={product.id} className={styles.productCard}>
-              <Link to={`/product/${product.id}`} className={styles.imageContainer}>
-                <img
-                  src={product.image}
-                  alt={product.name}
-                  className={styles.productImage}
+              <Link to={`/product/${product.id}`}>
+                <ProductImageSlider
+                  images={product.images}
+                  name={product.name}
+                  badge={product.badge}
                 />
-                <div className={styles.badge}>
-                  {product.badge}
-                </div>
               </Link>
-              
               <button
                 onClick={() => handleWishlistToggle(product)}
                 className={`${styles.wishlistButton} ${
                   isInWishlist(product.id) ? styles.active : styles.inactive
                 }`}
               >
-                <Heart className={`${styles.wishlistIcon} ${isInWishlist(product.id) ? styles.filled : ''}`} />
+                <Heart
+                  className={`${styles.wishlistIcon} ${
+                    isInWishlist(product.id) ? styles.filled : ""
+                  }`}
+                />
               </button>
 
               <div className={styles.content}>
@@ -109,22 +183,28 @@ const FeaturedProducts = () => {
                       <Star
                         key={i}
                         className={`${styles.star} ${
-                          i < Math.floor(product.rating) ? styles.filled : styles.empty
+                          i < Math.floor(product.rating)
+                            ? styles.filled
+                            : styles.empty
                         }`}
                       />
                     ))}
                   </div>
-                  <span className={styles.reviewCount}>({product.reviews})</span>
+                  <span className={styles.reviewCount}>
+                    ({product.reviews})
+                  </span>
                 </div>
 
                 <Link to={`/product/${product.id}`}>
                   <h3 className={styles.productName}>{product.name}</h3>
                 </Link>
-                
+
                 <div className={styles.priceContainer}>
                   <div className={styles.priceGroup}>
                     <span className={styles.price}>${product.price}</span>
-                    <span className={styles.originalPrice}>${product.originalPrice}</span>
+                    <span className={styles.originalPrice}>
+                      ${product.originalPrice}
+                    </span>
                   </div>
                 </div>
 

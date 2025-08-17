@@ -23,10 +23,10 @@ export const ProductProvider = ({ children }) => {
     setProducts(
       response.products.map((product) => ({
         ...product,
-        id: product._id, // Use the real ID from database
+        id: product._id,
       }))
     );
-    return response.products; // Return the full products array if needed
+    return response.products;
   };
 
   const getProduct = async (productId) => {
