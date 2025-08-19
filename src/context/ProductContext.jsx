@@ -30,6 +30,10 @@ export const ProductProvider = ({ children }) => {
   };
 
   const getProduct = async (productId) => {
+    if (!productId) {
+      throw new Error("Product ID is required");
+    }
+
     const response = await apiService.getProduct(productId);
     return response;
   };

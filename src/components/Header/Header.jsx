@@ -184,7 +184,7 @@ const Header = () => {
               {user?.role === "customer" && (
                 <Link
                   to="/wishlist"
-                  className={styles.actionButton}
+                  className={`${styles.actionButton} ${styles.hideOnSmallScreen}`}
                   aria-label="Wishlist"
                 >
                   <Heart className="h-5 w-5" />
@@ -421,6 +421,34 @@ const Header = () => {
                 >
                   <span>Categories</span>
                 </button>
+
+                {/* Social and Wishlist buttons - only show on very small screens */}
+                <div className={styles.smallScreenButtons}>
+                  <button
+                    onClick={() => handleMobileNavClick("/social")}
+                    className={styles.mobileNavLink}
+                  >
+                    <Users className="h-4 w-4" />
+                    <span>Social</span>
+                  </button>
+
+                  {user?.role === "customer" && (
+                    <button
+                      onClick={() => handleMobileNavClick("/wishlist")}
+                      className={styles.mobileNavLink}
+                    >
+                      <Heart className="h-4 w-4" />
+                      <span>Wishlist</span>
+                      {wishlistItems.length > 0 && (
+                        <span
+                          className={`${styles.badge} ${styles.wishlistBadge}`}
+                        >
+                          {wishlistItems.length}
+                        </span>
+                      )}
+                    </button>
+                  )}
+                </div>
               </div>
             </div>
           </div>

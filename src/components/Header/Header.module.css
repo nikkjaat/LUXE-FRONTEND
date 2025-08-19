@@ -111,6 +111,12 @@
   gap: 0.5rem;
 }
 
+@media (max-width: 450px) {
+  .alwaysVisibleButtons {
+    gap: 0;
+  }
+}
+
 .alwaysVisibleButton {
   display: flex;
   align-items: center;
@@ -124,6 +130,12 @@
   position: relative;
   background: rgba(30, 58, 138, 0.05);
   border: 1px solid rgba(30, 58, 138, 0.1);
+}
+
+@media (max-width: 450px) {
+  .alwaysVisibleButton:nth-child(2) {
+    display: none;
+  }
 }
 
 .alwaysVisibleButton:hover {
@@ -273,6 +285,17 @@
   color: #1e3a8a;
   background: rgba(30, 58, 138, 0.1);
   transform: translateY(-1px);
+}
+
+/* Hide wishlist button on very small screens */
+.hideOnSmallScreen {
+  display: flex;
+}
+
+@media (max-width: 450px) {
+  .hideOnSmallScreen {
+    display: none;
+  }
 }
 
 /* Badges */
@@ -548,6 +571,26 @@
 .mobileNavLink:active {
   transform: translateX(0.125rem);
   background: rgba(30, 58, 138, 0.1);
+}
+
+/* Small screen buttons in mobile menu */
+.smallScreenButtons {
+  display: none;
+  flex-direction: column;
+  gap: 0.25rem;
+  border-top: 1px solid rgba(0, 0, 0, 0.05);
+  padding-top: 1rem;
+  margin-top: 1rem;
+}
+
+@media (max-width: 450px) {
+  .smallScreenButtons {
+    display: flex;
+  }
+}
+
+.smallScreenButtons .mobileNavLink {
+  position: relative;
 }
 
 /* Animations */
