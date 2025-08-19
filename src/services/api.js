@@ -191,6 +191,13 @@ class ApiService {
     return this.request(`/products/search?${queryString}`);
   }
 
+  async addToCart(productId, quantity = 1) {
+    return this.request(`/cart`, {
+      method: "POST",
+      body: JSON.stringify({ productId, quantity }),
+    });
+  }
+
   // Review endpoints
   async getProductReviews(productId) {
     return this.request(`/products/${productId}/reviews`);
