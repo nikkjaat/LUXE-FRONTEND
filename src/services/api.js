@@ -191,10 +191,37 @@ class ApiService {
     return this.request(`/products/search?${queryString}`);
   }
 
-  async addToCart(productId, quantity = 1) {
-    return this.request(`/cart`, {
+  // cart endpoints
+  async getCartItems() {
+    return this.request("/user/cart");
+  }
+
+  async addToCart(item) {
+    return this.request(`/user/addtocart`, {
       method: "POST",
-      body: JSON.stringify({ productId, quantity }),
+      body: JSON.stringify(item),
+    });
+  }
+
+  //wishlist endpoints
+  async getWishlistItems() {
+    return this.request("/user/wishlist");
+  }
+
+  async addToWishlist(item) {
+    return this.request(`/user/addtowishlist`, {
+      method: "POST",
+      body: JSON.stringify(item),
+    });
+  }
+  async removeFromWishlist(id) {
+    return this.request(`/user/wishlist/${id}`, {
+      method: "DELETE",
+    });
+  }
+  async clearWishlist() {
+    return this.request("/user/wishlist/clear", {
+      method: "DELETE",
     });
   }
 

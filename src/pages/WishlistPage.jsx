@@ -1,19 +1,19 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
-import { Heart, ShoppingCart, Star, Trash2, ArrowLeft } from 'lucide-react';
-import { useWishlist } from '../context/WishlistContext';
-import { useCart } from '../context/CartContext';
+import React from "react";
+import { Link } from "react-router-dom";
+import { Heart, ShoppingCart, Star, Trash2, ArrowLeft } from "lucide-react";
+import { useWishlist } from "../context/WishlistContext";
+import { useCart } from "../context/CartContext";
 
 const WishlistPage = () => {
   const { items, removeFromWishlist } = useWishlist();
   const { addToCart } = useCart();
-
+  console.log(items);
   const handleAddToCart = (item) => {
     addToCart({
       id: item.id,
       name: item.name,
       price: item.price,
-      image: item.image
+      image: item.image,
     });
   };
 
@@ -25,8 +25,12 @@ const WishlistPage = () => {
             <div className="w-24 h-24 bg-pink-100 rounded-full flex items-center justify-center mx-auto mb-6">
               <Heart className="h-12 w-12 text-pink-400" />
             </div>
-            <h2 className="text-2xl font-bold text-gray-900 mb-4">Your wishlist is empty</h2>
-            <p className="text-gray-600 mb-8">Save items you love to your wishlist and shop them later.</p>
+            <h2 className="text-2xl font-bold text-gray-900 mb-4">
+              Your wishlist is empty
+            </h2>
+            <p className="text-gray-600 mb-8">
+              Save items you love to your wishlist and shop them later.
+            </p>
             <Link
               to="/shop"
               className="bg-pink-600 hover:bg-pink-700 text-white px-8 py-3 rounded-lg font-semibold transition-colors inline-flex items-center"
@@ -62,15 +66,18 @@ const WishlistPage = () => {
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
           {items.map((item) => (
-            <div key={item.id} className="bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 group">
+            <div
+              key={item.productId.id}
+              className="bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 group"
+            >
               <div className="relative">
                 <img
-                  src={item.image}
-                  alt={item.name}
+                  src={item.productId.images[0].url}
+                  alt={item.productId.name}
                   className="w-full h-64 object-cover group-hover:scale-105 transition-transform duration-300"
                 />
                 <button
-                  onClick={() => removeFromWishlist(item.id)}
+                  onClick={() => removeFromWishlist(item.productId.id)}
                   className="absolute top-4 right-4 bg-white p-2 rounded-full shadow-lg hover:bg-red-50 transition-colors group"
                 >
                   <Trash2 className="h-5 w-5 text-red-500" />
@@ -94,22 +101,30 @@ const WishlistPage = () => {
                         key={i}
                         className={`h-4 w-4 ${
                           i < Math.floor(item.rating)
-                            ? 'text-yellow-400 fill-current'
-                            : 'text-gray-300'
+                            ? "text-yellow-400 fill-current"
+                            : "text-gray-300"
                         }`}
                       />
                     ))}
                   </div>
-                  <span className="text-sm text-gray-500 ml-2">({item.reviews})</span>
+                  <span className="text-sm text-gray-500 ml-2">
+                    ({item.productId.reviews})
+                  </span>
                 </div>
 
-                <h3 className="text-lg font-semibold text-gray-900 mb-2 line-clamp-2">{item.name}</h3>
-                
+                <h3 className="text-lg font-semibold text-gray-900 mb-2 line-clamp-2">
+                  {item.productId.name}
+                </h3>
+
                 <div className="flex items-center justify-between">
                   <div className="flex items-center space-x-2">
-                    <span className="text-xl font-bold text-blue-900">${item.price}</span>
-                    {item.originalPrice && (
-                      <span className="text-sm text-gray-500 line-through">${item.originalPrice}</span>
+                    <span className="text-xl font-bold text-blue-900">
+                      ${item.productId.price}
+                    </span>
+                    {item.productId.originalPrice && (
+                      <span className="text-sm text-gray-500 line-through">
+                        ${item.productId.originalPrice}
+                      </span>
                     )}
                   </div>
                   <button
@@ -127,8 +142,12 @@ const WishlistPage = () => {
         <div className="mt-12 text-center">
           <div className="bg-white rounded-2xl shadow-lg p-8 max-w-md mx-auto">
             <Heart className="h-12 w-12 text-pink-600 mx-auto mb-4" />
-            <h3 className="text-xl font-bold text-gray-900 mb-2">Share Your Wishlist</h3>
-            <p className="text-gray-600 mb-4">Let friends and family know what you're wishing for</p>
+            <h3 className="text-xl font-bold text-gray-900 mb-2">
+              Share Your Wishlist
+            </h3>
+            <p className="text-gray-600 mb-4">
+              Let friends and family know what you're wishing for
+            </p>
             <button className="bg-pink-600 hover:bg-pink-700 text-white px-6 py-2 rounded-lg font-semibold transition-colors">
               Share Wishlist
             </button>

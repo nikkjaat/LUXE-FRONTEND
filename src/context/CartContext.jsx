@@ -1,4 +1,6 @@
-import React, { createContext, useContext, useState } from "react";
+import React, { createContext, useContext, useEffect, useState } from "react";
+import apiService from "../services/api";
+import { useAuth } from "./AuthContext";
 
 const CartContext = createContext(undefined);
 
@@ -13,16 +15,30 @@ export const useCart = () => {
 export const CartProvider = ({ children }) => {
   const [items, setItems] = useState([]);
 
-  const addToCart = (item) => {
-    setItems((prevItems) => {
-      const existingItem = prevItems.find((i) => i.id === item.id);
-      if (existingItem) {
-        return prevItems.map((i) =>
-          i.id === item.id ? { ...i, quantity: i.quantity + 1 } : i
-        );
+  const getCartItems = async () => {
+    try {
+      const response = await apiService.getCartItems();
+      console.log(response);
+      setItems(response || []);
+    } catch (error) {
+      console.error("Failed to load cart items", error);
+    }
+  };
+  useEffect(() => {
+    if (localStorage.getItem("token")) {
+      getCartItems();
+    }
+  }, [localStorage.getItem("token")]);
+
+  const addToCart = async (item) => {
+    try {
+      const response = await apiService.addToCart(item);
+      if (response.success) {
+        getCartItems();
       }
-      return [...prevItems, { ...item, quantity: 1 }];
-    });
+    } catch (error) {
+      console.log(error);
+    }
   };
 
   const removeFromCart = (id) => {
@@ -45,7 +61,7 @@ export const CartProvider = ({ children }) => {
 
   const totalItems = items.reduce((sum, item) => sum + item.quantity, 0);
   const totalPrice = items.reduce(
-    (sum, item) => sum + item.price * item.quantity,
+    (sum, item) => sum + item.productId.price * item.quantity,
     0
   );
 
