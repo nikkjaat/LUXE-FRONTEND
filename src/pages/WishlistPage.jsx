@@ -7,7 +7,6 @@ import { useCart } from "../context/CartContext";
 const WishlistPage = () => {
   const { items, removeFromWishlist } = useWishlist();
   const { addToCart } = useCart();
-  console.log(items);
   const handleAddToCart = (item) => {
     addToCart({
       id: item.id,

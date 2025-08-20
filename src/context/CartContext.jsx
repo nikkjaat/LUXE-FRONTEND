@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
 import apiService from "../services/api";
 import { useAuth } from "./AuthContext";
+import api from "../services/api";
 
 const CartContext = createContext(undefined);
 
@@ -18,7 +19,7 @@ export const CartProvider = ({ children }) => {
   const getCartItems = async () => {
     try {
       const response = await apiService.getCartItems();
-      console.log(response);
+      // console.log(response);
       setItems(response || []);
     } catch (error) {
       console.error("Failed to load cart items", error);
@@ -41,18 +42,24 @@ export const CartProvider = ({ children }) => {
     }
   };
 
-  const removeFromCart = (id) => {
-    setItems((prevItems) => prevItems.filter((item) => item.id !== id));
+  const removeFromCart = async (id) => {
+    try {
+      const response = await apiService.removeFromCart(id);
+      if (response.success) {
+        getCartItems();
+      }
+    } catch (error) {
+      console.error("Failed to remove item from cart", error);
+    }
   };
 
-  const updateQuantity = (id, quantity) => {
-    if (quantity <= 0) {
-      removeFromCart(id);
+  const updateQuantity = async (id, quantity) => {
+    const response = await apiService.updateQuantity(id, quantity);
+    if (!response.success) {
+      console.error("Failed to update quantity", response.message);
       return;
     }
-    setItems((prevItems) =>
-      prevItems.map((item) => (item.id === id ? { ...item, quantity } : item))
-    );
+    getCartItems();
   };
 
   const clearCart = () => {

@@ -203,15 +203,29 @@ class ApiService {
     });
   }
 
+  async updateQuantity(id, quantity) {
+    return this.request(`/user/cart/${id}`, {
+      method: "PUT",
+      body: JSON.stringify({ quantity }),
+    });
+  }
+
+  async removeFromCart(id) {
+    return this.request(`/user/cart/${id}`, {
+      method: "DELETE",
+    });
+  }
+
   //wishlist endpoints
   async getWishlistItems() {
     return this.request("/user/wishlist");
   }
 
   async addToWishlist(item) {
+    const id = item._id || item.id; // Ensure we use the correct ID field
     return this.request(`/user/addtowishlist`, {
       method: "POST",
-      body: JSON.stringify(item),
+      body: JSON.stringify({ id }),
     });
   }
   async removeFromWishlist(id) {

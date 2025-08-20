@@ -120,7 +120,7 @@ const ProductDetailPage = () => {
   };
 
   const handleWishlistToggle = () => {
-    if (isInWishlist(product._id)) {
+    if (isInWishlist(id)) {
       removeFromWishlist(product._id);
     } else {
       addToWishlist(product);

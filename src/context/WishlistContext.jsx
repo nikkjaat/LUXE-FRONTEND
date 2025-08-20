@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState } from "react";
+import React, { createContext, useContext, useEffect, useState } from "react";
 import apiService from "../services/api";
 import { useAuth } from "./AuthContext";
 import api from "../services/api";
@@ -16,24 +16,44 @@ export const useWishlist = () => {
 export const WishlistProvider = ({ children }) => {
   const [items, setItems] = useState([]);
 
+  const getWishlistItems = async () => {
+    try {
+      const response = await apiService.getWishlistItems();
+      setItems(response || []);
+    } catch (error) {
+      console.error("Failed to load wishlist items", error);
+    }
+  };
+  useEffect(() => {
+    if (localStorage.getItem("token")) {
+      getWishlistItems();
+    }
+  }, [localStorage.getItem("token")]);
+
   const addToWishlist = async (item) => {
-    const response = await apiService.addToWishlist(item);
-    // console.log(response.wishlist);
-    setItems(response.wishlist);
-    // setItems((prevItems) => {
-    //   if (prevItems.find((i) => i.id === item.id)) {
-    //     return prevItems;
-    //   }
-    //   return [...prevItems, item];
-    // });
+    try {
+      const response = await apiService.addToWishlist(item);
+      setItems(response.wishlist);
+    } catch (error) {
+      console.log("Failed to add wishlist item", error);
+    }
   };
 
-  const removeFromWishlist = (id) => {
-    setItems((prevItems) => prevItems.filter((item) => item.id !== id));
+  const removeFromWishlist = async (id) => {
+    try {
+      const response = await apiService.removeFromWishlist(id);
+      if (response.success) {
+        setItems((prevItems) =>
+          prevItems.filter((item) => item.productId._id !== id)
+        );
+      }
+    } catch (error) {
+      console.error("Failed to remove item from wishlist", error);
+    }
   };
 
   const isInWishlist = (id) => {
-    return items.some((item) => item.id === id);
+    return items.some((item) => item.productId._id === id);
   };
 
   return (

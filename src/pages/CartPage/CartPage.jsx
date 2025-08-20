@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import {
   Minus,
@@ -9,6 +9,7 @@ import {
   CreditCard,
   Shield,
   Truck,
+  Loader,
 } from "lucide-react";
 import { useCart } from "../../context/CartContext";
 import styles from "./CartPage.module.css";
@@ -16,19 +17,22 @@ import styles from "./CartPage.module.css";
 const CartPage = () => {
   const { items, updateQuantity, removeFromCart, totalPrice, totalItems } =
     useCart();
+  const [loadingItems, setLoadingItems] = useState({});
+  const [deletingItems, setDeletingItems] = useState({});
 
-  console.log(items);
+  const handleQuantityChange = async (id, newQuantity) => {
+    if (newQuantity < 1) return;
 
-  // useEffect(() => {
-  //   const fetchCartItems = async () => {
-  //     try {
-  //       await getCartItems();
-  //     } catch (error) {
-  //       console.error("Failed to fetch cart items:", error);
-  //     }
-  //   };
-  //   fetchCartItems();
-  // }, [items]);
+    setLoadingItems((prev) => ({ ...prev, [id]: true }));
+    await updateQuantity(id, newQuantity);
+    setLoadingItems((prev) => ({ ...prev, [id]: false }));
+  };
+
+  const handleRemoveItem = async (id) => {
+    setDeletingItems((prev) => ({ ...prev, [id]: true }));
+    await removeFromCart(id);
+    setDeletingItems((prev) => ({ ...prev, [id]: false }));
+  };
 
   if (items.length === 0) {
     return (
@@ -71,61 +75,87 @@ const CartPage = () => {
               <div className={styles.itemsContent}>
                 <div className={styles.itemsList}>
                   {items.map((item) => (
-                    <div key={item.id} className={styles.cartItem}>
-                      <div className={styles.itemImage}>
-                        <img
-                          src={item.productId?.images?.[0]?.url}
-                          alt={item.productId.name}
-                          className={styles.productImage}
-                        />
-                      </div>
+                    <div key={item._id} className={styles.cartItem}>
+                      <Link
+                        to={`/product/${item.productId._id}`}
+                        className={styles.itemLink}
+                      >
+                        <div className={styles.itemImage}>
+                          <img
+                            src={item.productId?.images?.[0]?.url}
+                            alt={item.productId.name}
+                            className={styles.productImage}
+                          />
+                        </div>
+                      </Link>
 
                       <div className={styles.itemInfo}>
-                        <h3 className={styles.productName}>
-                          {item.productId.name}
-                        </h3>
-                        <div className={styles.productOptions}>
-                          {item.size && (
-                            <span className={styles.optionText}>
-                              Size: Medium
-                            </span>
-                          )}
-                          {item.color && (
-                            <span className={styles.optionText}>
-                              Color: {item.color}
-                            </span>
-                          )}
-                        </div>
-                        <p className={styles.productPrice}>${item.productId.price}</p>
+                        <Link to={`/product/${item.productId._id}`}>
+                          <h3 className={styles.productName}>
+                            {item.productId.name}
+                          </h3>
+                          <div className={styles.productOptions}>
+                            {item.size && (
+                              <span className={styles.optionText}>
+                                Size: Medium
+                              </span>
+                            )}
+                            {item.color && (
+                              <span className={styles.optionText}>
+                                Color: {item.color}
+                              </span>
+                            )}
+                          </div>
+                          <p className={styles.productPrice}>
+                            ${item.productId.price}
+                          </p>
+                        </Link>
                       </div>
 
                       <div className={styles.quantityControls}>
                         <button
                           onClick={() =>
-                            updateQuantity(item.id, item.quantity - 1)
+                            handleQuantityChange(item._id, item.quantity - 1)
                           }
                           className={styles.quantityButton}
+                          disabled={
+                            loadingItems[item._id] || item.quantity <= 1
+                          }
                         >
                           <Minus className={styles.quantityIcon} />
                         </button>
                         <span className={styles.quantityDisplay}>
-                          {item.quantity}
+                          {loadingItems[item._id] ? (
+                            <Loader
+                              className={`${styles.quantityLoader} ${styles.spinning}`}
+                            />
+                          ) : (
+                            item.quantity
+                          )}
                         </span>
                         <button
                           onClick={() =>
-                            updateQuantity(item.id, item.quantity + 1)
+                            handleQuantityChange(item._id, item.quantity + 1)
                           }
                           className={styles.quantityButton}
+                          disabled={loadingItems[item._id]}
                         >
                           <Plus className={styles.quantityIcon} />
                         </button>
                       </div>
 
                       <button
-                        onClick={() => removeFromCart(item.id)}
+                        onClick={() => handleRemoveItem(item._id)}
                         className={styles.removeButton}
+                        disabled={deletingItems[item._id]}
                       >
-                        <Trash2 className={styles.removeIcon} />
+                        {deletingItems[item._id] ? (
+                          <Loader
+                            className={`${styles.removeIcon} ${styles.spinning}`}
+                          />
+                        ) : (
+                          <Trash2 className={styles.removeIcon} />
+                        )}
                       </button>
                     </div>
                   ))}
