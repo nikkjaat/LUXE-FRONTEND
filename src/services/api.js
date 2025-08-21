@@ -80,7 +80,6 @@ class ApiService {
   }
 
   async login(credentials) {
-    console.log(credentials);
     return this.request("/auth/login", {
       method: "POST",
       body: JSON.stringify(credentials),
@@ -193,48 +192,48 @@ class ApiService {
 
   // cart endpoints
   async getCartItems() {
-    return this.request("/user/cart");
+    return this.request("/customer/cart");
   }
 
   async addToCart(item) {
-    return this.request(`/user/addtocart`, {
+    return this.request(`/customer/addtocart`, {
       method: "POST",
       body: JSON.stringify(item),
     });
   }
 
   async updateQuantity(id, quantity) {
-    return this.request(`/user/cart/${id}`, {
+    return this.request(`/customer/cart/update/${id}`, {
       method: "PUT",
       body: JSON.stringify({ quantity }),
     });
   }
 
   async removeFromCart(id) {
-    return this.request(`/user/cart/${id}`, {
+    return this.request(`/customer/cart/remove/${id}`, {
       method: "DELETE",
     });
   }
 
   //wishlist endpoints
   async getWishlistItems() {
-    return this.request("/user/wishlist");
+    return this.request("/customer/wishlist");
   }
 
   async addToWishlist(item) {
     const id = item._id || item.id; // Ensure we use the correct ID field
-    return this.request(`/user/addtowishlist`, {
+    return this.request(`/customer/wishlist/add`, {
       method: "POST",
       body: JSON.stringify({ id }),
     });
   }
   async removeFromWishlist(id) {
-    return this.request(`/user/wishlist/${id}`, {
+    return this.request(`/customer/wishlist/remove/${id}`, {
       method: "DELETE",
     });
   }
   async clearWishlist() {
-    return this.request("/user/wishlist/clear", {
+    return this.request("/customer/wishlist/clear", {
       method: "DELETE",
     });
   }

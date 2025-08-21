@@ -15,12 +15,12 @@ export const useCart = () => {
 export const CartProvider = ({ children }) => {
   const [items, setItems] = useState([]);
 
-  const { isAuthenticated, isLoading } = useAuth(); // ✅ use proper auth tracking
+  const { isAuthenticated, isLoading } = useAuth();
 
   const getCartItems = async () => {
     try {
       const response = await apiService.getCartItems();
-      setItems(response || []);
+      setItems(response.cartItems.cart || []);
     } catch (error) {
       console.error("Failed to load cart items", error);
     }
@@ -33,7 +33,7 @@ export const CartProvider = ({ children }) => {
     } else if (!isAuthenticated) {
       setItems([]);
     }
-  }, [isAuthenticated, isLoading]);
+  }, [isAuthenticated]);
 
   const addToCart = async (item) => {
     try {
@@ -73,7 +73,6 @@ export const CartProvider = ({ children }) => {
   const clearCart = () => {
     setItems([]);
   };
-
   const totalItems = items.reduce((sum, item) => sum + item.quantity, 0);
   const totalPrice = items.reduce(
     (sum, item) => sum + item.productId.price * item.quantity,

@@ -15,25 +15,30 @@ export const useWishlist = () => {
 
 export const WishlistProvider = ({ children }) => {
   const [items, setItems] = useState([]);
+  const { isAuthenticated, isLoading } = useAuth();
 
   const getWishlistItems = async () => {
     try {
       const response = await apiService.getWishlistItems();
-      setItems(response || []);
+      setItems(response.wishlistItems.wishlist || []);
     } catch (error) {
       console.error("Failed to load wishlist items", error);
     }
   };
   useEffect(() => {
-    if (localStorage.getItem("token")) {
+    if (!isLoading && isAuthenticated) {
       getWishlistItems();
+    } else if (!isAuthenticated) {
+      setItems([]);
     }
-  }, [localStorage.getItem("token")]);
+  }, [isAuthenticated]);
 
   const addToWishlist = async (item) => {
     try {
       const response = await apiService.addToWishlist(item);
-      setItems(response.wishlist);
+      if (response.success) {
+        getWishlistItems();
+      }
     } catch (error) {
       console.log("Failed to add wishlist item", error);
     }
@@ -43,9 +48,7 @@ export const WishlistProvider = ({ children }) => {
     try {
       const response = await apiService.removeFromWishlist(id);
       if (response.success) {
-        setItems((prevItems) =>
-          prevItems.filter((item) => item.productId._id !== id)
-        );
+        getWishlistItems();
       }
     } catch (error) {
       console.error("Failed to remove item from wishlist", error);
