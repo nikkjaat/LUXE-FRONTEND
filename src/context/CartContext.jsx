@@ -1,7 +1,6 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
 import apiService from "../services/api";
 import { useAuth } from "./AuthContext";
-import api from "../services/api";
 
 const CartContext = createContext(undefined);
 
@@ -16,20 +15,25 @@ export const useCart = () => {
 export const CartProvider = ({ children }) => {
   const [items, setItems] = useState([]);
 
+  const { isAuthenticated, isLoading } = useAuth(); // ✅ use proper auth tracking
+
   const getCartItems = async () => {
     try {
       const response = await apiService.getCartItems();
-      // console.log(response);
       setItems(response || []);
     } catch (error) {
       console.error("Failed to load cart items", error);
     }
   };
+
+  // Load cart items when user is authenticated and auth is done loading
   useEffect(() => {
-    if (localStorage.getItem("token")) {
+    if (!isLoading && isAuthenticated) {
       getCartItems();
+    } else if (!isAuthenticated) {
+      setItems([]);
     }
-  }, [localStorage.getItem("token")]);
+  }, [isAuthenticated, isLoading]);
 
   const addToCart = async (item) => {
     try {
@@ -54,12 +58,16 @@ export const CartProvider = ({ children }) => {
   };
 
   const updateQuantity = async (id, quantity) => {
-    const response = await apiService.updateQuantity(id, quantity);
-    if (!response.success) {
-      console.error("Failed to update quantity", response.message);
-      return;
+    try {
+      const response = await apiService.updateQuantity(id, quantity);
+      if (!response.success) {
+        console.error("Failed to update quantity", response.message);
+        return;
+      }
+      getCartItems();
+    } catch (error) {
+      console.error("Update quantity error", error);
     }
-    getCartItems();
   };
 
   const clearCart = () => {
