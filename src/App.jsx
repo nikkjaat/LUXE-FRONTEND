@@ -15,6 +15,7 @@ import CartPage from "./pages/CartPage/CartPage";
 import ProfilePage from "./pages/ProfilePage";
 import WishlistPage from "./pages/WishlistPage";
 import CategoriesPage from "./pages/CategoriesPage/CategoriesPage";
+import CategoryProductsPage from "./pages/CategoryProductsPage/CategoryProductsPage";
 import ShopPage from "./pages/ShopPage/ShopPage";
 import ProductDetailPage from "./pages/ProductDetailPage";
 import SocialPage from "./pages/SocialPage";

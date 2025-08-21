@@ -450,34 +450,57 @@
   .page {
     padding: 2rem 0;
   }
-  
+
   .title {
     font-size: 2rem;
   }
-  
+
   .description {
     font-size: 1rem;
   }
-  
+
   .searchCard {
     padding: 1rem;
   }
-  
+
   .gridView {
     gap: 1rem;
   }
-  
+
   .imageContainer {
     height: 10rem;
   }
-  
+
   .listContent {
     flex-direction: column;
     text-align: center;
   }
-  
+
   .listImageContainer {
     width: 5rem;
     height: 5rem;
+  }
+}
+
+.loadingState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 4rem 2rem;
+  text-align: center;
+}
+
+.spinner {
+  animation: spin 1s linear infinite;
+  margin-bottom: 1rem;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
   }
 }
