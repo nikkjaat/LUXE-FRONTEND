@@ -228,6 +228,7 @@ class ApiService {
     });
   }
   async removeFromWishlist(id) {
+    console.log(id)
     return this.request(`/customer/wishlist/remove/${id}`, {
       method: "DELETE",
     });

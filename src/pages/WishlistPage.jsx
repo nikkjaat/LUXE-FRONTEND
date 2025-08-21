@@ -7,9 +7,10 @@ import { useCart } from "../context/CartContext";
 const WishlistPage = () => {
   const { items, removeFromWishlist } = useWishlist();
   const { addToCart } = useCart();
+
   const handleAddToCart = (item) => {
     addToCart({
-      id: item.id,
+      id: item.productId._id,
       name: item.name,
       price: item.price,
       image: item.image,
@@ -76,7 +77,7 @@ const WishlistPage = () => {
                   className="w-full h-64 object-cover group-hover:scale-105 transition-transform duration-300"
                 />
                 <button
-                  onClick={() => removeFromWishlist(item.productId.id)}
+                  onClick={() => removeFromWishlist(item.productId._id)}
                   className="absolute top-4 right-4 bg-white p-2 rounded-full shadow-lg hover:bg-red-50 transition-colors group"
                 >
                   <Trash2 className="h-5 w-5 text-red-500" />
