@@ -63,7 +63,7 @@ const Categories = () => {
           {categories.map((category) => (
             <Link
               key={category.id}
-              to="/categories"
+              to={`/category/${category.id}`}
               className={styles.categoryCard}
             >
               <div className={styles.imageContainer}>

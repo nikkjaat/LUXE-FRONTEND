@@ -35,23 +35,23 @@ const CategoryProductsPage = () => {
 
   // Category definitions (same as in CategoriesPage)
   const categoryDefinitions = {
-    "womens-fashion": {
+    "1": {
       name: "Women's Fashion",
       subcategories: ["Dresses", "Tops", "Bottoms", "Outerwear", "Activewear"],
     },
-    "mens-collection": {
+    "2": {
       name: "Men's Collection",
       subcategories: ["Shirts", "Suits", "Casual Wear", "Accessories", "Shoes"],
     },
-    accessories: {
+    "3": {
       name: "Accessories",
       subcategories: ["Jewelry", "Bags", "Watches", "Sunglasses", "Scarves"],
     },
-    "home-living": {
+    "4": {
       name: "Home & Living",
       subcategories: ["Furniture", "Decor", "Lighting", "Textiles", "Kitchen"],
     },
-    electronics: {
+    "5": {
       name: "Electronics",
       subcategories: [
         "Smartphones",
@@ -61,7 +61,7 @@ const CategoryProductsPage = () => {
         "Gaming",
       ],
     },
-    "beauty-care": {
+    "6": {
       name: "Beauty & Care",
       subcategories: [
         "Skincare",
@@ -71,7 +71,7 @@ const CategoryProductsPage = () => {
         "Wellness",
       ],
     },
-    "sports-fitness": {
+    "7": {
       name: "Sports & Fitness",
       subcategories: [
         "Activewear",
@@ -81,7 +81,7 @@ const CategoryProductsPage = () => {
         "Fitness",
       ],
     },
-    "kids-baby": {
+    "8": {
       name: "Kids & Baby",
       subcategories: ["Baby Clothes", "Toys", "Shoes", "Accessories", "Gear"],
     },

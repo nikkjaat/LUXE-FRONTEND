@@ -107,6 +107,10 @@ function AppContent() {
                                   element={<CategoriesPage />}
                                 />
                                 <Route
+                                  path="/category/:categoryId"
+                                  element={<CategoryProductsPage />}
+                                />
+                                <Route
                                   path="/social"
                                   element={<SocialPage />}
                                 />

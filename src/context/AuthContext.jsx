@@ -107,16 +107,17 @@ export const AuthProvider = ({ children }) => {
   };
 
   const logout = async () => {
+    // Clear local state immediately for instant logout
+    setUser(null);
+    setIsAuthenticated(false);
+    localStorage.removeItem("token");
+    apiService.setToken(null);
+
+    // Then make API call in background (don't wait for it)
     try {
-      await apiService.logout();
+      apiService.logout(); // Don't await this
     } catch (error) {
       console.error("Logout error:", error);
-    } finally {
-      // Clear local state regardless of API call success
-      setUser(null);
-      setIsAuthenticated(false);
-      localStorage.removeItem("token");
-      apiService.setToken(null);
     }
   };
 
