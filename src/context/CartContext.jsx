@@ -36,6 +36,7 @@ export const CartProvider = ({ children }) => {
   }, [isAuthenticated]);
 
   const addToCart = async (item) => {
+    console.log(item);
     try {
       const response = await apiService.addToCart(item);
       if (response.success) {

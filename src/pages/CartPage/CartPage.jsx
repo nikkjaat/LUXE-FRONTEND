@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import {
   Minus,
@@ -20,12 +20,18 @@ const CartPage = () => {
   const [loadingItems, setLoadingItems] = useState({});
   const [deletingItems, setDeletingItems] = useState({});
 
+  // Reset loading state when items change (after successful update)
+  useEffect(() => {
+    setLoadingItems({});
+  }, [items]);
+
   const handleQuantityChange = async (id, newQuantity) => {
     if (newQuantity < 1) return;
 
     setLoadingItems((prev) => ({ ...prev, [id]: true }));
     await updateQuantity(id, newQuantity);
-    setLoadingItems((prev) => ({ ...prev, [id]: false }));
+    // Loading state will be reset automatically by the useEffect above
+    // when the items array updates
   };
 
   const handleRemoveItem = async (id) => {
