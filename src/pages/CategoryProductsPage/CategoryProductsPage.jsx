@@ -99,17 +99,33 @@ const CategoryProductsPage = () => {
       const productCategory = product.category;
       if (!productCategory) return false;
 
+      // Map category IDs to category names for filtering
+      const categoryNameMap = {
+        "1": "women",
+        "2": "men", 
+        "3": "accessories",
+        "4": "home",
+        "5": "electronics",
+        "6": "beauty",
+        "7": "sports",
+        "8": "kids"
+      };
+
+      const expectedCategoryName = categoryNameMap[currentCategoryId];
+
       if (typeof productCategory === "string") {
         return (
-          productCategory.toLowerCase() === currentCategoryId.toLowerCase() ||
-          productCategory.toLowerCase() === currentCategory?.name.toLowerCase()
+          productCategory.toLowerCase() === expectedCategoryName ||
+          productCategory.toLowerCase() === currentCategory?.name.toLowerCase() ||
+          productCategory.toLowerCase().includes(expectedCategoryName)
         );
       } else if (typeof productCategory === "object") {
         return (
-          productCategory._id === currentCategoryId ||
+          productCategory._id === expectedCategoryName ||
           productCategory.name?.toLowerCase() ===
             currentCategory?.name.toLowerCase() ||
-          productCategory.slug === currentCategoryId
+          productCategory.slug === expectedCategoryName ||
+          productCategory.name?.toLowerCase().includes(expectedCategoryName)
         );
       }
       return false;

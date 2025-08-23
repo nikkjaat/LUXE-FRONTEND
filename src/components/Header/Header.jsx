@@ -93,7 +93,8 @@ const Header = () => {
   const handleLogout = () => {
     logout();
     setIsUserMenuOpen(false);
-    navigate("/");
+    // Navigate immediately since logout is now instant
+    setTimeout(() => navigate("/"), 0);
   };
 
   const handleSearch = (query) => {
