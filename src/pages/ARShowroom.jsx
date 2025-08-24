@@ -92,7 +92,7 @@ const ARShowroom = () => {
                     onClick={() => setSelectedProduct(product)}
                   >
                     <img
-                      src={product.image}
+                      src={product.images[0].url}
                       alt={product.name}
                       className="w-full h-32 object-cover rounded-lg mb-3"
                     />
