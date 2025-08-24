@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useParams, Link } from "react-router-dom";
 import {
   ArrowLeft,
@@ -10,13 +10,14 @@ import {
   Shield,
   RotateCcw,
   Sparkles,
+  Camera,
+  CameraOff,
 } from "lucide-react";
 import { useProducts } from "../context/ProductContext";
 import { useCart } from "../context/CartContext";
 import { useWishlist } from "../context/WishlistContext";
 import ProductReviews from "../components/ProductReviews";
 import ComparisonTool from "../components/ComparisonTool";
-import ARTryOn from "../components/ARTryOn";
 
 const ProductDetailPage = () => {
   const { id } = useParams();
@@ -31,6 +32,11 @@ const ProductDetailPage = () => {
   const [showAR, setShowAR] = useState(false);
   const [autoScroll, setAutoScroll] = useState(true);
   const [isSmallScreen, setIsSmallScreen] = useState(false);
+  const [cameraActive, setCameraActive] = useState(false);
+  const [cameraError, setCameraError] = useState(null);
+
+  const videoRef = useRef(null);
+  const streamRef = useRef(null);
 
   useEffect(() => {
     const checkScreenSize = () => {
@@ -66,6 +72,67 @@ const ProductDetailPage = () => {
       setProduct(foundProduct);
     }
   }, [products, id]);
+
+  // Start/stop camera when AR mode is toggled
+  useEffect(() => {
+    if (showAR && cameraActive) {
+      startCamera();
+    } else {
+      stopCamera();
+    }
+
+    return () => {
+      stopCamera();
+    };
+  }, [showAR, cameraActive]);
+
+  const startCamera = async () => {
+    try {
+      setCameraError(null);
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: { facingMode: "user" },
+      });
+
+      if (videoRef.current) {
+        videoRef.current.srcObject = stream;
+        streamRef.current = stream;
+      }
+    } catch (err) {
+      console.error("Error accessing camera:", err);
+      setCameraError("Unable to access camera. Please check permissions.");
+      setCameraActive(false);
+    }
+  };
+
+  const stopCamera = () => {
+    if (streamRef.current) {
+      streamRef.current.getTracks().forEach((track) => track.stop());
+      streamRef.current = null;
+    }
+
+    if (videoRef.current) {
+      videoRef.current.srcObject = null;
+    }
+  };
+
+  const toggleCamera = () => {
+    if (cameraActive) {
+      setCameraActive(false);
+      stopCamera();
+    } else {
+      setCameraActive(true);
+    }
+  };
+
+  const handleARButtonClick = () => {
+    if (!showAR) {
+      setShowAR(true);
+      setCameraActive(true);
+    } else {
+      setShowAR(false);
+      setCameraActive(false);
+    }
+  };
 
   const relatedProducts = products
     .filter((p) => p.category === product?.category && p._id !== id)
@@ -105,9 +172,13 @@ const ProductDetailPage = () => {
   const reviewsCount =
     typeof product.rating === "object" ? product.rating.count : product.reviews;
 
-  const isARCompatible = ["accessories", "jewelry", "watches"].includes(
-    product.category
-  );
+  const isARCompatible = [
+    "accessories",
+    "jewelry",
+    "watches",
+    "eyewear",
+    "hats",
+  ].includes(product.category);
 
   const handleAddToCart = () => {
     addToCart({
@@ -170,35 +241,6 @@ const ProductDetailPage = () => {
                 </div>
               )}
             </div>
-
-            {/* Thumbnail scrollbar */}
-            {/* {product.images.length > 1 && (
-              <div className="relative">
-                <div className="flex space-x-4 overflow-x-auto pb-2 scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
-                  {product.images.map((image, index) => (
-                    <button
-                      key={index}
-                      onClick={() => {
-                        setSelectedImage(index);
-                        setAutoScroll(false);
-                        setTimeout(() => setAutoScroll(true), 5000);
-                      }}
-                      className={`flex-shrink-0 aspect-square bg-white rounded-lg overflow-hidden border-2 ${
-                        selectedImage === index
-                          ? "border-blue-500"
-                          : "border-gray-200"
-                      }`}
-                    >
-                      <img
-                        src={image.url}
-                        alt={`${product.name} ${index + 1}`}
-                        className="w-full h-full object-cover"
-                      />
-                    </button>
-                  ))}
-                </div>
-              </div>
-            )} */}
           </div>
 
           {/* Product Info */}
@@ -279,7 +321,7 @@ const ProductDetailPage = () => {
                   </p>
                 </div>
                 <button
-                  onClick={() => setShowAR(!showAR)}
+                  onClick={handleARButtonClick}
                   className={`w-full py-3 px-6 rounded-lg transition-all flex items-center justify-center mb-4 ${
                     showAR
                       ? "bg-gray-600 hover:bg-gray-700 text-white"
@@ -386,8 +428,82 @@ const ProductDetailPage = () => {
 
         {/* AR Try-On Section */}
         {showAR && isARCompatible && (
-          <div className="mb-12">
-            <ARTryOn product={product} />
+          <div className="mb-12 bg-white rounded-lg shadow-lg p-6">
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-xl font-bold text-gray-900">
+                AR Try-On Experience
+              </h2>
+              <button
+                onClick={toggleCamera}
+                className={`flex items-center px-4 py-2 rounded-lg ${
+                  cameraActive
+                    ? "bg-red-600 text-white hover:bg-red-700"
+                    : "bg-blue-600 text-white hover:bg-blue-700"
+                }`}
+              >
+                {cameraActive ? (
+                  <>
+                    <CameraOff className="h-4 w-4 mr-2" />
+                    Turn Off Camera
+                  </>
+                ) : (
+                  <>
+                    <Camera className="h-4 w-4 mr-2" />
+                    Turn On Camera
+                  </>
+                )}
+              </button>
+            </div>
+
+            {cameraError && (
+              <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+                {cameraError}
+              </div>
+            )}
+
+            <div className="relative aspect-[9/16] max-w-md mx-auto bg-gray-900 rounded-lg overflow-hidden">
+              {cameraActive ? (
+                <video
+                  ref={videoRef}
+                  autoPlay
+                  playsInline
+                  muted
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                <div className="w-full h-full flex flex-col items-center justify-center text-white">
+                  <CameraOff className="h-16 w-16 mb-4 text-gray-500" />
+                  <p className="text-lg font-medium">Camera is off</p>
+                  <p className="text-gray-400 text-sm mt-2">
+                    Click "Turn On Camera" to start the AR experience
+                  </p>
+                </div>
+              )}
+
+              {/* Product overlay for AR - this is where you'd integrate with a real AR library */}
+              {cameraActive && (
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <div className="bg-white bg-opacity-80 rounded-lg p-4 max-w-xs text-center">
+                    <img
+                      src={product.images[0].url}
+                      alt={product.name}
+                      className="w-32 h-32 object-contain mx-auto mb-2"
+                    />
+                    <p className="font-semibold">{product.name}</p>
+                    <p className="text-blue-600 font-bold">${product.price}</p>
+                    <p className="text-xs text-gray-600 mt-2">
+                      Move your device to see how this product looks on you
+                    </p>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            <div className="mt-4 text-center text-gray-600">
+              <p>
+                For best results, allow camera access and use in a well-lit area
+              </p>
+            </div>
           </div>
         )}
 

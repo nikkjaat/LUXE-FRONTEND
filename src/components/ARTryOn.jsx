@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { Camera, RotateCcw, Download, Share2, Sparkles, X } from "lucide-react";
 import { useAR } from "../context/ARContext";
 
@@ -9,6 +9,18 @@ const ARTryOn = ({ product }) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const videoRef = useRef(null);
+  const canvasRef = useRef(null);
+  const streamRef = useRef(null);
+
+  // Clean up on unmount
+  useEffect(() => {
+    return () => {
+      if (streamRef.current) {
+        const tracks = streamRef.current.getTracks();
+        tracks.forEach((track) => track.stop());
+      }
+    };
+  }, []);
 
   const handleStartAR = async () => {
     setLoading(true);
@@ -23,15 +35,19 @@ const ARTryOn = ({ product }) => {
       // Request camera access
       const stream = await navigator.mediaDevices.getUserMedia({
         video: {
-          width: { ideal: 640 },
-          height: { ideal: 480 },
+          width: { ideal: 1280 },
+          height: { ideal: 720 },
           facingMode: "user",
         },
       });
 
+      streamRef.current = stream;
+
       if (videoRef.current) {
         videoRef.current.srcObject = stream;
-        videoRef.current.play();
+        videoRef.current.onloadedmetadata = () => {
+          videoRef.current.play();
+        };
       }
 
       await startARSession(product.id, "try-on");
@@ -55,19 +71,52 @@ const ARTryOn = ({ product }) => {
   };
 
   const handleEndAR = () => {
-    if (videoRef.current && videoRef.current.srcObject) {
-      const tracks = videoRef.current.srcObject.getTracks();
+    if (streamRef.current) {
+      const tracks = streamRef.current.getTracks();
       tracks.forEach((track) => track.stop());
+      streamRef.current = null;
+    }
+
+    if (videoRef.current) {
       videoRef.current.srcObject = null;
     }
+
     endARSession();
     setIsARActive(false);
+    setCapturedPhoto(null);
     setError("");
   };
 
   const handleCapture = () => {
-    const photo = captureARPhoto(product.id);
-    setCapturedPhoto(photo);
+    if (videoRef.current && canvasRef.current) {
+      const video = videoRef.current;
+      const canvas = canvasRef.current;
+      const context = canvas.getContext("2d");
+
+      // Set canvas dimensions to match video
+      canvas.width = video.videoWidth;
+      canvas.height = video.videoHeight;
+
+      // Draw the current video frame to the canvas
+      context.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+      // Get the image data URL
+      const imageDataUrl = canvas.toDataURL("image/png");
+
+      // Create a photo object
+      const photo = {
+        image: imageDataUrl,
+        timestamp: new Date().toISOString(),
+        productId: product.id,
+      };
+
+      // Use the context function if available, otherwise set directly
+      if (captureARPhoto) {
+        captureARPhoto(photo);
+      }
+
+      setCapturedPhoto(photo);
+    }
   };
 
   const handleDownload = () => {
@@ -182,6 +231,9 @@ const ARTryOn = ({ product }) => {
                 className="w-full h-64 object-cover"
               />
 
+              {/* Hidden canvas for capturing images */}
+              <canvas ref={canvasRef} className="hidden" />
+
               {/* AR Overlay */}
               <div className="absolute inset-0 flex items-center justify-center">
                 <div className="bg-purple-600 bg-opacity-80 backdrop-blur-sm rounded-lg p-4 border-2 border-white border-dashed">
@@ -234,19 +286,6 @@ const ARTryOn = ({ product }) => {
                   <div className="w-2 h-2 bg-white rounded-full mr-1 animate-pulse"></div>
                   <span className="text-xs">REC</span>
                 </div>
-              </div>
-
-              {/* AR Effects Buttons */}
-              <div className="absolute left-4 top-1/2 transform -translate-y-1/2 flex flex-col space-y-2">
-                <button className="bg-white bg-opacity-20 backdrop-blur-sm text-white p-2 rounded-full">
-                  <span className="text-xs">✨</span>
-                </button>
-                <button className="bg-white bg-opacity-20 backdrop-blur-sm text-white p-2 rounded-full">
-                  <span className="text-xs">🎨</span>
-                </button>
-                <button className="bg-white bg-opacity-20 backdrop-blur-sm text-white p-2 rounded-full">
-                  <span className="text-xs">📐</span>
-                </button>
               </div>
 
               {/* AR Controls */}
