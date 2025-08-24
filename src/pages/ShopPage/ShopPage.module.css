@@ -55,10 +55,6 @@
     width: 16rem;
     display: block;
   }
-
-  .sidebar.visible {
-    display: block;
-  }
 }
 
 .filtersCard {
@@ -202,466 +198,6 @@
   justify-content: space-between;
 }
 
-/* Image Slider Styles */
-.imageContainer {
-  position: relative;
-  overflow: hidden;
-  border-radius: 12px 12px 0 0;
-  height: 250px;
-  cursor: pointer;
-}
-
-.imageWrapper {
-  position: relative;
-  width: 100%;
-  height: 100%;
-}
-
-.productImage {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  transition: opacity 0.3s ease-in-out;
-}
-
-.productImage.fadeIn {
-  opacity: 1;
-}
-
-.productImage.fadeOut {
-  opacity: 0.3;
-}
-
-/* Progress Bar Styles */
-.progressContainer {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  height: 3px;
-  background-color: rgba(255, 255, 255, 0.3);
-  backdrop-filter: blur(4px);
-}
-
-.progressBar {
-  height: 100%;
-  background: linear-gradient(90deg, #ffffff94, #e0e0e0);
-  transition: width 0.1s linear;
-  border-radius: 0 2px 2px 0;
-  box-shadow: 0 0 8px rgba(59, 130, 246, 0.4);
-}
-
-.progressBar.paused {
-  background: linear-gradient(90deg, #6b7280, #9ca3af);
-  box-shadow: 0 0 8px rgba(107, 114, 128, 0.4);
-}
-
-/* Image Indicators */
-.imageIndicators {
-  position: absolute;
-  bottom: 12px;
-  left: 50%;
-  transform: translateX(-50%);
-  display: flex;
-  gap: 6px;
-  z-index: 10;
-}
-
-.indicator {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background-color: rgba(255, 255, 255, 0.5);
-  transition: all 0.3s ease;
-  cursor: pointer;
-}
-
-.indicator.active {
-  background-color: white;
-  transform: scale(1.2);
-  box-shadow: 0 0 8px rgba(255, 255, 255, 0.6);
-}
-
-/* Slider Navigation Arrows */
-.sliderArrowLeft,
-.sliderArrowRight {
-  position: absolute;
-  top: 50%;
-  transform: translateY(-50%);
-  background: rgba(255, 255, 255, 0.9);
-  border: none;
-  border-radius: 50%;
-  width: 32px;
-  height: 32px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  z-index: 20;
-  opacity: 0;
-  transition: opacity 0.3s ease;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
-}
-
-.sliderArrowLeft {
-  left: 8px;
-}
-
-.sliderArrowRight {
-  right: 8px;
-}
-
-.imageContainer:hover .sliderArrowLeft,
-.imageContainer:hover .sliderArrowRight {
-  opacity: 1;
-}
-
-.arrowIcon {
-  width: 18px;
-  height: 18px;
-}
-
-/* Wishlist Button */
-.wishlistButton {
-  position: absolute;
-  top: 12px;
-  right: 12px;
-  padding: 8px;
-  border-radius: 50%;
-  border: none;
-  cursor: pointer;
-  z-index: 15;
-  transition: all 0.3s ease;
-  opacity: 0;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
-}
-
-.imageContainer:hover .wishlistButton {
-  opacity: 1;
-}
-
-.wishlistButton.active {
-  background: #ec4899;
-  color: white;
-}
-
-.wishlistButton.inactive {
-  background: white;
-  color: #6b7280;
-}
-
-.wishlistButton:hover.inactive {
-  background: #f9fafb;
-}
-
-.wishlistIcon {
-  width: 18px;
-  height: 18px;
-}
-
-.wishlistIcon.filled {
-  fill: currentColor;
-}
-
-/* Badge */
-.badge {
-  position: absolute;
-  top: 12px;
-  left: 12px;
-  background: linear-gradient(135deg, #3b82f6, #8b5cf6);
-  color: white;
-  padding: 4px 12px;
-  border-radius: 20px;
-  font-size: 12px;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  z-index: 15;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
-}
-
-/* List View Image Container */
-/* List View Styles */
-.productsList {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-}
-
-.listCard {
-  background: white;
-  border-radius: 1rem;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-  transition: all 0.3s ease;
-  overflow: hidden;
-}
-
-.listCard:hover {
-  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
-  transform: translateY(-0.25rem);
-}
-
-.listContent {
-  display: flex;
-  align-items: center;
-  padding: 1.5rem;
-  gap: 1.5rem;
-}
-
-.listImageContainer {
-  position: relative;
-  width: 120px;
-  height: 120px;
-  border-radius: 8px;
-  overflow: hidden;
-  flex-shrink: 0;
-}
-
-/* Fix for list view image container */
-.listImageContainer .imageContainer {
-  height: 120px;
-  width: 120px;
-  border-radius: 8px;
-}
-
-.listImageContainer .productImage {
-  width: 120px;
-  height: 120px;
-  object-fit: cover;
-}
-
-.listImageContainer .progressContainer {
-  height: 2px;
-}
-
-.listImageContainer .imageIndicators {
-  bottom: 6px;
-  gap: 4px;
-}
-
-.listImageContainer .indicator {
-  width: 6px;
-  height: 6px;
-}
-
-.listImageContainer .sliderArrowLeft,
-.listImageContainer .sliderArrowRight {
-  width: 20px;
-  height: 20px;
-  opacity: 1;
-}
-
-.listImageContainer .arrowIcon {
-  width: 12px;
-  height: 12px;
-}
-
-.listImageContainer .wishlistButton {
-  opacity: 1;
-  padding: 4px;
-  top: 6px;
-  right: 6px;
-  width: 24px;
-  height: 24px;
-}
-
-.listImageContainer .wishlistIcon {
-  width: 14px;
-  height: 14px;
-}
-
-.listImageContainer .badge {
-  top: 6px;
-  left: 6px;
-  padding: 2px 8px;
-  font-size: 10px;
-}
-
-.listInfo {
-  flex: 1;
-  min-width: 0;
-}
-
-.listRating {
-  display: flex;
-  align-items: center;
-  margin-bottom: 0.5rem;
-}
-
-.listStars {
-  display: flex;
-  align-items: center;
-  margin-right: 0.5rem;
-}
-
-.listStar {
-  height: 14px;
-  width: 14px;
-}
-
-.listStar.filled {
-  color: #fbbf24;
-  fill: currentColor;
-}
-
-.listStar.empty {
-  color: #d1d5db;
-}
-
-.listReviewCount {
-  font-size: 0.875rem;
-  color: #6b7280;
-}
-
-.listProductName {
-  font-size: 1.125rem;
-  font-weight: 600;
-  color: #111827;
-  margin-bottom: 0.5rem;
-  text-decoration: none;
-  display: block;
-}
-
-.listProductName:hover {
-  color: #3b82f6;
-}
-
-.listPriceGroup {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  margin-bottom: 1rem;
-}
-
-.listPrice {
-  font-size: 1.25rem;
-  font-weight: 700;
-  color: #1e3a8a;
-}
-
-.listOriginalPrice {
-  font-size: 0.875rem;
-  color: #6b7280;
-  text-decoration: line-through;
-}
-
-.listActions {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-  min-width: 120px;
-}
-
-.listAddToCartButton {
-  background: #1e3a8a;
-  color: white;
-  padding: 0.5rem 1rem;
-  border-radius: 0.5rem;
-  font-weight: 600;
-  transition: all 0.3s ease;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border: none;
-  cursor: pointer;
-  white-space: nowrap;
-}
-
-.listAddToCartButton:hover {
-  background: #1e40af;
-}
-
-.listCartIcon {
-  height: 1rem;
-  width: 1rem;
-  margin-right: 0.5rem;
-}
-
-/* Responsive Design for List View */
-@media (max-width: 768px) {
-  .listContent {
-    flex-direction: column;
-    padding: 1rem;
-    gap: 1rem;
-  }
-
-  .listImageContainer {
-    width: 100%;
-    height: 200px;
-  }
-
-  .listImageContainer .imageContainer {
-    width: 100%;
-    height: 200px;
-  }
-
-  .listImageContainer .productImage {
-    width: 100%;
-    height: 200px;
-  }
-
-  .listInfo {
-    width: 100%;
-  }
-
-  .listActions {
-    width: 100%;
-    flex-direction: row;
-  }
-
-  .listAddToCartButton {
-    flex: 1;
-  }
-}
-
-@media (max-width: 480px) {
-  .listContent {
-    padding: 0.75rem;
-  }
-
-  .listImageContainer {
-    height: 150px;
-  }
-
-  .listImageContainer .imageContainer {
-    height: 150px;
-  }
-
-  .listImageContainer .productImage {
-    height: 150px;
-  }
-
-  .listProductName {
-    font-size: 1rem;
-  }
-
-  .listPrice {
-    font-size: 1.125rem;
-  }
-}
-
-/* Ensure product links work correctly */
-.listCard a {
-  text-decoration: none;
-  color: inherit;
-}
-
-.listCard a:hover {
-  text-decoration: none;
-}
-
-/* Fix for the image container in list view */
-.listImageContainer .imageWrapper {
-  height: 100%;
-  width: 100%;
-}
-
-.listImageContainer .productImage {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
 @media (min-width: 768px) {
   .controls {
     flex-direction: row;
@@ -694,9 +230,8 @@
 
 .searchInput:focus {
   outline: none;
-  ring: 2px;
-  ring-color: #3b82f6;
-  border-color: transparent;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
 }
 
 .controlsRight {
@@ -741,9 +276,8 @@
 
 .sortSelect:focus {
   outline: none;
-  ring: 2px;
-  ring-color: #3b82f6;
-  border-color: transparent;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
 }
 
 .viewToggle {
@@ -811,6 +345,7 @@
   gap: 1rem;
 }
 
+/* Grid View Product Card */
 .productCard {
   position: relative;
   background: white;
@@ -818,6 +353,9 @@
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
   transition: all 0.3s ease;
   overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
 }
 
 .productCard:hover {
@@ -829,6 +367,7 @@
   position: relative;
   overflow: hidden;
   border-radius: 1rem 1rem 0 0;
+  flex-shrink: 0;
 }
 
 .productImage {
@@ -896,6 +435,9 @@
 
 .productContent {
   padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
 }
 
 .rating {
@@ -934,13 +476,15 @@
   font-weight: 600;
   color: #111827;
   margin-bottom: 0.5rem;
+  flex-grow: 1;
 }
 
 .priceContainer {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 1rem;
+  margin-top: auto;
+  padding-top: 1rem;
 }
 
 .priceGroup {
@@ -962,10 +506,9 @@
 }
 
 .addToCartButton {
-  width: 100%;
   background: #1e3a8a;
   color: white;
-  padding: 0.75rem;
+  padding: 0.75rem 1rem;
   border-radius: 0.5rem;
   font-weight: 600;
   transition: all 0.3s ease;
@@ -974,6 +517,7 @@
   justify-content: center;
   border: none;
   cursor: pointer;
+  min-width: 120px;
 }
 
 .addToCartButton:hover {
@@ -984,36 +528,35 @@
   height: 1.25rem;
   width: 1.25rem;
   margin-right: 0.5rem;
-  transition: transform 0.3s ease;
 }
 
-.addToCartButton:hover .cartIcon {
-  animation: bounce 0.5s ease;
-}
-
+/* List View Product Card */
 .listCard {
   background: white;
   border-radius: 1rem;
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-  padding: 1.5rem;
-  transition: box-shadow 0.3s ease;
+  transition: all 0.3s ease;
+  overflow: hidden;
 }
 
 .listCard:hover {
   box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  transform: translateY(-0.25rem);
 }
 
 .listContent {
   display: flex;
   align-items: center;
+  padding: 1.5rem;
   gap: 1.5rem;
+  height: 100%;
 }
 
 .listImageContainer {
   position: relative;
-  width: 8rem;
-  height: 8rem;
-  border-radius: 0.75rem;
+  width: 120px;
+  height: 120px;
+  border-radius: 8px;
   overflow: hidden;
   flex-shrink: 0;
 }
@@ -1024,20 +567,12 @@
   object-fit: cover;
 }
 
-.listBadge {
-  position: absolute;
-  top: 0.5rem;
-  left: 0.5rem;
-  background: #f97316;
-  color: white;
-  padding: 0.125rem 0.5rem;
-  border-radius: 9999px;
-  font-size: 0.75rem;
-  font-weight: 600;
-}
-
 .listInfo {
   flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
 }
 
 .listRating {
@@ -1049,11 +584,12 @@
 .listStars {
   display: flex;
   align-items: center;
+  margin-right: 0.5rem;
 }
 
 .listStar {
-  height: 1rem;
-  width: 1rem;
+  height: 14px;
+  width: 14px;
 }
 
 .listStar.filled {
@@ -1068,31 +604,44 @@
 .listReviewCount {
   font-size: 0.875rem;
   color: #6b7280;
-  margin-left: 0.5rem;
 }
 
 .listProductName {
-  font-size: 1.25rem;
+  font-size: 1.125rem;
   font-weight: 600;
   color: #111827;
   margin-bottom: 0.5rem;
+  text-decoration: none;
+  display: block;
+  flex-grow: 1;
+}
+
+.listProductName:hover {
+  color: #3b82f6;
+}
+
+.listPriceContainer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: auto;
+  padding-top: 1rem;
 }
 
 .listPriceGroup {
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  margin-bottom: 1rem;
 }
 
 .listPrice {
-  font-size: 1.5rem;
+  font-size: 1.25rem;
   font-weight: 700;
   color: #1e3a8a;
 }
 
 .listOriginalPrice {
-  font-size: 1.125rem;
+  font-size: 0.875rem;
   color: #6b7280;
   text-decoration: line-through;
 }
@@ -1101,50 +650,22 @@
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
-}
-
-.listWishlistButton {
-  padding: 0.75rem;
-  border-radius: 0.5rem;
-  transition: all 0.3s ease;
-  border: none;
-  cursor: pointer;
-}
-
-.listWishlistButton.active {
-  background: #ec4899;
-  color: white;
-}
-
-.listWishlistButton.inactive {
-  border: 1px solid #d1d5db;
-  color: #6b7280;
-  background: white;
-}
-
-.listWishlistButton.inactive:hover {
-  background: #f9fafb;
-}
-
-.listWishlistIcon {
-  height: 1.25rem;
-  width: 1.25rem;
-}
-
-.listWishlistIcon.filled {
-  fill: currentColor;
+  min-width: 120px;
 }
 
 .listAddToCartButton {
-  display: flex;
-  align-items: center;
-  padding: 0.75rem 1.5rem;
   background: #1e3a8a;
   color: white;
+  padding: 0.5rem 1rem;
   border-radius: 0.5rem;
-  transition: background-color 0.3s ease;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   border: none;
   cursor: pointer;
+  white-space: nowrap;
 }
 
 .listAddToCartButton:hover {
@@ -1152,8 +673,8 @@
 }
 
 .listCartIcon {
-  height: 1.25rem;
-  width: 1.25rem;
+  height: 1rem;
+  width: 1rem;
   margin-right: 0.5rem;
 }
 
@@ -1190,26 +711,6 @@
   color: #6b7280;
 }
 
-@keyframes bounce {
-  0%,
-  20%,
-  53%,
-  80%,
-  100% {
-    transform: translateY(0);
-  }
-  40%,
-  43% {
-    transform: translateY(-10px);
-  }
-  70% {
-    transform: translateY(-5px);
-  }
-  90% {
-    transform: translateY(-2px);
-  }
-}
-
 /* Responsive Design */
 @media (max-width: 768px) {
   .page {
@@ -1235,15 +736,204 @@
   .listContent {
     flex-direction: column;
     text-align: center;
+    padding: 1rem;
   }
 
   .listImageContainer {
-    width: 6rem;
-    height: 6rem;
+    width: 100%;
+    height: 200px;
+  }
+
+  .listImage {
+    width: 100%;
+    height: 200px;
   }
 
   .listActions {
+    width: 100%;
     flex-direction: row;
-    justify-content: center;
   }
+
+  .listAddToCartButton {
+    flex: 1;
+  }
+
+  .priceContainer,
+  .listPriceContainer {
+    flex-direction: column;
+    gap: 1rem;
+    align-items: flex-start;
+  }
+
+  .addToCartButton {
+    width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .listContent {
+    padding: 0.75rem;
+  }
+
+  .listImageContainer {
+    height: 150px;
+  }
+
+  .listImage {
+    height: 150px;
+  }
+
+  .productName,
+  .listProductName {
+    font-size: 1rem;
+  }
+
+  .price,
+  .listPrice {
+    font-size: 1.125rem;
+  }
+}
+
+/* Progress Bar Container */
+.progressContainer {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background-color: rgba(255, 255, 255, 0.3);
+  backdrop-filter: blur(4px);
+  z-index: 10;
+}
+
+/* Progress Bar */
+.progressBar {
+  height: 100%;
+  background: linear-gradient(90deg, #ffffff94, #e0e0e0);
+  transition: width 0.1s linear;
+  border-radius: 0 2px 2px 0;
+  box-shadow: 0 0 8px rgba(59, 130, 246, 0.4);
+  width: 0%;
+}
+
+/* Paused state */
+.progressBar.paused {
+  background: linear-gradient(90deg, #6b7280, #9ca3af);
+  box-shadow: 0 0 8px rgba(107, 114, 128, 0.4);
+}
+
+/* Completed state */
+.progressBar.completed {
+  background: linear-gradient(90deg, #10b981, #34d399);
+  box-shadow: 0 0 8px rgba(16, 185, 129, 0.4);
+}
+
+/* Error state */
+.progressBar.error {
+  background: linear-gradient(90deg, #ef4444, #f87171);
+  box-shadow: 0 0 8px rgba(239, 68, 68, 0.4);
+}
+
+/* Progress Bar with percentage text */
+.progressContainer.withText {
+  height: 20px;
+  border-radius: 10px;
+  background-color: #e5e7eb;
+}
+
+.progressBar.withText {
+  border-radius: 10px;
+  position: relative;
+}
+
+.progressText {
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 10px;
+  font-weight: 600;
+  color: #374151;
+  text-shadow: 0 0 2px rgba(255, 255, 255, 0.8);
+}
+
+/* Horizontal progress bar variants */
+.progressHorizontal {
+  width: 100%;
+  height: 4px;
+  background-color: #e5e7eb;
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.progressHorizontal .progressBar {
+  height: 100%;
+  border-radius: 2px;
+}
+
+/* Vertical progress bar */
+.progressVertical {
+  width: 4px;
+  height: 100px;
+  background-color: #e5e7eb;
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.progressVertical .progressBar {
+  width: 100%;
+  height: 0%;
+  border-radius: 2px;
+}
+
+/* Striped animation */
+.progressBar.striped {
+  background-image: linear-gradient(
+    45deg,
+    rgba(255, 255, 255, 0.15) 25%,
+    transparent 25%,
+    transparent 50%,
+    rgba(255, 255, 255, 0.15) 50%,
+    rgba(255, 255, 255, 0.15) 75%,
+    transparent 75%,
+    transparent
+  );
+  background-size: 1rem 1rem;
+  animation: progressStripes 1s linear infinite;
+}
+
+@keyframes progressStripes {
+  0% {
+    background-position: 1rem 0;
+  }
+  100% {
+    background-position: 0 0;
+  }
+}
+
+/* Smooth transition for width changes */
+.progressBar.smooth {
+  transition: width 0.3s ease-in-out;
+}
+
+/* Instant transition */
+.progressBar.instant {
+  transition: width 0s;
+}
+
+/* Progress bar sizes */
+.progressContainer.sm {
+  height: 2px;
+}
+
+.progressContainer.md {
+  height: 4px;
+}
+
+.progressContainer.lg {
+  height: 6px;
+}
+
+.progressContainer.xl {
+  height: 8px;
 }

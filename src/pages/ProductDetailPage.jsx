@@ -266,12 +266,28 @@ const ProductDetailPage = () => {
             {/* AR Try-On Button */}
             {isARCompatible && (
               <div className="border-t border-gray-200 pt-6">
+                <div className="mb-4 p-4 bg-gradient-to-r from-purple-50 to-pink-50 rounded-lg border border-purple-200">
+                  <div className="flex items-center mb-2">
+                    <Sparkles className="h-5 w-5 text-purple-600 mr-2" />
+                    <span className="font-semibold text-purple-900">
+                      AR Try-On Available
+                    </span>
+                  </div>
+                  <p className="text-sm text-purple-700">
+                    See how this {product.category} looks on you using augmented
+                    reality
+                  </p>
+                </div>
                 <button
                   onClick={() => setShowAR(!showAR)}
-                  className="w-full bg-gradient-to-r from-purple-600 to-pink-600 text-white py-3 px-6 rounded-lg hover:from-purple-700 hover:to-pink-700 transition-all flex items-center justify-center mb-4"
+                  className={`w-full py-3 px-6 rounded-lg transition-all flex items-center justify-center mb-4 ${
+                    showAR
+                      ? "bg-gray-600 hover:bg-gray-700 text-white"
+                      : "bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white"
+                  }`}
                 >
                   <Sparkles className="h-5 w-5 mr-2" />
-                  Try with AR
+                  {showAR ? "Close AR Try-On" : "Try with AR"}
                 </button>
               </div>
             )}

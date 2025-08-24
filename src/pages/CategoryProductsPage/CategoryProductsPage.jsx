@@ -1,5 +1,10 @@
 import React, { useState, useEffect, useMemo } from "react";
-import { useParams, useSearchParams, Link } from "react-router-dom";
+import {
+  useParams,
+  useSearchParams,
+  Link,
+  useNavigate,
+} from "react-router-dom";
 import {
   Search,
   Filter,
@@ -13,14 +18,171 @@ import {
   ArrowLeft,
   Loader,
   X,
+  Eye,
+  Plus,
+  Minus,
+  Check,
 } from "lucide-react";
 import styles from "./CategoryProductsPage.module.css";
 import { useProducts } from "../../context/ProductContext";
+import { useWishlist } from "../../context/WishlistContext";
+import { useCart } from "../../context/CartContext";
+
+// Product Image Slider Component
+const ProductImageSlider = ({
+  images,
+  name,
+  badge,
+  onWishlistToggle,
+  isInWishlist,
+  onQuickView,
+}) => {
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [progress, setProgress] = useState(0);
+  const [isTransitioning, setIsTransitioning] = useState(false);
+  const [isPaused, setIsPaused] = useState(false);
+
+  useEffect(() => {
+    if (images.length <= 1) return;
+
+    let progressInterval;
+    let imageInterval;
+
+    if (!isPaused) {
+      // Progress bar animation
+      progressInterval = setInterval(() => {
+        setProgress((prev) => {
+          if (prev >= 100) {
+            return 0;
+          }
+          return prev + 100 / 30; // 30 steps for 3 seconds (100ms intervals)
+        });
+      }, 100);
+
+      // Image change every 3 seconds
+      imageInterval = setInterval(() => {
+        setIsTransitioning(true);
+
+        setTimeout(() => {
+          setCurrentImageIndex((prevIndex) => (prevIndex + 1) % images.length);
+          setProgress(0);
+          setIsTransitioning(false);
+        }, 300); // 300ms fade transition
+      }, 3000);
+    }
+
+    return () => {
+      clearInterval(progressInterval);
+      clearInterval(imageInterval);
+    };
+  }, [images.length, isPaused]);
+
+  const handleMouseEnter = () => {
+    setIsPaused(true);
+  };
+
+  const handleMouseLeave = () => {
+    setIsPaused(false);
+    setProgress(0);
+  };
+
+  const handleWishlistClick = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    onWishlistToggle();
+  };
+
+  const handleQuickViewClick = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    onQuickView();
+  };
+
+  if (!images || images.length === 0) {
+    return (
+      <div className={styles.imageContainer}>
+        <img
+          src="https://via.placeholder.com/300"
+          alt={name}
+          className={styles.productImage}
+        />
+      </div>
+    );
+  }
+
+  return (
+    <div
+      className={styles.imageContainer}
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
+    >
+      <div className={styles.imageWrapper}>
+        <img
+          src={images[currentImageIndex]?.url || images[currentImageIndex]}
+          alt={name}
+          className={`${styles.productImage} ${
+            isTransitioning ? styles.fadeOut : styles.fadeIn
+          }`}
+        />
+
+        {/* Badge */}
+        {badge && <div className={styles.badge}>{badge}</div>}
+
+        {/* Wishlist Button */}
+        <button
+          className={`${styles.wishlistButton} ${
+            isInWishlist ? styles.inWishlist : ""
+          }`}
+          onClick={handleWishlistClick}
+          title={isInWishlist ? "Remove from wishlist" : "Add to wishlist"}
+        >
+          <Heart className={styles.wishlistIcon} />
+        </button>
+
+        {/* Quick View Button */}
+        <button
+          className={styles.quickViewButton}
+          onClick={handleQuickViewClick}
+          title="Quick View"
+        >
+          <Eye className={styles.quickViewIcon} />
+        </button>
+      </div>
+
+      {/* Progress Bar - only show if there are multiple images */}
+      {images.length > 1 && (
+        <div className={styles.progressContainer}>
+          <div
+            className={`${styles.progressBar} ${isPaused ? styles.paused : ""}`}
+            style={{ width: `${progress}%` }}
+          ></div>
+        </div>
+      )}
+
+      {/* Image Indicators */}
+      {images.length > 1 && (
+        <div className={styles.imageIndicators}>
+          {images.map((_, index) => (
+            <div
+              key={index}
+              className={`${styles.indicator} ${
+                index === currentImageIndex ? styles.active : ""
+              }`}
+            />
+          ))}
+        </div>
+      )}
+    </div>
+  );
+};
 
 const CategoryProductsPage = () => {
   const { categoryId } = useParams();
   const [searchParams, setSearchParams] = useSearchParams();
-  const { products, loading: productsLoading } = useProducts();
+  const navigate = useNavigate();
+  const { products, loading: productsLoading, getProducts } = useProducts();
+  const { addToWishlist, removeFromWishlist, isInWishlist } = useWishlist();
+  const { addToCart, removeFromCart, cartItems } = useCart();
 
   // State management
   const [viewMode, setViewMode] = useState("grid");
@@ -31,28 +193,43 @@ const CategoryProductsPage = () => {
   const [selectedSubcategories, setSelectedSubcategories] = useState([]);
   const [showFilters, setShowFilters] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
+  const [quantities, setQuantities] = useState({});
   const itemsPerPage = 12;
 
-  // Category definitions (same as in CategoriesPage)
+  useEffect(() => {
+    getProducts();
+  }, []);
+
+  // Category definitions
   const categoryDefinitions = {
-    "1": {
+    women: {
       name: "Women's Fashion",
+      description:
+        "Discover the latest trends in women's clothing, from casual wear to elegant evening dresses.",
       subcategories: ["Dresses", "Tops", "Bottoms", "Outerwear", "Activewear"],
     },
-    "2": {
+    men: {
       name: "Men's Collection",
+      description:
+        "Premium men's fashion featuring sophisticated styles for the modern gentleman.",
       subcategories: ["Shirts", "Suits", "Casual Wear", "Accessories", "Shoes"],
     },
-    "3": {
+    accessories: {
       name: "Accessories",
+      description:
+        "Complete your look with our curated selection of luxury accessories.",
       subcategories: ["Jewelry", "Bags", "Watches", "Sunglasses", "Scarves"],
     },
-    "4": {
+    "home-living": {
       name: "Home & Living",
+      description:
+        "Transform your space with our elegant home decor and living essentials.",
       subcategories: ["Furniture", "Decor", "Lighting", "Textiles", "Kitchen"],
     },
-    "5": {
+    electronics: {
       name: "Electronics",
+      description:
+        "Latest technology and gadgets to enhance your digital lifestyle.",
       subcategories: [
         "Smartphones",
         "Laptops",
@@ -61,8 +238,10 @@ const CategoryProductsPage = () => {
         "Gaming",
       ],
     },
-    "6": {
+    "beauty-care": {
       name: "Beauty & Care",
+      description:
+        "Premium beauty products and personal care essentials for your daily routine.",
       subcategories: [
         "Skincare",
         "Makeup",
@@ -71,8 +250,10 @@ const CategoryProductsPage = () => {
         "Wellness",
       ],
     },
-    "7": {
+    "sports-fitness": {
       name: "Sports & Fitness",
+      description:
+        "High-performance gear and apparel for your active lifestyle.",
       subcategories: [
         "Activewear",
         "Equipment",
@@ -81,8 +262,10 @@ const CategoryProductsPage = () => {
         "Fitness",
       ],
     },
-    "8": {
+    "kids-baby": {
       name: "Kids & Baby",
+      description:
+        "Safe, comfortable, and stylish products for children of all ages.",
       subcategories: ["Baby Clothes", "Toys", "Shoes", "Accessories", "Gear"],
     },
   };
@@ -90,6 +273,14 @@ const CategoryProductsPage = () => {
   // Get category from URL params or search params
   const currentCategoryId = categoryId || searchParams.get("category");
   const currentCategory = categoryDefinitions[currentCategoryId];
+
+  // Initialize search term from URL
+  useEffect(() => {
+    const urlSearchTerm = searchParams.get("search");
+    if (urlSearchTerm) {
+      setSearchTerm(urlSearchTerm);
+    }
+  }, [searchParams]);
 
   // Filter products for current category
   const categoryProducts = useMemo(() => {
@@ -99,33 +290,17 @@ const CategoryProductsPage = () => {
       const productCategory = product.category;
       if (!productCategory) return false;
 
-      // Map category IDs to category names for filtering
-      const categoryNameMap = {
-        "1": "women",
-        "2": "men", 
-        "3": "accessories",
-        "4": "home",
-        "5": "electronics",
-        "6": "beauty",
-        "7": "sports",
-        "8": "kids"
-      };
-
-      const expectedCategoryName = categoryNameMap[currentCategoryId];
-
       if (typeof productCategory === "string") {
         return (
-          productCategory.toLowerCase() === expectedCategoryName ||
-          productCategory.toLowerCase() === currentCategory?.name.toLowerCase() ||
-          productCategory.toLowerCase().includes(expectedCategoryName)
+          productCategory.toLowerCase() === currentCategoryId.toLowerCase() ||
+          productCategory.toLowerCase() === currentCategory?.name.toLowerCase()
         );
       } else if (typeof productCategory === "object") {
         return (
-          productCategory._id === expectedCategoryName ||
+          productCategory._id === currentCategoryId ||
           productCategory.name?.toLowerCase() ===
             currentCategory?.name.toLowerCase() ||
-          productCategory.slug === expectedCategoryName ||
-          productCategory.name?.toLowerCase().includes(expectedCategoryName)
+          productCategory.slug === currentCategoryId
         );
       }
       return false;
@@ -224,6 +399,61 @@ const CategoryProductsPage = () => {
 
   const totalPages = Math.ceil(filteredProducts.length / itemsPerPage);
 
+  // Check if product is in cart
+  const isInCart = (productId) => {
+    return cartItems?.some((item) => item.id === productId);
+  };
+
+  // Get cart quantity
+  const getCartQuantity = (productId) => {
+    const cartItem = cartItems?.find((item) => item.id === productId);
+    return cartItem ? cartItem.quantity : 0;
+  };
+
+  // Handle add to cart
+  const handleAddToCart = (product) => {
+    addToCart({
+      id: product._id || product.id,
+      name: product.name,
+      price: product.price,
+      image: product.images?.[0]?.url || product.image,
+      quantity: 1,
+    });
+  };
+
+  // Handle remove from cart
+  const handleRemoveFromCart = (productId) => {
+    removeFromCart(productId);
+  };
+
+  // Handle quantity change
+  const handleQuantityChange = (productId, newQuantity) => {
+    if (newQuantity <= 0) {
+      handleRemoveFromCart(productId);
+    } else {
+      // Update quantity in cart
+      const cartItem = cartItems.find((item) => item.id === productId);
+      if (cartItem) {
+        addToCart({ ...cartItem, quantity: newQuantity });
+      }
+    }
+  };
+
+  // Handle wishlist toggle
+  const handleWishlistToggle = (product) => {
+    const productId = product._id || product.id;
+    if (isInWishlist(productId)) {
+      removeFromWishlist(productId);
+    } else {
+      addToWishlist(product);
+    }
+  };
+
+  // Handle product quick view
+  const handleQuickView = (product) => {
+    navigate(`/product/${product._id || product.id}`);
+  };
+
   // Handle subcategory filter
   const handleSubcategoryToggle = (subcategory) => {
     setSelectedSubcategories((prev) =>
@@ -292,6 +522,9 @@ const CategoryProductsPage = () => {
 
           <div className={styles.headerContent}>
             <h1 className={styles.title}>{currentCategory.name}</h1>
+            <p className={styles.categoryDescription}>
+              {currentCategory.description}
+            </p>
             <p className={styles.description}>
               {filteredProducts.length} products found
             </p>
@@ -474,125 +707,234 @@ const CategoryProductsPage = () => {
           <>
             {viewMode === "grid" ? (
               <div className={styles.productsGrid}>
-                {paginatedProducts.map((product) => (
-                  <div
-                    key={product._id || product.id}
-                    className={styles.productCard}
-                  >
-                    <div className={styles.productImageContainer}>
-                      <img
-                        src={
-                          product.image ||
-                          product.images?.[0] ||
-                          "https://via.placeholder.com/300"
-                        }
-                        alt={product.name}
-                        className={styles.productImage}
-                      />
-                      <div className={styles.productActions}>
-                        <button className={styles.wishlistButton}>
-                          <Heart className={styles.wishlistIcon} />
-                        </button>
-                        <button className={styles.quickViewButton}>
-                          Quick View
-                        </button>
-                      </div>
-                    </div>
+                {paginatedProducts.map((product) => {
+                  const productId = product._id || product.id;
+                  const inCart = isInCart(productId);
+                  const cartQuantity = getCartQuantity(productId);
 
-                    <div className={styles.productInfo}>
-                      <h3 className={styles.productName}>{product.name}</h3>
-                      <p className={styles.productDescription}>
-                        {product.description?.slice(0, 80)}
-                        {product.description?.length > 80 ? "..." : ""}
-                      </p>
+                  return (
+                    <div key={productId} className={styles.productCard}>
+                      <Link
+                        to={`/product/${productId}`}
+                        className={styles.productLink}
+                      >
+                        <ProductImageSlider
+                          images={product.images || [product.image]}
+                          name={product.name}
+                          badge={product.badge}
+                          onWishlistToggle={() => handleWishlistToggle(product)}
+                          isInWishlist={isInWishlist(productId)}
+                          onQuickView={() => handleQuickView(product)}
+                        />
+                      </Link>
 
-                      <div className={styles.productMeta}>
-                        {product.rating && (
-                          <div className={styles.rating}>
-                            <Star className={styles.starIcon} />
-                            <span>{product.rating.toFixed(1)}</span>
-                          </div>
-                        )}
+                      <div className={styles.productInfo}>
+                        <Link
+                          to={`/product/${productId}`}
+                          className={styles.productLink}
+                        >
+                          <h3 className={styles.productName}>{product.name}</h3>
+                          <p className={styles.productDescription}>
+                            {product.description?.slice(0, 80)}
+                            {product.description?.length > 80 ? "..." : ""}
+                          </p>
+                        </Link>
 
-                        <div className={styles.price}>
-                          {product.originalPrice &&
-                            product.originalPrice > product.price && (
-                              <span className={styles.originalPrice}>
-                                ${product.originalPrice}
+                        <div className={styles.productMeta}>
+                          {product.rating && (
+                            <div className={styles.rating}>
+                              <Star className={styles.starIcon} />
+                              <span>
+                                {typeof product.rating === "number"
+                                  ? product.rating.toFixed(1)
+                                  : "0.0"}
                               </span>
-                            )}
-                          <span className={styles.currentPrice}>
-                            ${product.price}
-                          </span>
-                        </div>
-                      </div>
+                              {product.reviewCount && (
+                                <span className={styles.reviewCount}>
+                                  ({product.reviewCount})
+                                </span>
+                              )}
+                            </div>
+                          )}
 
-                      <button className={styles.addToCartButton}>
-                        <ShoppingCart className={styles.cartIcon} />
-                        Add to Cart
-                      </button>
+                          <div className={styles.price}>
+                            {product.originalPrice &&
+                              product.originalPrice > product.price && (
+                                <span className={styles.originalPrice}>
+                                  ${product.originalPrice}
+                                </span>
+                              )}
+                            <span className={styles.currentPrice}>
+                              ${product.price}
+                            </span>
+                          </div>
+                        </div>
+
+                        {inCart ? (
+                          <div className={styles.quantityControls}>
+                            <button
+                              onClick={() =>
+                                handleQuantityChange(
+                                  productId,
+                                  cartQuantity - 1
+                                )
+                              }
+                              className={styles.quantityButton}
+                            >
+                              <Minus className={styles.quantityIcon} />
+                            </button>
+                            <span className={styles.quantityDisplay}>
+                              {cartQuantity} in cart
+                            </span>
+                            <button
+                              onClick={() =>
+                                handleQuantityChange(
+                                  productId,
+                                  cartQuantity + 1
+                                )
+                              }
+                              className={styles.quantityButton}
+                            >
+                              <Plus className={styles.quantityIcon} />
+                            </button>
+                          </div>
+                        ) : (
+                          <button
+                            className={styles.addToCartButton}
+                            onClick={() => handleAddToCart(product)}
+                          >
+                            <ShoppingCart className={styles.cartIcon} />
+                            Add to Cart
+                          </button>
+                        )}
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             ) : (
               <div className={styles.productsList}>
-                {paginatedProducts.map((product) => (
-                  <div
-                    key={product._id || product.id}
-                    className={styles.productListItem}
-                  >
-                    <div className={styles.productListImage}>
-                      <img
-                        src={
-                          product.image ||
-                          product.images?.[0] ||
-                          "https://via.placeholder.com/150"
-                        }
-                        alt={product.name}
-                        className={styles.listImage}
-                      />
-                    </div>
+                {paginatedProducts.map((product) => {
+                  const productId = product._id || product.id;
+                  const inCart = isInCart(productId);
+                  const cartQuantity = getCartQuantity(productId);
 
-                    <div className={styles.productListInfo}>
-                      <h3 className={styles.productListName}>{product.name}</h3>
-                      <p className={styles.productListDescription}>
-                        {product.description}
-                      </p>
+                  return (
+                    <div key={productId} className={styles.productListItem}>
+                      <Link
+                        to={`/product/${productId}`}
+                        className={styles.listImageLink}
+                      >
+                        <div className={styles.productListImage}>
+                          <ProductImageSlider
+                            images={product.images || [product.image]}
+                            name={product.name}
+                            badge={product.badge}
+                            onWishlistToggle={() =>
+                              handleWishlistToggle(product)
+                            }
+                            isInWishlist={isInWishlist(productId)}
+                            onQuickView={() => handleQuickView(product)}
+                          />
+                        </div>
+                      </Link>
 
-                      <div className={styles.productListMeta}>
-                        {product.rating && (
-                          <div className={styles.rating}>
-                            <Star className={styles.starIcon} />
-                            <span>{product.rating.toFixed(1)}</span>
+                      <div className={styles.productListInfo}>
+                        <Link
+                          to={`/product/${productId}`}
+                          className={styles.productLink}
+                        >
+                          <h3 className={styles.productListName}>
+                            {product.name}
+                          </h3>
+                          <p className={styles.productListDescription}>
+                            {product.description}
+                          </p>
+                        </Link>
+
+                        <div className={styles.productListMeta}>
+                          {product.rating && (
+                            <div className={styles.rating}>
+                              <Star className={styles.starIcon} />
+                              <span>
+                                {typeof product.rating === "number"
+                                  ? product.rating.toFixed(1)
+                                  : "0.0"}
+                              </span>
+                              {product.reviewCount && (
+                                <span className={styles.reviewCount}>
+                                  ({product.reviewCount})
+                                </span>
+                              )}
+                            </div>
+                          )}
+
+                          <div className={styles.price}>
+                            {product.originalPrice &&
+                              product.originalPrice > product.price && (
+                                <span className={styles.originalPrice}>
+                                  ${product.originalPrice}
+                                </span>
+                              )}
+                            <span className={styles.currentPrice}>
+                              ${product.price}
+                            </span>
+                          </div>
+                        </div>
+
+                        {product.tags && (
+                          <div className={styles.productTags}>
+                            {product.tags.slice(0, 3).map((tag, index) => (
+                              <span key={index} className={styles.tag}>
+                                {tag}
+                              </span>
+                            ))}
                           </div>
                         )}
+                      </div>
 
-                        <div className={styles.price}>
-                          {product.originalPrice &&
-                            product.originalPrice > product.price && (
-                              <span className={styles.originalPrice}>
-                                ${product.originalPrice}
-                              </span>
-                            )}
-                          <span className={styles.currentPrice}>
-                            ${product.price}
-                          </span>
-                        </div>
+                      <div className={styles.productListActions}>
+                        {inCart ? (
+                          <div className={styles.listQuantityControls}>
+                            <button
+                              onClick={() =>
+                                handleQuantityChange(
+                                  productId,
+                                  cartQuantity - 1
+                                )
+                              }
+                              className={styles.quantityButton}
+                            >
+                              <Minus className={styles.quantityIcon} />
+                            </button>
+                            <span className={styles.quantityDisplay}>
+                              {cartQuantity}
+                            </span>
+                            <button
+                              onClick={() =>
+                                handleQuantityChange(
+                                  productId,
+                                  cartQuantity + 1
+                                )
+                              }
+                              className={styles.quantityButton}
+                            >
+                              <Plus className={styles.quantityIcon} />
+                            </button>
+                          </div>
+                        ) : (
+                          <button
+                            className={styles.addToCartButton}
+                            onClick={() => handleAddToCart(product)}
+                          >
+                            <ShoppingCart className={styles.cartIcon} />
+                            Add to Cart
+                          </button>
+                        )}
                       </div>
                     </div>
-
-                    <div className={styles.productListActions}>
-                      <button className={styles.wishlistButton}>
-                        <Heart className={styles.wishlistIcon} />
-                      </button>
-                      <button className={styles.addToCartButton}>
-                        <ShoppingCart className={styles.cartIcon} />
-                        Add to Cart
-                      </button>
-                    </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             )}
 

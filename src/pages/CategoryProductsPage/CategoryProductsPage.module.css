@@ -82,8 +82,14 @@
   background-clip: text;
 }
 
-.description {
+.categoryDescription {
   font-size: 1.1rem;
+  color: #6b7280;
+  margin-bottom: 0.5rem;
+}
+
+.description {
+  font-size: 1rem;
   color: #6b7280;
 }
 
@@ -254,7 +260,7 @@
 
 .filtersHeader {
   display: flex;
-  justify-content: between;
+  justify-content: space-between;
   align-items: center;
   margin-bottom: 1rem;
 }
@@ -389,6 +395,8 @@
   box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
   transition: all 0.3s;
   border: 1px solid rgba(255, 255, 255, 0.2);
+  display: flex;
+  flex-direction: column;
 }
 
 .productCard:hover {
@@ -402,62 +410,142 @@
   overflow: hidden;
 }
 
+/* Image Slider Styles */
+.imageContainer {
+  position: relative;
+  overflow: hidden;
+  height: 250px;
+  cursor: pointer;
+}
+
+.imageWrapper {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
 .productImage {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  transition: transform 0.3s;
+  transition: opacity 0.3s ease-in-out;
 }
 
-.productCard:hover .productImage {
-  transform: scale(1.05);
-}
-
-.productActions {
-  position: absolute;
-  top: 1rem;
-  right: 1rem;
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-  opacity: 0;
-  transition: opacity 0.3s;
-}
-
-.productCard:hover .productActions {
+.productImage.fadeIn {
   opacity: 1;
 }
 
-.wishlistButton,
-.quickViewButton {
-  background: rgba(255, 255, 255, 0.9);
-  border: none;
-  border-radius: 0.5rem;
-  padding: 0.5rem;
-  cursor: pointer;
-  transition: all 0.2s;
-  backdrop-filter: blur(10px);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 0.75rem;
-  font-weight: 500;
+.productImage.fadeOut {
+  opacity: 0.3;
 }
 
-.wishlistButton:hover,
-.quickViewButton:hover {
+/* Progress Bar */
+.progressContainer {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background-color: rgba(255, 255, 255, 0.3);
+}
+
+.progressBar {
+  height: 100%;
+  background: linear-gradient(90deg, #ffffff94, #e0e0e0);
+  transition: width 0.1s linear;
+  border-radius: 0 2px 2px 0;
+}
+
+.progressBar.paused {
+  background: linear-gradient(90deg, #6b7280, #9ca3af);
+}
+
+/* Image Indicators */
+.imageIndicators {
+  position: absolute;
+  bottom: 12px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 6px;
+  z-index: 10;
+}
+
+.indicator {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: rgba(255, 255, 255, 0.5);
+  transition: all 0.3s ease;
+}
+
+.indicator.active {
+  background-color: white;
+  transform: scale(1.2);
+}
+
+/* Badge */
+.badge {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+  color: white;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  z-index: 15;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+/* Wishlist Button */
+.wishlistButton {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  padding: 8px;
+  border-radius: 50%;
+  border: none;
+  cursor: pointer;
+  z-index: 15;
+  transition: all 0.3s ease;
+  opacity: 0;
   background: white;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  color: #6b7280;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+.wishlistButton.inWishlist {
+  background: #ec4899;
+  color: white;
+}
+
+.imageContainer:hover .wishlistButton {
+  opacity: 1;
+}
+
+.wishlistButton:hover {
+  background: #f9fafb;
+}
+
+.wishlistButton.inWishlist:hover {
+  background: #db2777;
 }
 
 .wishlistIcon {
-  width: 16px;
-  height: 16px;
-  color: #ef4444;
+  width: 18px;
+  height: 18px;
 }
 
+/* Product Info - Fixed Layout */
 .productInfo {
   padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
 }
 
 .productName {
@@ -473,13 +561,16 @@
   font-size: 0.9rem;
   line-height: 1.5;
   margin-bottom: 1rem;
+  flex-grow: 1;
 }
 
+/* Product Meta - Always at bottom */
 .productMeta {
   display: flex;
   justify-content: space-between;
   align-items: center;
   margin-bottom: 1rem;
+  margin-top: auto;
 }
 
 .rating {
@@ -519,6 +610,7 @@
   color: #059669;
 }
 
+/* Add to Cart Button - Consistent styling */
 .addToCartButton {
   width: 100%;
   display: flex;
@@ -533,6 +625,7 @@
   font-weight: 600;
   cursor: pointer;
   transition: all 0.3s;
+  margin-top: auto;
 }
 
 .addToCartButton:hover {
@@ -545,7 +638,42 @@
   height: 18px;
 }
 
-/* Products List */
+/* Quantity Controls */
+.quantityControls {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.quantityButton {
+  padding: 6px;
+  border-radius: 6px;
+  border: 1px solid #e5e7eb;
+  background: white;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.quantityButton:hover {
+  background: #f9fafb;
+  border-color: #d1d5db;
+}
+
+.quantityIcon {
+  width: 16px;
+  height: 16px;
+}
+
+.quantityDisplay {
+  font-weight: 600;
+  color: #374151;
+  min-width: 60px;
+  text-align: center;
+}
+
+/* Products List View */
 .productsList {
   display: flex;
   flex-direction: column;
@@ -572,6 +700,7 @@
   width: 200px;
   height: 200px;
   flex-shrink: 0;
+  position: relative;
 }
 
 .listImage {
@@ -585,7 +714,6 @@
   padding: 1.5rem;
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
 }
 
 .productListName {
@@ -606,6 +734,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
+  margin-bottom: 1rem;
 }
 
 .productListActions {
@@ -618,14 +747,11 @@
   min-width: 150px;
 }
 
-.productListActions .wishlistButton {
-  width: 40px;
-  height: 40px;
-}
-
-.productListActions .addToCartButton {
-  width: 100%;
-  padding: 0.75rem 1rem;
+.listQuantityControls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
 }
 
 /* Pagination */
@@ -816,4 +942,23 @@
   .viewToggle {
     display: none;
   }
+}
+
+/* Link Styles */
+.productLink {
+  text-decoration: none;
+  color: inherit;
+  display: block;
+}
+
+.productLink:hover {
+  text-decoration: none;
+  color: inherit;
+}
+
+.listImageLink {
+  text-decoration: none;
+  color: inherit;
+  display: block;
+  flex-shrink: 0;
 }

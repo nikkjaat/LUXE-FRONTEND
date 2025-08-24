@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Search, Filter, Grid, List, ArrowRight, Loader } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import styles from "./CategoriesPage.module.css";
 import { useProducts } from "../../context/ProductContext";
 
@@ -9,12 +9,17 @@ const CategoriesPage = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [categories, setCategories] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
-  const { products, loading: productsLoading } = useProducts();
+  const { products, loading: productsLoading, getProducts } = useProducts();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    getProducts();
+  }, []);
 
   // Define all possible categories with their properties
   const allCategories = [
     {
-      id: "womens-fashion",
+      id: "women",
       name: "Women's Fashion",
       image:
         "https://images.pexels.com/photos/1926769/pexels-photo-1926769.jpeg?auto=compress&cs=tinysrgb&w=600",
@@ -24,7 +29,7 @@ const CategoriesPage = () => {
       subcategories: ["Dresses", "Tops", "Bottoms", "Outerwear", "Activewear"],
     },
     {
-      id: "mens-collection",
+      id: "men",
       name: "Men's Collection",
       image:
         "https://images.pexels.com/photos/2379004/pexels-photo-2379004.jpeg?auto=compress&cs=tinysrgb&w=600",
@@ -44,7 +49,7 @@ const CategoriesPage = () => {
       subcategories: ["Jewelry", "Bags", "Watches", "Sunglasses", "Scarves"],
     },
     {
-      id: "home-living",
+      id: "home",
       name: "Home & Living",
       image:
         "https://images.pexels.com/photos/1571460/pexels-photo-1571460.jpeg?auto=compress&cs=tinysrgb&w=600",
@@ -70,7 +75,7 @@ const CategoriesPage = () => {
       ],
     },
     {
-      id: "beauty-care",
+      id: "beauty",
       name: "Beauty & Care",
       image:
         "https://images.pexels.com/photos/3785147/pexels-photo-3785147.jpeg?auto=compress&cs=tinysrgb&w=600",
@@ -86,7 +91,7 @@ const CategoriesPage = () => {
       ],
     },
     {
-      id: "sports-fitness",
+      id: "sports",
       name: "Sports & Fitness",
       image:
         "https://images.pexels.com/photos/1552242/pexels-photo-1552242.jpeg?auto=compress&cs=tinysrgb&w=600",
@@ -102,7 +107,7 @@ const CategoriesPage = () => {
       ],
     },
     {
-      id: "kids-baby",
+      id: "kids",
       name: "Kids & Baby",
       image:
         "https://images.pexels.com/photos/1620760/pexels-photo-1620760.jpeg?auto=compress&cs=tinysrgb&w=600",
@@ -113,28 +118,45 @@ const CategoriesPage = () => {
     },
   ];
 
+  const getProductByCategory = (id, name, itemCount, category) => {
+    const keyword = id.split("-")[0];
+    const filterCategory = products.filter(
+      (product) => product.category === keyword
+    );
+    navigate(`/category/${id}`, {
+      state: {
+        keyword,
+        filterCategory,
+        name,
+        itemCount,
+      },
+    });
+  };
+
   // Count products in each category
   useEffect(() => {
     if (products.length > 0 || !productsLoading) {
       const categoriesWithCounts = allCategories.map((category) => {
+        // Extract the first part of the category ID to match with backend
+        const categoryKeyword = category.id.split("-")[0];
+
         // Count products that match this category
         const productCount = products.filter((product) => {
           // Handle different category field structures
           const productCategory = product.category;
           if (!productCategory) return false;
 
-          // Check if category matches by ID, name, or slug
+          // Check if category matches by the first part of the ID
           if (typeof productCategory === "string") {
             return (
-              productCategory.toLowerCase() === category.id.toLowerCase() ||
-              productCategory.toLowerCase() === category.name.toLowerCase()
+              productCategory.toLowerCase() === categoryKeyword.toLowerCase()
             );
           } else if (typeof productCategory === "object") {
             return (
-              productCategory._id === category.id ||
+              productCategory._id === categoryKeyword ||
               productCategory.name?.toLowerCase() ===
-                category.name.toLowerCase() ||
-              productCategory.slug === category.id
+                categoryKeyword.toLowerCase() ||
+              productCategory.slug === categoryKeyword
             );
           }
           return false;
@@ -231,7 +253,18 @@ const CategoriesPage = () => {
           viewMode === "grid" ? (
             <div className={styles.gridView}>
               {filteredCategories.map((category) => (
-                <div key={category.id} className={styles.categoryCard}>
+                <div
+                  onClick={() => {
+                    getProductByCategory(
+                      category.id,
+                      category.name,
+                      category.itemCount,
+                      category
+                    );
+                  }}
+                  key={category.id}
+                  className={styles.categoryCard}
+                >
                   <div className={styles.imageContainer}>
                     <img
                       src={category.image}
@@ -248,13 +281,10 @@ const CategoriesPage = () => {
                         {category.itemCount} items
                       </p>
 
-                      <Link
-                        to={`/products?category=${category.id}`}
-                        className={styles.exploreButton}
-                      >
+                      <div className={styles.exploreButton}>
                         Explore
                         <ArrowRight className={styles.exploreIcon} />
-                      </Link>
+                      </div>
                     </div>
                   </div>
 
@@ -278,7 +308,18 @@ const CategoriesPage = () => {
           ) : (
             <div className={styles.listView}>
               {filteredCategories.map((category) => (
-                <div key={category.id} className={styles.listCard}>
+                <div
+                  key={category.id}
+                  className={styles.listCard}
+                  onClick={() => {
+                    getProductByCategory(
+                      category.id,
+                      category.name,
+                      category.itemCount,
+                      category
+                    );
+                  }}
+                >
                   <div className={styles.listContent}>
                     <div className={styles.listImageContainer}>
                       <img
@@ -315,13 +356,10 @@ const CategoriesPage = () => {
                       </div>
                     </div>
 
-                    <Link
-                      to={`/products?category=${category.id}`}
-                      className={styles.listExploreButton}
-                    >
+                    <div className={styles.listExploreButton}>
                       Explore
                       <ArrowRight className={styles.listExploreIcon} />
-                    </Link>
+                    </div>
                   </div>
                 </div>
               ))}

@@ -1,52 +1,58 @@
-import React from 'react';
-import { ArrowRight } from 'lucide-react';
-import { Link } from 'react-router-dom';
-import styles from './Categories.module.css';
+import React from "react";
+import { ArrowRight } from "lucide-react";
+import { Link } from "react-router-dom";
+import styles from "./Categories.module.css";
 
 const Categories = () => {
   const categories = [
     {
       id: 1,
-      name: 'Women\'s Fashion',
-      image: 'https://images.pexels.com/photos/1926769/pexels-photo-1926769.jpeg?auto=compress&cs=tinysrgb&w=600',
+      name: "Women's Fashion",
+      image:
+        "https://images.pexels.com/photos/1926769/pexels-photo-1926769.jpeg?auto=compress&cs=tinysrgb&w=600",
       itemCount: 245,
-      overlayClass: styles.overlayPink
+      overlayClass: styles.overlayPink,
     },
     {
       id: 2,
-      name: 'Men\'s Collection',
-      image: 'https://images.pexels.com/photos/2379004/pexels-photo-2379004.jpeg?auto=compress&cs=tinysrgb&w=600',
+      name: "Men's Collection",
+      image:
+        "https://images.pexels.com/photos/2379004/pexels-photo-2379004.jpeg?auto=compress&cs=tinysrgb&w=600",
       itemCount: 189,
-      overlayClass: styles.overlayBlue
+      overlayClass: styles.overlayBlue,
     },
     {
       id: 3,
-      name: 'Accessories',
-      image: 'https://images.pexels.com/photos/1454171/pexels-photo-1454171.jpeg?auto=compress&cs=tinysrgb&w=600',
+      name: "Accessories",
+      image:
+        "https://images.pexels.com/photos/1454171/pexels-photo-1454171.jpeg?auto=compress&cs=tinysrgb&w=600",
       itemCount: 156,
-      overlayClass: styles.overlayPurple
+      overlayClass: styles.overlayPurple,
     },
     {
       id: 4,
-      name: 'Home & Living',
-      image: 'https://images.pexels.com/photos/1571460/pexels-photo-1571460.jpeg?auto=compress&cs=tinysrgb&w=600',
+      name: "Home & Living",
+      image:
+        "https://images.pexels.com/photos/1571460/pexels-photo-1571460.jpeg?auto=compress&cs=tinysrgb&w=600",
       itemCount: 298,
-      overlayClass: styles.overlayEmerald
+      overlayClass: styles.overlayEmerald,
     },
     {
       id: 5,
-      name: 'Electronics',
-      image: 'https://images.pexels.com/photos/356056/pexels-photo-356056.jpeg?auto=compress&cs=tinysrgb&w=600',
+      name: "Electronics",
+      image:
+        "https://images.pexels.com/photos/356056/pexels-photo-356056.jpeg?auto=compress&cs=tinysrgb&w=600",
       itemCount: 167,
-      overlayClass: styles.overlayOrange
+      overlayClass: styles.overlayOrange,
     },
     {
       id: 6,
-      name: 'Beauty & Care',
-      image: 'https://images.pexels.com/photos/3785147/pexels-photo-3785147.jpeg?auto=compress&cs=tinysrgb&w=600',
+      name: "Beauty & Care",
+      image:
+        "https://images.pexels.com/photos/3785147/pexels-photo-3785147.jpeg?auto=compress&cs=tinysrgb&w=600",
       itemCount: 223,
-      overlayClass: styles.overlayAmber
-    }
+      overlayClass: styles.overlayAmber,
+    },
   ];
 
   return (
@@ -72,12 +78,14 @@ const Categories = () => {
                   alt={category.name}
                   className={styles.categoryImage}
                 />
-                <div className={`${styles.overlay} ${category.overlayClass}`}></div>
-                
+                <div
+                  className={`${styles.overlay} ${category.overlayClass}`}
+                ></div>
+
                 <div className={styles.content}>
                   <h3 className={styles.categoryName}>{category.name}</h3>
                   <p className={styles.itemCount}>{category.itemCount} items</p>
-                  
+
                   <div className={styles.exploreButton}>
                     <span>Explore</span>
                     <ArrowRight className={styles.exploreIcon} />
