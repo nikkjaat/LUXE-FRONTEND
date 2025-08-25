@@ -8,14 +8,45 @@ import {
   UserCheck,
   Store,
   AlertCircle,
+  Eye,
+  Edit,
+  Trash2,
+  Ban,
+  CheckCircle,
+  XCircle,
+  Calendar,
+  Activity,
 } from "lucide-react";
 import { useVendors } from "../../context/VendorContext";
 import { useProducts } from "../../context/ProductContext";
+import { useAnalytics } from "../../context/AnalyticsContext";
+import { Link } from "react-router-dom";
 
 const AdminDashboard = () => {
-  const { vendors, vendorApplications, getVendors } = useVendors();
-  const { products } = useProducts();
+  const { vendors, vendorApplications, getVendors, getVendorApplications } = useVendors();
+  const { products, getProducts } = useProducts();
+  const { analytics, getRevenueGrowth, getVisitorGrowth } = useAnalytics();
   const [activeTab, setActiveTab] = useState("overview");
+  const [loading, setLoading] = useState(true);
+  const [selectedTimeframe, setSelectedTimeframe] = useState("monthly");
+
+  useEffect(() => {
+    const loadData = async () => {
+      try {
+        await Promise.all([
+          getVendors(),
+          getVendorApplications(),
+          getProducts()
+        ]);
+      } catch (error) {
+        console.error("Failed to load admin data:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadData();
+  }, []);
 
   const stats = [
     {
@@ -24,39 +55,106 @@ const AdminDashboard = () => {
       change: "+12%",
       icon: Users,
       color: "bg-blue-500",
+      trend: "up"
     },
     {
       name: "Active Vendors",
-      value: vendors.filter((v) => v.status === "approved").length,
+      value: vendors.filter((v) => v.vendorInfo?.status === "approved").length.toString(),
       change: "+8%",
       icon: Store,
       color: "bg-green-500",
+      trend: "up"
     },
     {
       name: "Total Products",
-      value: products.length,
+      value: products.length.toString(),
       change: "+23%",
       icon: Package,
       color: "bg-purple-500",
+      trend: "up"
     },
     {
       name: "Total Revenue",
       value: "$124,563",
-      change: "+15%",
+      change: `+${getRevenueGrowth()}%`,
       icon: DollarSign,
       color: "bg-yellow-500",
+      trend: "up"
     },
   ];
 
   const pendingApplications = vendorApplications.filter(
-    (app) => app.status === "pending"
+    (app) => app.vendorInfo?.status === "pending"
   );
 
-  useEffect(() => {
-    getVendors();
-    // Fetch products if needed
-    // getProducts(); // Uncomment if you have a function to fetch products
-  }, []);
+  const recentActivities = [
+    {
+      id: 1,
+      type: "vendor_approved",
+      message: "Tech Gadgets Pro vendor application approved",
+      time: "2 hours ago",
+      icon: CheckCircle,
+      color: "text-green-600"
+    },
+    {
+      id: 2,
+      type: "product_added",
+      message: "New product 'Premium Headphones' added",
+      time: "4 hours ago",
+      icon: Package,
+      color: "text-blue-600"
+    },
+    {
+      id: 3,
+      type: "order_completed",
+      message: "Order #ORD-1234 completed successfully",
+      time: "6 hours ago",
+      icon: ShoppingBag,
+      color: "text-purple-600"
+    }
+  ];
+
+  const getStatusBadge = (status) => {
+    const statusConfig = {
+      approved: { bg: "bg-green-100", text: "text-green-800", label: "Approved" },
+      pending: { bg: "bg-yellow-100", text: "text-yellow-800", label: "Pending" },
+      rejected: { bg: "bg-red-100", text: "text-red-800", label: "Rejected" },
+      active: { bg: "bg-green-100", text: "text-green-800", label: "Active" },
+      inactive: { bg: "bg-gray-100", text: "text-gray-800", label: "Inactive" }
+    };
+
+    const config = statusConfig[status] || statusConfig.pending;
+    return (
+      <span className={`px-2 py-1 text-xs font-medium rounded-full ${config.bg} ${config.text}`}>
+        {config.label}
+      </span>
+    );
+  };
+
+  const formatProductRating = (rating) => {
+    if (typeof rating === 'object' && rating !== null) {
+      return rating.average ? rating.average.toFixed(1) : '0.0';
+    }
+    return typeof rating === 'number' ? rating.toFixed(1) : '0.0';
+  };
+
+  const formatProductReviews = (rating) => {
+    if (typeof rating === 'object' && rating !== null) {
+      return rating.count || 0;
+    }
+    return 0;
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-16 h-16 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading admin dashboard...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -83,7 +181,9 @@ const AdminDashboard = () => {
                     <p className="text-2xl font-semibold text-gray-900">
                       {stat.value}
                     </p>
-                    <span className="ml-2 text-sm text-green-600 flex items-center">
+                    <span className={`ml-2 text-sm flex items-center ${
+                      stat.trend === 'up' ? 'text-green-600' : 'text-red-600'
+                    }`}>
                       <TrendingUp className="h-4 w-4 mr-1" />
                       {stat.change}
                     </span>
@@ -94,42 +194,70 @@ const AdminDashboard = () => {
           ))}
         </div>
 
-        {/* Pending Applications Alert */}
-        {pendingApplications.length > 0 && (
-          <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-8">
-            <div className="flex items-center">
-              <AlertCircle className="h-5 w-5 text-yellow-600 mr-3" />
-              <div>
-                <h3 className="text-sm font-medium text-yellow-800">
-                  Pending Vendor Applications
-                </h3>
-                <p className="text-sm text-yellow-700 mt-1">
-                  You have {pendingApplications.length} vendor application(s)
-                  waiting for review.
-                </p>
+        {/* Alerts */}
+        <div className="mb-8 space-y-4">
+          {pendingApplications.length > 0 && (
+            <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+              <div className="flex items-center">
+                <AlertCircle className="h-5 w-5 text-yellow-600 mr-3" />
+                <div className="flex-1">
+                  <h3 className="text-sm font-medium text-yellow-800">
+                    Pending Vendor Applications
+                  </h3>
+                  <p className="text-sm text-yellow-700 mt-1">
+                    You have {pendingApplications.length} vendor application(s) waiting for review.
+                  </p>
+                </div>
+                <Link
+                  to="/admin/vendor-applications"
+                  className="bg-yellow-600 text-white px-4 py-2 rounded-lg hover:bg-yellow-700 transition-colors"
+                >
+                  Review Now
+                </Link>
               </div>
             </div>
-          </div>
-        )}
+          )}
+
+          {products.filter(p => p.stock < 10).length > 0 && (
+            <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+              <div className="flex items-center">
+                <Package className="h-5 w-5 text-red-600 mr-3" />
+                <div className="flex-1">
+                  <h3 className="text-sm font-medium text-red-800">
+                    Low Stock Alert
+                  </h3>
+                  <p className="text-sm text-red-700 mt-1">
+                    {products.filter(p => p.stock < 10).length} products are running low on stock.
+                  </p>
+                </div>
+                <button className="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition-colors">
+                  View Products
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
 
         {/* Navigation Tabs */}
         <div className="border-b border-gray-200 mb-8">
           <nav className="-mb-px flex space-x-8">
             {[
-              { id: "overview", name: "Overview" },
-              { id: "vendors", name: "Vendors" },
-              { id: "products", name: "Products" },
-              { id: "analytics", name: "Analytics" },
+              { id: "overview", name: "Overview", icon: Activity },
+              { id: "vendors", name: "Vendors", icon: Store },
+              { id: "products", name: "Products", icon: Package },
+              { id: "users", name: "Users", icon: Users },
+              { id: "analytics", name: "Analytics", icon: TrendingUp },
             ].map((tab) => (
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
-                className={`py-2 px-1 border-b-2 font-medium text-sm ${
+                className={`py-2 px-1 border-b-2 font-medium text-sm flex items-center ${
                   activeTab === tab.id
                     ? "border-blue-500 text-blue-600"
                     : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
                 }`}
               >
+                <tab.icon className="h-4 w-4 mr-2" />
                 {tab.name}
               </button>
             ))}
@@ -138,81 +266,100 @@ const AdminDashboard = () => {
 
         {/* Tab Content */}
         {activeTab === "overview" && (
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            {/* Recent Vendors */}
-            <div className="bg-white rounded-lg shadow">
-              <div className="p-6 border-b border-gray-200">
-                <h3 className="text-lg font-medium text-gray-900">
-                  Recent Vendors
-                </h3>
-              </div>
-              <div className="p-6">
-                <div className="space-y-4">
-                  {vendors.slice(0, 5).map((vendor) => (
-                    <div
-                      key={vendor._id}
-                      className="flex items-center justify-between"
-                    >
-                      <div>
-                        <p className="font-medium text-gray-900">
-                          {vendor.vendorInfo.shopName}
-                        </p>
-                        <p className="text-sm text-gray-500">
-                          {vendor.vendorInfo.businessType}
-                        </p>
+          <div className="space-y-8">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+              {/* Recent Activities */}
+              <div className="bg-white rounded-lg shadow">
+                <div className="p-6 border-b border-gray-200">
+                  <h3 className="text-lg font-medium text-gray-900">
+                    Recent Activities
+                  </h3>
+                </div>
+                <div className="p-6">
+                  <div className="space-y-4">
+                    {recentActivities.map((activity) => (
+                      <div key={activity.id} className="flex items-center space-x-3">
+                        <activity.icon className={`h-5 w-5 ${activity.color}`} />
+                        <div className="flex-1">
+                          <p className="text-sm text-gray-900">{activity.message}</p>
+                          <p className="text-xs text-gray-500">{activity.time}</p>
+                        </div>
                       </div>
-                      <span
-                        className={`px-2 py-1 text-xs font-medium rounded-full ${
-                          vendor.vendorInfo.status === "approved"
-                            ? "bg-green-100 text-green-800"
-                            : vendor.vendorInfo.status === "pending"
-                            ? "bg-yellow-100 text-yellow-800"
-                            : "bg-red-100 text-red-800"
-                        }`}
-                      >
-                        {vendor.vendorInfo.status}
-                      </span>
-                    </div>
-                  ))}
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              {/* Top Products */}
+              <div className="bg-white rounded-lg shadow">
+                <div className="p-6 border-b border-gray-200">
+                  <h3 className="text-lg font-medium text-gray-900">
+                    Top Products
+                  </h3>
+                </div>
+                <div className="p-6">
+                  <div className="space-y-4">
+                    {products.slice(0, 5).map((product) => (
+                      <div key={product._id} className="flex items-center">
+                        <img
+                          src={product.images?.[0]?.url || 'https://via.placeholder.com/48'}
+                          alt={product.name}
+                          className="h-12 w-12 rounded-lg object-cover"
+                        />
+                        <div className="ml-4 flex-1">
+                          <p className="font-medium text-gray-900">
+                            {product.name}
+                          </p>
+                          <p className="text-sm text-gray-500">
+                            ${product.price}
+                          </p>
+                        </div>
+                        <div className="text-right">
+                          <p className="text-sm font-medium text-gray-900">
+                            ★ {formatProductRating(product.rating)}
+                          </p>
+                          <p className="text-sm text-gray-500">
+                            {formatProductReviews(product.rating)} reviews
+                          </p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
                 </div>
               </div>
             </div>
 
-            {/* Top Products */}
-            <div className="bg-white rounded-lg shadow">
-              <div className="p-6 border-b border-gray-200">
-                <h3 className="text-lg font-medium text-gray-900">
-                  Top Products
-                </h3>
-              </div>
-              <div className="p-6">
-                <div className="space-y-4">
-                  {products.slice(0, 5).map((product) => (
-                    <div key={product.id} className="flex items-center">
-                      <img
-                        src={product.image}
-                        alt={product.name}
-                        className="h-12 w-12 rounded-lg object-cover"
-                      />
-                      <div className="ml-4 flex-1">
-                        <p className="font-medium text-gray-900">
-                          {product.name}
-                        </p>
-                        <p className="text-sm text-gray-500">
-                          ${product.price}
-                        </p>
-                      </div>
-                      <div className="text-right">
-                        <p className="text-sm font-medium text-gray-900">
-                          {product.reviews} reviews
-                        </p>
-                        <p className="text-sm text-gray-500">
-                          ★ {product.rating}
-                        </p>
-                      </div>
-                    </div>
-                  ))}
-                </div>
+            {/* Quick Actions */}
+            <div className="bg-white rounded-lg shadow p-6">
+              <h3 className="text-lg font-medium text-gray-900 mb-4">Quick Actions</h3>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <Link
+                  to="/admin/vendor-applications"
+                  className="flex items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
+                >
+                  <UserCheck className="h-8 w-8 text-blue-600 mr-3" />
+                  <div>
+                    <p className="font-medium text-gray-900">Review Applications</p>
+                    <p className="text-sm text-gray-500">{pendingApplications.length} pending</p>
+                  </div>
+                </Link>
+                <Link
+                  to="/admin/promotions"
+                  className="flex items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
+                >
+                  <Package className="h-8 w-8 text-green-600 mr-3" />
+                  <div>
+                    <p className="font-medium text-gray-900">Manage Promotions</p>
+                    <p className="text-sm text-gray-500">Create & edit offers</p>
+                  </div>
+                </Link>
+                <button className="flex items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
+                  <TrendingUp className="h-8 w-8 text-purple-600 mr-3" />
+                  <div>
+                    <p className="font-medium text-gray-900">View Analytics</p>
+                    <p className="text-sm text-gray-500">Sales & performance</p>
+                  </div>
+                </button>
               </div>
             </div>
           </div>
@@ -220,10 +367,15 @@ const AdminDashboard = () => {
 
         {activeTab === "vendors" && (
           <div className="bg-white rounded-lg shadow">
-            <div className="p-6 border-b border-gray-200">
+            <div className="p-6 border-b border-gray-200 flex justify-between items-center">
               <h3 className="text-lg font-medium text-gray-900">
                 Vendor Management
               </h3>
+              <div className="flex space-x-2">
+                <span className="text-sm text-gray-500">
+                  Total: {vendors.length} vendors
+                </span>
+              </div>
             </div>
             <div className="overflow-x-auto">
               <table className="min-w-full divide-y divide-gray-200">
@@ -242,7 +394,7 @@ const AdminDashboard = () => {
                       Products
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Sales
+                      Join Date
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Actions
@@ -250,50 +402,55 @@ const AdminDashboard = () => {
                   </tr>
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
-                  {vendors.map((vendor) => (
-                    <tr key={vendor._id}>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div>
-                          <div className="text-sm font-medium text-gray-900">
-                            {vendor.shopName}
+                  {vendors.map((vendor) => {
+                    const vendorProducts = products.filter(p => p.vendor === vendor._id);
+                    return (
+                      <tr key={vendor._id}>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="flex items-center">
+                            <img
+                              src={vendor.avatar || 'https://images.pexels.com/photos/2379004/pexels-photo-2379004.jpeg?auto=compress&cs=tinysrgb&w=150'}
+                              alt={vendor.name}
+                              className="h-10 w-10 rounded-full object-cover"
+                            />
+                            <div className="ml-4">
+                              <div className="text-sm font-medium text-gray-900">
+                                {vendor.vendorInfo?.shopName || vendor.name}
+                              </div>
+                              <div className="text-sm text-gray-500">
+                                {vendor.email}
+                              </div>
+                            </div>
                           </div>
-                          <div className="text-sm text-gray-500">
-                            {vendor.email}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                          {vendor.vendorInfo?.businessType || 'Not specified'}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          {getStatusBadge(vendor.vendorInfo?.status || 'pending')}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                          {vendorProducts.length}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                          {new Date(vendor.createdAt || Date.now()).toLocaleDateString()}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                          <div className="flex space-x-2">
+                            <button className="text-blue-600 hover:text-blue-900">
+                              <Eye className="h-4 w-4" />
+                            </button>
+                            <button className="text-green-600 hover:text-green-900">
+                              <Edit className="h-4 w-4" />
+                            </button>
+                            <button className="text-red-600 hover:text-red-900">
+                              <Ban className="h-4 w-4" />
+                            </button>
                           </div>
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        {vendor.vendorInfo.businessType}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <span
-                          className={`px-2 py-1 text-xs font-medium rounded-full ${
-                            vendor.vendorInfo.status === "approved"
-                              ? "bg-green-100 text-green-800"
-                              : vendor.vendorInfo.status === "pending"
-                              ? "bg-yellow-100 text-yellow-800"
-                              : "bg-red-100 text-red-800"
-                          }`}
-                        >
-                          {vendor.vendorInfo.status}
-                        </span>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        {vendor.vendorInfo.totalProducts}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        ${vendor.vendorInfo.totalSales}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                        <button className="text-blue-600 hover:text-blue-900 mr-3">
-                          View
-                        </button>
-                        <button className="text-red-600 hover:text-red-900">
-                          Suspend
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
+                        </td>
+                      </tr>
+                    );
+                  })}
                 </tbody>
               </table>
             </div>
@@ -302,38 +459,62 @@ const AdminDashboard = () => {
 
         {activeTab === "products" && (
           <div className="bg-white rounded-lg shadow">
-            <div className="p-6 border-b border-gray-200">
+            <div className="p-6 border-b border-gray-200 flex justify-between items-center">
               <h3 className="text-lg font-medium text-gray-900">
                 Product Management
               </h3>
+              <div className="flex items-center space-x-4">
+                <span className="text-sm text-gray-500">
+                  Total: {products.length} products
+                </span>
+                <select className="border border-gray-300 rounded-md px-3 py-1 text-sm">
+                  <option>All Categories</option>
+                  <option>Women</option>
+                  <option>Men</option>
+                  <option>Accessories</option>
+                </select>
+              </div>
             </div>
             <div className="p-6">
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {products.map((product) => (
                   <div
-                    key={product.id}
-                    className="border border-gray-200 rounded-lg p-4"
+                    key={product._id}
+                    className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow"
                   >
                     <img
-                      src={product.image}
+                      src={product.images?.[0]?.url || 'https://via.placeholder.com/200'}
                       alt={product.name}
                       className="w-full h-48 object-cover rounded-lg mb-4"
                     />
-                    <h4 className="font-medium text-gray-900 mb-2">
-                      {product.name}
-                    </h4>
-                    <p className="text-sm text-gray-500 mb-2">
-                      by {product.vendorName}
-                    </p>
-                    <div className="flex justify-between items-center">
-                      <span className="text-lg font-bold text-blue-600">
-                        ${product.price}
-                      </span>
-                      <div className="flex space-x-2">
-                        <button className="text-blue-600 hover:text-blue-800 text-sm">
+                    <div className="space-y-2">
+                      <h4 className="font-medium text-gray-900 line-clamp-2">
+                        {product.name}
+                      </h4>
+                      <p className="text-sm text-gray-500">
+                        by {product.vendorName || 'Unknown Vendor'}
+                      </p>
+                      <div className="flex items-center justify-between">
+                        <span className="text-lg font-bold text-blue-600">
+                          ${product.price}
+                        </span>
+                        {getStatusBadge(product.status || 'active')}
+                      </div>
+                      <div className="flex items-center justify-between text-sm text-gray-500">
+                        <span>Stock: {product.stock || 0}</span>
+                        <span>★ {formatProductRating(product.rating)}</span>
+                      </div>
+                      <div className="flex space-x-2 pt-2">
+                        <button className="flex-1 text-blue-600 hover:text-blue-800 text-sm font-medium">
+                          <Eye className="h-4 w-4 inline mr-1" />
+                          View
+                        </button>
+                        <button className="flex-1 text-green-600 hover:text-green-800 text-sm font-medium">
+                          <Edit className="h-4 w-4 inline mr-1" />
                           Edit
                         </button>
-                        <button className="text-red-600 hover:text-red-800 text-sm">
+                        <button className="flex-1 text-red-600 hover:text-red-800 text-sm font-medium">
+                          <Trash2 className="h-4 w-4 inline mr-1" />
                           Remove
                         </button>
                       </div>
@@ -345,26 +526,162 @@ const AdminDashboard = () => {
           </div>
         )}
 
-        {activeTab === "analytics" && (
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            <div className="bg-white rounded-lg shadow p-6">
-              <h3 className="text-lg font-medium text-gray-900 mb-4">
-                Sales Analytics
+        {activeTab === "users" && (
+          <div className="bg-white rounded-lg shadow">
+            <div className="p-6 border-b border-gray-200">
+              <h3 className="text-lg font-medium text-gray-900">
+                User Management
               </h3>
-              <div className="h-64 bg-gray-100 rounded-lg flex items-center justify-center">
-                <p className="text-gray-500">Sales Chart Placeholder</p>
-              </div>
             </div>
-            <div className="bg-white rounded-lg shadow p-6">
-              <h3 className="text-lg font-medium text-gray-900 mb-4">
-                User Growth
-              </h3>
-              <div className="h-64 bg-gray-100 rounded-lg flex items-center justify-center">
-                <p className="text-gray-500">Growth Chart Placeholder</p>
+            <div className="p-6">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+                <div className="bg-blue-50 rounded-lg p-4">
+                  <div className="flex items-center">
+                    <Users className="h-8 w-8 text-blue-600" />
+                    <div className="ml-3">
+                      <p className="text-sm font-medium text-blue-900">Total Users</p>
+                      <p className="text-2xl font-bold text-blue-600">2,543</p>
+                    </div>
+                  </div>
+                </div>
+                <div className="bg-green-50 rounded-lg p-4">
+                  <div className="flex items-center">
+                    <UserCheck className="h-8 w-8 text-green-600" />
+                    <div className="ml-3">
+                      <p className="text-sm font-medium text-green-900">Active Users</p>
+                      <p className="text-2xl font-bold text-green-600">2,156</p>
+                    </div>
+                  </div>
+                </div>
+                <div className="bg-purple-50 rounded-lg p-4">
+                  <div className="flex items-center">
+                    <Calendar className="h-8 w-8 text-purple-600" />
+                    <div className="ml-3">
+                      <p className="text-sm font-medium text-purple-900">New This Month</p>
+                      <p className="text-2xl font-bold text-purple-600">387</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              <div className="text-center py-8 text-gray-500">
+                <Users className="h-12 w-12 mx-auto mb-4 text-gray-400" />
+                <p>User management interface coming soon</p>
               </div>
             </div>
           </div>
         )}
+
+        {activeTab === "analytics" && (
+          <div className="space-y-8">
+            {/* Analytics Controls */}
+            <div className="bg-white rounded-lg shadow p-6">
+              <div className="flex justify-between items-center">
+                <h3 className="text-lg font-medium text-gray-900">Analytics Overview</h3>
+                <select
+                  value={selectedTimeframe}
+                  onChange={(e) => setSelectedTimeframe(e.target.value)}
+                  className="border border-gray-300 rounded-md px-3 py-2"
+                >
+                  <option value="daily">Daily</option>
+                  <option value="weekly">Weekly</option>
+                  <option value="monthly">Monthly</option>
+                </select>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+              {/* Sales Chart */}
+              <div className="bg-white rounded-lg shadow p-6">
+                <h3 className="text-lg font-medium text-gray-900 mb-4">
+                  Sales Analytics
+                </h3>
+                <div className="h-64 bg-gradient-to-br from-blue-50 to-indigo-100 rounded-lg flex items-center justify-center">
+                  <div className="text-center">
+                    <TrendingUp className="h-16 w-16 text-blue-500 mx-auto mb-4" />
+                    <p className="text-gray-600">Sales Chart</p>
+                    <p className="text-sm text-gray-500">Revenue: ${analytics.sales[selectedTimeframe]?.slice(-1)[0] || 0}</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Visitor Analytics */}
+              <div className="bg-white rounded-lg shadow p-6">
+                <h3 className="text-lg font-medium text-gray-900 mb-4">
+                  Visitor Analytics
+                </h3>
+                <div className="h-64 bg-gradient-to-br from-green-50 to-emerald-100 rounded-lg flex items-center justify-center">
+                  <div className="text-center">
+                    <Users className="h-16 w-16 text-green-500 mx-auto mb-4" />
+                    <p className="text-gray-600">Visitor Chart</p>
+                    <p className="text-sm text-gray-500">Growth: +{getVisitorGrowth()}%</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Top Categories */}
+            <div className="bg-white rounded-lg shadow p-6">
+              <h3 className="text-lg font-medium text-gray-900 mb-4">Top Categories</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                {analytics.topCategories.map((category, index) => (
+                  <div key={index} className="bg-gray-50 rounded-lg p-4">
+                    <h4 className="font-medium text-gray-900">{category.name}</h4>
+                    <p className="text-2xl font-bold text-blue-600">{category.sales}</p>
+                    <p className="text-sm text-gray-500">{category.percentage}% of total</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Quick Navigation to Other Admin Pages */}
+        <div className="mt-8 bg-white rounded-lg shadow p-6">
+          <h3 className="text-lg font-medium text-gray-900 mb-4">Admin Tools</h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <Link
+              to="/admin/users"
+              className="flex items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
+            >
+              <Users className="h-8 w-8 text-blue-600 mr-3" />
+              <div>
+                <p className="font-medium text-gray-900">User Management</p>
+                <p className="text-sm text-gray-500">Manage all users</p>
+              </div>
+            </Link>
+            <Link
+              to="/admin/products"
+              className="flex items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
+            >
+              <Package className="h-8 w-8 text-green-600 mr-3" />
+              <div>
+                <p className="font-medium text-gray-900">Product Management</p>
+                <p className="text-sm text-gray-500">Manage all products</p>
+              </div>
+            </Link>
+            <Link
+              to="/admin/orders"
+              className="flex items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
+            >
+              <ShoppingBag className="h-8 w-8 text-purple-600 mr-3" />
+              <div>
+                <p className="font-medium text-gray-900">Order Management</p>
+                <p className="text-sm text-gray-500">Track all orders</p>
+              </div>
+            </Link>
+            <Link
+              to="/admin/vendor-applications"
+              className="flex items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
+            >
+              <Store className="h-8 w-8 text-orange-600 mr-3" />
+              <div>
+                <p className="font-medium text-gray-900">Vendor Applications</p>
+                <p className="text-sm text-gray-500">Review applications</p>
+              </div>
+            </Link>
+          </div>
+        </div>
       </div>
     </div>
   );

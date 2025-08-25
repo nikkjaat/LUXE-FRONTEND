@@ -24,6 +24,9 @@ import UnauthorizedPage from "./pages/UnauthorizedPage";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import VendorApplications from "./pages/admin/VendorApplications";
 import PromotionManagement from "./pages/admin/PromotionManagement";
+import UserManagement from "./pages/admin/UserManagement";
+import ProductManagement from "./pages/admin/ProductManagement";
+import OrderManagement from "./pages/admin/OrderManagement";
 import VendorDashboard from "./pages/vendor/VendorDashboard";
 import AddProduct from "./pages/vendor/AddProduct";
 import RoleBasedRoute from "./components/RoleBasedRoute";
@@ -171,6 +174,30 @@ function AppContent() {
                                   element={
                                     <RoleBasedRoute allowedRoles={["admin"]}>
                                       <PromotionManagement />
+                                    </RoleBasedRoute>
+                                  }
+                                />
+                                <Route
+                                  path="/admin/users"
+                                  element={
+                                    <RoleBasedRoute allowedRoles={["admin"]}>
+                                      <UserManagement />
+                                    </RoleBasedRoute>
+                                  }
+                                />
+                                <Route
+                                  path="/admin/products"
+                                  element={
+                                    <RoleBasedRoute allowedRoles={["admin"]}>
+                                      <ProductManagement />
+                                    </RoleBasedRoute>
+                                  }
+                                />
+                                <Route
+                                  path="/admin/orders"
+                                  element={
+                                    <RoleBasedRoute allowedRoles={["admin"]}>
+                                      <OrderManagement />
                                     </RoleBasedRoute>
                                   }
                                 />
