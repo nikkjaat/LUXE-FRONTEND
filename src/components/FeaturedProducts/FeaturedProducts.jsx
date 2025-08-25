@@ -11,17 +11,38 @@ const FeaturedProducts = () => {
   const { items, addToWishlist, removeFromWishlist, isInWishlist } =
     useWishlist();
   const { products, getProducts } = useProducts();
+  const [featuredProducts, setFeaturedProducts] = useState([]);
 
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        await getProducts({ featured: true, limit: 4 });
+        // Fetch all products first
+        await getProducts();
       } catch (error) {
-        console.error("Failed to fetch featured products:", error);
+        console.error("Failed to fetch products:", error);
       }
     };
     fetchProducts();
   }, []);
+
+  // Filter and limit to top 8 featured products
+  useEffect(() => {
+    if (products.length > 0) {
+      // Sort products by rating, popularity, or any other criteria
+      const sortedProducts = [...products]
+        .sort((a, b) => {
+          // Sort by rating (highest first)
+          if (b.rating !== a.rating) {
+            return b.rating - a.rating;
+          }
+          // If ratings are equal, sort by number of reviews
+          return b.reviews - a.reviews;
+        })
+        .slice(0, 8); // Take only top 8 products
+
+      setFeaturedProducts(sortedProducts);
+    }
+  }, [products]);
 
   const handleAddToCart = (product) => {
     addToCart({
@@ -154,77 +175,83 @@ const FeaturedProducts = () => {
           </p>
         </div>
 
-        <div className={styles.grid}>
-          {products.map((product) => {
-            const isWishlisted = isInWishlist(product._id);
+        {featuredProducts.length === 0 ? (
+          <div className={styles.loadingState}>
+            <p>Loading featured products...</p>
+          </div>
+        ) : (
+          <div className={styles.grid}>
+            {featuredProducts.map((product) => {
+              const isWishlisted = isInWishlist(product._id);
 
-            return (
-              <div key={product._id} className={styles.productCard}>
-                <Link to={`/product/${product._id}`}>
-                  <ProductImageSlider
-                    images={product.images}
-                    name={product.name}
-                    badge={product.badge}
-                  />
-                </Link>
-                <button
-                  onClick={() => handleWishlistToggle(product)}
-                  className={`${styles.wishlistButton} ${
-                    isWishlisted ? styles.active : styles.inactive
-                  }`}
-                >
-                  <Heart
-                    className={`${styles.wishlistIcon} ${
-                      isWishlisted ? styles.filled : ""
-                    }`}
-                    fill={isWishlisted ? "currentColor" : "none"}
-                  />
-                </button>
-
-                <div className={styles.content}>
-                  <div className={styles.rating}>
-                    <div className={styles.stars}>
-                      {[...Array(5)].map((_, i) => (
-                        <Star
-                          key={i}
-                          className={`${styles.star} ${
-                            i < Math.floor(product.rating)
-                              ? styles.filled
-                              : styles.empty
-                          }`}
-                        />
-                      ))}
-                    </div>
-                    <span className={styles.reviewCount}>
-                      ({product.reviews})
-                    </span>
-                  </div>
-
+              return (
+                <div key={product._id} className={styles.productCard}>
                   <Link to={`/product/${product._id}`}>
-                    <h3 className={styles.productName}>{product.name}</h3>
+                    <ProductImageSlider
+                      images={product.images}
+                      name={product.name}
+                      badge={product.badge}
+                    />
                   </Link>
+                  <button
+                    onClick={() => handleWishlistToggle(product)}
+                    className={`${styles.wishlistButton} ${
+                      isWishlisted ? styles.active : styles.inactive
+                    }`}
+                  >
+                    <Heart
+                      className={`${styles.wishlistIcon} ${
+                        isWishlisted ? styles.filled : ""
+                      }`}
+                      fill={isWishlisted ? "currentColor" : "none"}
+                    />
+                  </button>
 
-                  <div className={styles.priceContainer}>
-                    <div className={styles.priceGroup}>
-                      <span className={styles.price}>${product.price}</span>
-                      <span className={styles.originalPrice}>
-                        ${product.originalPrice}
+                  <div className={styles.content}>
+                    <div className={styles.rating}>
+                      <div className={styles.stars}>
+                        {[...Array(5)].map((_, i) => (
+                          <Star
+                            key={i}
+                            className={`${styles.star} ${
+                              i < Math.floor(product.rating)
+                                ? styles.filled
+                                : styles.empty
+                            }`}
+                          />
+                        ))}
+                      </div>
+                      <span className={styles.reviewCount}>
+                        ({product.reviews})
                       </span>
                     </div>
-                  </div>
 
-                  <button
-                    onClick={() => handleAddToCart(product)}
-                    className={styles.addToCartButton}
-                  >
-                    <ShoppingCart className={styles.cartIcon} />
-                    Add to Cart
-                  </button>
+                    <Link to={`/product/${product._id}`}>
+                      <h3 className={styles.productName}>{product.name}</h3>
+                    </Link>
+
+                    <div className={styles.priceContainer}>
+                      <div className={styles.priceGroup}>
+                        <span className={styles.price}>${product.price}</span>
+                        <span className={styles.originalPrice}>
+                          ${product.originalPrice}
+                        </span>
+                      </div>
+                    </div>
+
+                    <button
+                      onClick={() => handleAddToCart(product)}
+                      className={styles.addToCartButton}
+                    >
+                      <ShoppingCart className={styles.cartIcon} />
+                      Add to Cart
+                    </button>
+                  </div>
                 </div>
-              </div>
-            );
-          })}
-        </div>
+              );
+            })}
+          </div>
+        )}
       </div>
     </section>
   );

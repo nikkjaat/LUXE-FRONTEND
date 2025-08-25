@@ -21,14 +21,18 @@ import { useVendors } from "../../context/VendorContext";
 import { useProducts } from "../../context/ProductContext";
 import { useAnalytics } from "../../context/AnalyticsContext";
 import { Link } from "react-router-dom";
+import apiService from "../../services/api";
 
 const AdminDashboard = () => {
-  const { vendors, vendorApplications, getVendors, getVendorApplications } = useVendors();
+  const { vendors, vendorApplications, getVendors, getVendorApplications } =
+    useVendors();
   const { products, getProducts } = useProducts();
   const { analytics, getRevenueGrowth, getVisitorGrowth } = useAnalytics();
   const [activeTab, setActiveTab] = useState("overview");
   const [loading, setLoading] = useState(true);
   const [selectedTimeframe, setSelectedTimeframe] = useState("monthly");
+  const [allUsers, setAllUsers] = useState([]);
+  const [allVendors, setAllVendors] = useState([]);
 
   useEffect(() => {
     const loadData = async () => {
@@ -36,7 +40,7 @@ const AdminDashboard = () => {
         await Promise.all([
           getVendors(),
           getVendorApplications(),
-          getProducts()
+          getProducts(),
         ]);
       } catch (error) {
         console.error("Failed to load admin data:", error);
@@ -48,22 +52,37 @@ const AdminDashboard = () => {
     loadData();
   }, []);
 
+  useEffect(() => {
+    const getAllUsers = async () => {
+      const response = await apiService.getAllUsers();
+      const filterUsers = response.users.filter(
+        (user) => user.role === "customer"
+      );
+      const filterVendors = response.users.filter(
+        (user) => user.role === "vendor"
+      );
+      setAllUsers(filterUsers);
+      setAllVendors(filterVendors);
+    };
+    getAllUsers();
+  }, []);
+
   const stats = [
     {
       name: "Total Users",
-      value: "2,543",
+      value: allUsers.length,
       change: "+12%",
       icon: Users,
       color: "bg-blue-500",
-      trend: "up"
+      trend: "up",
     },
     {
       name: "Active Vendors",
-      value: vendors.filter((v) => v.vendorInfo?.status === "approved").length.toString(),
+      value: allVendors.length,
       change: "+8%",
       icon: Store,
       color: "bg-green-500",
-      trend: "up"
+      trend: "up",
     },
     {
       name: "Total Products",
@@ -71,7 +90,7 @@ const AdminDashboard = () => {
       change: "+23%",
       icon: Package,
       color: "bg-purple-500",
-      trend: "up"
+      trend: "up",
     },
     {
       name: "Total Revenue",
@@ -79,7 +98,7 @@ const AdminDashboard = () => {
       change: `+${getRevenueGrowth()}%`,
       icon: DollarSign,
       color: "bg-yellow-500",
-      trend: "up"
+      trend: "up",
     },
   ];
 
@@ -94,7 +113,7 @@ const AdminDashboard = () => {
       message: "Tech Gadgets Pro vendor application approved",
       time: "2 hours ago",
       icon: CheckCircle,
-      color: "text-green-600"
+      color: "text-green-600",
     },
     {
       id: 2,
@@ -102,7 +121,7 @@ const AdminDashboard = () => {
       message: "New product 'Premium Headphones' added",
       time: "4 hours ago",
       icon: Package,
-      color: "text-blue-600"
+      color: "text-blue-600",
     },
     {
       id: 3,
@@ -110,36 +129,46 @@ const AdminDashboard = () => {
       message: "Order #ORD-1234 completed successfully",
       time: "6 hours ago",
       icon: ShoppingBag,
-      color: "text-purple-600"
-    }
+      color: "text-purple-600",
+    },
   ];
 
   const getStatusBadge = (status) => {
     const statusConfig = {
-      approved: { bg: "bg-green-100", text: "text-green-800", label: "Approved" },
-      pending: { bg: "bg-yellow-100", text: "text-yellow-800", label: "Pending" },
+      approved: {
+        bg: "bg-green-100",
+        text: "text-green-800",
+        label: "Approved",
+      },
+      pending: {
+        bg: "bg-yellow-100",
+        text: "text-yellow-800",
+        label: "Pending",
+      },
       rejected: { bg: "bg-red-100", text: "text-red-800", label: "Rejected" },
       active: { bg: "bg-green-100", text: "text-green-800", label: "Active" },
-      inactive: { bg: "bg-gray-100", text: "text-gray-800", label: "Inactive" }
+      inactive: { bg: "bg-gray-100", text: "text-gray-800", label: "Inactive" },
     };
 
     const config = statusConfig[status] || statusConfig.pending;
     return (
-      <span className={`px-2 py-1 text-xs font-medium rounded-full ${config.bg} ${config.text}`}>
+      <span
+        className={`px-2 py-1 text-xs font-medium rounded-full ${config.bg} ${config.text}`}
+      >
         {config.label}
       </span>
     );
   };
 
   const formatProductRating = (rating) => {
-    if (typeof rating === 'object' && rating !== null) {
-      return rating.average ? rating.average.toFixed(1) : '0.0';
+    if (typeof rating === "object" && rating !== null) {
+      return rating.average ? rating.average.toFixed(1) : "0.0";
     }
-    return typeof rating === 'number' ? rating.toFixed(1) : '0.0';
+    return typeof rating === "number" ? rating.toFixed(1) : "0.0";
   };
 
   const formatProductReviews = (rating) => {
-    if (typeof rating === 'object' && rating !== null) {
+    if (typeof rating === "object" && rating !== null) {
       return rating.count || 0;
     }
     return 0;
@@ -181,9 +210,11 @@ const AdminDashboard = () => {
                     <p className="text-2xl font-semibold text-gray-900">
                       {stat.value}
                     </p>
-                    <span className={`ml-2 text-sm flex items-center ${
-                      stat.trend === 'up' ? 'text-green-600' : 'text-red-600'
-                    }`}>
+                    <span
+                      className={`ml-2 text-sm flex items-center ${
+                        stat.trend === "up" ? "text-green-600" : "text-red-600"
+                      }`}
+                    >
                       <TrendingUp className="h-4 w-4 mr-1" />
                       {stat.change}
                     </span>
@@ -205,7 +236,8 @@ const AdminDashboard = () => {
                     Pending Vendor Applications
                   </h3>
                   <p className="text-sm text-yellow-700 mt-1">
-                    You have {pendingApplications.length} vendor application(s) waiting for review.
+                    You have {pendingApplications.length} vendor application(s)
+                    waiting for review.
                   </p>
                 </div>
                 <Link
@@ -218,7 +250,7 @@ const AdminDashboard = () => {
             </div>
           )}
 
-          {products.filter(p => p.stock < 10).length > 0 && (
+          {products.filter((p) => p.stock < 10).length > 0 && (
             <div className="bg-red-50 border border-red-200 rounded-lg p-4">
               <div className="flex items-center">
                 <Package className="h-5 w-5 text-red-600 mr-3" />
@@ -227,7 +259,8 @@ const AdminDashboard = () => {
                     Low Stock Alert
                   </h3>
                   <p className="text-sm text-red-700 mt-1">
-                    {products.filter(p => p.stock < 10).length} products are running low on stock.
+                    {products.filter((p) => p.stock < 10).length} products are
+                    running low on stock.
                   </p>
                 </div>
                 <button className="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition-colors">
@@ -278,11 +311,20 @@ const AdminDashboard = () => {
                 <div className="p-6">
                   <div className="space-y-4">
                     {recentActivities.map((activity) => (
-                      <div key={activity.id} className="flex items-center space-x-3">
-                        <activity.icon className={`h-5 w-5 ${activity.color}`} />
+                      <div
+                        key={activity.id}
+                        className="flex items-center space-x-3"
+                      >
+                        <activity.icon
+                          className={`h-5 w-5 ${activity.color}`}
+                        />
                         <div className="flex-1">
-                          <p className="text-sm text-gray-900">{activity.message}</p>
-                          <p className="text-xs text-gray-500">{activity.time}</p>
+                          <p className="text-sm text-gray-900">
+                            {activity.message}
+                          </p>
+                          <p className="text-xs text-gray-500">
+                            {activity.time}
+                          </p>
                         </div>
                       </div>
                     ))}
@@ -302,7 +344,10 @@ const AdminDashboard = () => {
                     {products.slice(0, 5).map((product) => (
                       <div key={product._id} className="flex items-center">
                         <img
-                          src={product.images?.[0]?.url || 'https://via.placeholder.com/48'}
+                          src={
+                            product.images?.[0]?.url ||
+                            "https://via.placeholder.com/48"
+                          }
                           alt={product.name}
                           className="h-12 w-12 rounded-lg object-cover"
                         />
@@ -331,7 +376,9 @@ const AdminDashboard = () => {
 
             {/* Quick Actions */}
             <div className="bg-white rounded-lg shadow p-6">
-              <h3 className="text-lg font-medium text-gray-900 mb-4">Quick Actions</h3>
+              <h3 className="text-lg font-medium text-gray-900 mb-4">
+                Quick Actions
+              </h3>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <Link
                   to="/admin/vendor-applications"
@@ -339,8 +386,12 @@ const AdminDashboard = () => {
                 >
                   <UserCheck className="h-8 w-8 text-blue-600 mr-3" />
                   <div>
-                    <p className="font-medium text-gray-900">Review Applications</p>
-                    <p className="text-sm text-gray-500">{pendingApplications.length} pending</p>
+                    <p className="font-medium text-gray-900">
+                      Review Applications
+                    </p>
+                    <p className="text-sm text-gray-500">
+                      {pendingApplications.length} pending
+                    </p>
                   </div>
                 </Link>
                 <Link
@@ -349,8 +400,12 @@ const AdminDashboard = () => {
                 >
                   <Package className="h-8 w-8 text-green-600 mr-3" />
                   <div>
-                    <p className="font-medium text-gray-900">Manage Promotions</p>
-                    <p className="text-sm text-gray-500">Create & edit offers</p>
+                    <p className="font-medium text-gray-900">
+                      Manage Promotions
+                    </p>
+                    <p className="text-sm text-gray-500">
+                      Create & edit offers
+                    </p>
                   </div>
                 </Link>
                 <button className="flex items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
@@ -403,13 +458,18 @@ const AdminDashboard = () => {
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
                   {vendors.map((vendor) => {
-                    const vendorProducts = products.filter(p => p.vendor === vendor._id);
+                    const vendorProducts = products.filter(
+                      (p) => p.vendor === vendor._id
+                    );
                     return (
                       <tr key={vendor._id}>
                         <td className="px-6 py-4 whitespace-nowrap">
                           <div className="flex items-center">
                             <img
-                              src={vendor.avatar || 'https://images.pexels.com/photos/2379004/pexels-photo-2379004.jpeg?auto=compress&cs=tinysrgb&w=150'}
+                              src={
+                                vendor.avatar ||
+                                "https://images.pexels.com/photos/2379004/pexels-photo-2379004.jpeg?auto=compress&cs=tinysrgb&w=150"
+                              }
                               alt={vendor.name}
                               className="h-10 w-10 rounded-full object-cover"
                             />
@@ -424,16 +484,20 @@ const AdminDashboard = () => {
                           </div>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                          {vendor.vendorInfo?.businessType || 'Not specified'}
+                          {vendor.vendorInfo?.businessType || "Not specified"}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
-                          {getStatusBadge(vendor.vendorInfo?.status || 'pending')}
+                          {getStatusBadge(
+                            vendor.vendorInfo?.status || "pending"
+                          )}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                           {vendorProducts.length}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                          {new Date(vendor.createdAt || Date.now()).toLocaleDateString()}
+                          {new Date(
+                            vendor.createdAt || Date.now()
+                          ).toLocaleDateString()}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                           <div className="flex space-x-2">
@@ -483,7 +547,10 @@ const AdminDashboard = () => {
                     className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow"
                   >
                     <img
-                      src={product.images?.[0]?.url || 'https://via.placeholder.com/200'}
+                      src={
+                        product.images?.[0]?.url ||
+                        "https://via.placeholder.com/200"
+                      }
                       alt={product.name}
                       className="w-full h-48 object-cover rounded-lg mb-4"
                     />
@@ -492,13 +559,13 @@ const AdminDashboard = () => {
                         {product.name}
                       </h4>
                       <p className="text-sm text-gray-500">
-                        by {product.vendorName || 'Unknown Vendor'}
+                        by {product.vendorName || "Unknown Vendor"}
                       </p>
                       <div className="flex items-center justify-between">
                         <span className="text-lg font-bold text-blue-600">
                           ${product.price}
                         </span>
-                        {getStatusBadge(product.status || 'active')}
+                        {getStatusBadge(product.status || "active")}
                       </div>
                       <div className="flex items-center justify-between text-sm text-gray-500">
                         <span>Stock: {product.stock || 0}</span>
@@ -539,7 +606,9 @@ const AdminDashboard = () => {
                   <div className="flex items-center">
                     <Users className="h-8 w-8 text-blue-600" />
                     <div className="ml-3">
-                      <p className="text-sm font-medium text-blue-900">Total Users</p>
+                      <p className="text-sm font-medium text-blue-900">
+                        Total Users
+                      </p>
                       <p className="text-2xl font-bold text-blue-600">2,543</p>
                     </div>
                   </div>
@@ -548,7 +617,9 @@ const AdminDashboard = () => {
                   <div className="flex items-center">
                     <UserCheck className="h-8 w-8 text-green-600" />
                     <div className="ml-3">
-                      <p className="text-sm font-medium text-green-900">Active Users</p>
+                      <p className="text-sm font-medium text-green-900">
+                        Active Users
+                      </p>
                       <p className="text-2xl font-bold text-green-600">2,156</p>
                     </div>
                   </div>
@@ -557,13 +628,15 @@ const AdminDashboard = () => {
                   <div className="flex items-center">
                     <Calendar className="h-8 w-8 text-purple-600" />
                     <div className="ml-3">
-                      <p className="text-sm font-medium text-purple-900">New This Month</p>
+                      <p className="text-sm font-medium text-purple-900">
+                        New This Month
+                      </p>
                       <p className="text-2xl font-bold text-purple-600">387</p>
                     </div>
                   </div>
                 </div>
               </div>
-              
+
               <div className="text-center py-8 text-gray-500">
                 <Users className="h-12 w-12 mx-auto mb-4 text-gray-400" />
                 <p>User management interface coming soon</p>
@@ -577,7 +650,9 @@ const AdminDashboard = () => {
             {/* Analytics Controls */}
             <div className="bg-white rounded-lg shadow p-6">
               <div className="flex justify-between items-center">
-                <h3 className="text-lg font-medium text-gray-900">Analytics Overview</h3>
+                <h3 className="text-lg font-medium text-gray-900">
+                  Analytics Overview
+                </h3>
                 <select
                   value={selectedTimeframe}
                   onChange={(e) => setSelectedTimeframe(e.target.value)}
@@ -600,7 +675,10 @@ const AdminDashboard = () => {
                   <div className="text-center">
                     <TrendingUp className="h-16 w-16 text-blue-500 mx-auto mb-4" />
                     <p className="text-gray-600">Sales Chart</p>
-                    <p className="text-sm text-gray-500">Revenue: ${analytics.sales[selectedTimeframe]?.slice(-1)[0] || 0}</p>
+                    <p className="text-sm text-gray-500">
+                      Revenue: $
+                      {analytics.sales[selectedTimeframe]?.slice(-1)[0] || 0}
+                    </p>
                   </div>
                 </div>
               </div>
@@ -614,7 +692,9 @@ const AdminDashboard = () => {
                   <div className="text-center">
                     <Users className="h-16 w-16 text-green-500 mx-auto mb-4" />
                     <p className="text-gray-600">Visitor Chart</p>
-                    <p className="text-sm text-gray-500">Growth: +{getVisitorGrowth()}%</p>
+                    <p className="text-sm text-gray-500">
+                      Growth: +{getVisitorGrowth()}%
+                    </p>
                   </div>
                 </div>
               </div>
@@ -622,13 +702,21 @@ const AdminDashboard = () => {
 
             {/* Top Categories */}
             <div className="bg-white rounded-lg shadow p-6">
-              <h3 className="text-lg font-medium text-gray-900 mb-4">Top Categories</h3>
+              <h3 className="text-lg font-medium text-gray-900 mb-4">
+                Top Categories
+              </h3>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                 {analytics.topCategories.map((category, index) => (
                   <div key={index} className="bg-gray-50 rounded-lg p-4">
-                    <h4 className="font-medium text-gray-900">{category.name}</h4>
-                    <p className="text-2xl font-bold text-blue-600">{category.sales}</p>
-                    <p className="text-sm text-gray-500">{category.percentage}% of total</p>
+                    <h4 className="font-medium text-gray-900">
+                      {category.name}
+                    </h4>
+                    <p className="text-2xl font-bold text-blue-600">
+                      {category.sales}
+                    </p>
+                    <p className="text-sm text-gray-500">
+                      {category.percentage}% of total
+                    </p>
                   </div>
                 ))}
               </div>
@@ -638,7 +726,9 @@ const AdminDashboard = () => {
 
         {/* Quick Navigation to Other Admin Pages */}
         <div className="mt-8 bg-white rounded-lg shadow p-6">
-          <h3 className="text-lg font-medium text-gray-900 mb-4">Admin Tools</h3>
+          <h3 className="text-lg font-medium text-gray-900 mb-4">
+            Admin Tools
+          </h3>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             <Link
               to="/admin/users"

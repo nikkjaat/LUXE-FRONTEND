@@ -240,7 +240,9 @@ function AppContent() {
 function App() {
   return (
     <AuthProvider>
-      <AppContent />
+      <ProductProvider>
+        <AppContent />
+      </ProductProvider>
     </AuthProvider>
   );
 }

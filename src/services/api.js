@@ -70,9 +70,14 @@ class ApiService {
     }
   }
 
+  //Admin route
+
+  async getAllUsers() {
+    return this.request("/admin/getallusers");
+  }
+
   // Auth endpoints
   async register(userData) {
-    console.log(userData);
     return this.request("/auth/register", {
       method: "POST",
       body: JSON.stringify(userData),
@@ -228,7 +233,7 @@ class ApiService {
     });
   }
   async removeFromWishlist(id) {
-    console.log(id)
+    console.log(id);
     return this.request(`/customer/wishlist/remove/${id}`, {
       method: "DELETE",
     });

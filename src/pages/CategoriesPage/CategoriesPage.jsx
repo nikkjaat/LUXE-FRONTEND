@@ -118,7 +118,7 @@ const CategoriesPage = () => {
     },
   ];
 
-  const getProductByCategory = (id, name, itemCount, category) => {
+  const getProductByCategory = (id, name, itemCount) => {
     const keyword = id.split("-")[0];
     const filterCategory = products.filter(
       (product) => product.category === keyword

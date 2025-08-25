@@ -13,19 +13,37 @@ export const useProducts = () => {
 
 export const ProductProvider = ({ children }) => {
   const [products, setProducts] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const [hasFetched, setHasFetched] = useState(false);
 
   const getProducts = async (params = {}) => {
-    const response = await apiService.getProducts(params);
-    if (!response.success) {
-      throw new Error("Failed to fetch products");
-    }
-    setProducts(
-      response.products.map((product) => ({
+    // Don't fetch if already loading or already fetched
+    if (isLoading || hasFetched) return products;
+
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      const response = await apiService.getProducts(params);
+      if (!response.success) {
+        throw new Error("Failed to fetch products");
+      }
+
+      const formattedProducts = response.products.map((product) => ({
         ...product,
         id: product._id,
-      }))
-    );
-    return response.products;
+      }));
+
+      setProducts(formattedProducts);
+      setHasFetched(true);
+      return formattedProducts;
+    } catch (err) {
+      setError(err.message);
+      throw err;
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const getProduct = async (productId) => {
@@ -42,19 +60,23 @@ export const ProductProvider = ({ children }) => {
     if (!response.success) {
       throw new Error("Failed to create product");
     }
+    getProducts();
+
     setProducts((prev) => [
       ...prev,
       {
-        ...response.product, // Use the actual product from backend
-        id: response.product._id, // Use the real ID from database
+        ...response.product,
+        id: response.product._id,
       },
     ]);
 
-    return response; // Return the full response if needed
+    return response;
   };
 
   const updateProduct = async (id, updates) => {
     const response = await apiService.updateProduct(id, updates);
+    // After updating, you might want to refresh the products list
+    return response;
   };
 
   const deleteProduct = (id) => {
@@ -65,10 +87,20 @@ export const ProductProvider = ({ children }) => {
     return products.filter((product) => product.vendor._id === vendorId);
   };
 
+  // Clear the fetched state when component unmounts (optional)
+  useEffect(() => {
+    return () => {
+      setHasFetched(false);
+    };
+  }, []);
+
   return (
     <ProductContext.Provider
       value={{
         products,
+        isLoading,
+        error,
+        hasFetched,
         getProducts,
         getProduct,
         addProduct,
