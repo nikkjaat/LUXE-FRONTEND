@@ -389,6 +389,11 @@ class ApiService {
     });
   }
 
+  async adminGetUsers(params = {}) {
+    const queryString = new URLSearchParams(params).toString();
+    return this.request(`/admin/users?${queryString}`);
+  }
+
   async adminUpdateUser(id, userData) {
     return this.request(`/admin/users/${id}`, {
       method: "PUT",
@@ -414,6 +419,11 @@ class ApiService {
     });
   }
 
+  async adminGetProducts(params = {}) {
+    const queryString = new URLSearchParams(params).toString();
+    return this.request(`/admin/products?${queryString}`);
+  }
+
   async adminGetOrders(params = {}) {
     const queryString = new URLSearchParams(params).toString();
     return this.request(`/admin/orders?${queryString}`);
@@ -435,6 +445,57 @@ class ApiService {
     return this.request("/admin/dashboard/stats");
   }
 
+  async adminCreateProduct(productData) {
+    const headers = {};
+    if (this.token) {
+      headers.Authorization = `Bearer ${this.token}`;
+    }
+
+    const response = await fetch(`${this.baseURL}/admin/products`, {
+      method: "POST",
+      headers,
+      body: productData, // FormData object
+    });
+
+    const data = await response.json();
+    if (!response.ok) {
+      const error = new Error(data.message || "Failed to create product");
+      error.status = response.status;
+      throw error;
+    }
+
+    return data;
+  }
+
+  async adminGetVendors(params = {}) {
+    const queryString = new URLSearchParams(params).toString();
+    return this.request(`/admin/vendors?${queryString}`);
+  }
+
+  async adminApproveVendor(vendorId) {
+    return this.request(`/admin/vendors/${vendorId}/approve`, {
+      method: "PUT",
+    });
+  }
+
+  async adminRejectVendor(vendorId, reason) {
+    return this.request(`/admin/vendors/${vendorId}/reject`, {
+      method: "PUT",
+      body: JSON.stringify({ reason }),
+    });
+  }
+
+  async adminSuspendVendor(vendorId) {
+    return this.request(`/admin/vendors/${vendorId}/suspend`, {
+      method: "PUT",
+    });
+  }
+
+  async adminActivateVendor(vendorId) {
+    return this.request(`/admin/vendors/${vendorId}/activate`, {
+      method: "PUT",
+    });
+  }
   // Notification endpoints
   async getNotifications(params = {}) {
     const queryString = new URLSearchParams(params).toString();
