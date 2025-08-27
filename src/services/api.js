@@ -360,6 +360,81 @@ class ApiService {
     return this.request(`/analytics/vendor?${queryString}`);
   }
 
+  // Admin-specific endpoints
+  async adminUpdateProduct(id, productData) {
+    const headers = {};
+    if (this.token) {
+      headers.Authorization = `Bearer ${this.token}`;
+    }
+
+    const response = await fetch(`${this.baseURL}/admin/products/${id}`, {
+      method: "PUT",
+      headers,
+      body: productData, // FormData object
+    });
+
+    const data = await response.json();
+    if (!response.ok) {
+      const error = new Error(data.message || "Failed to update product");
+      error.status = response.status;
+      throw error;
+    }
+
+    return data;
+  }
+
+  async adminDeleteProduct(id) {
+    return this.request(`/admin/products/${id}`, {
+      method: "DELETE",
+    });
+  }
+
+  async adminUpdateUser(id, userData) {
+    return this.request(`/admin/users/${id}`, {
+      method: "PUT",
+      body: JSON.stringify(userData),
+    });
+  }
+
+  async adminDeleteUser(id) {
+    return this.request(`/admin/users/${id}`, {
+      method: "DELETE",
+    });
+  }
+
+  async adminSuspendUser(id) {
+    return this.request(`/admin/users/${id}/suspend`, {
+      method: "PUT",
+    });
+  }
+
+  async adminActivateUser(id) {
+    return this.request(`/admin/users/${id}/activate`, {
+      method: "PUT",
+    });
+  }
+
+  async adminGetOrders(params = {}) {
+    const queryString = new URLSearchParams(params).toString();
+    return this.request(`/admin/orders?${queryString}`);
+  }
+
+  async adminUpdateOrderStatus(id, status) {
+    return this.request(`/admin/orders/${id}/status`, {
+      method: "PUT",
+      body: JSON.stringify({ status }),
+    });
+  }
+
+  async adminGetAnalytics(params = {}) {
+    const queryString = new URLSearchParams(params).toString();
+    return this.request(`/admin/analytics?${queryString}`);
+  }
+
+  async adminGetDashboardStats() {
+    return this.request("/admin/dashboard/stats");
+  }
+
   // Notification endpoints
   async getNotifications(params = {}) {
     const queryString = new URLSearchParams(params).toString();
