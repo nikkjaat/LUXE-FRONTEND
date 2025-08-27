@@ -496,6 +496,105 @@ class ApiService {
       method: "PUT",
     });
   }
+
+  // Enhanced Admin Analytics
+  async adminGetSalesAnalytics(timeframe = 'monthly') {
+    return this.request(`/admin/analytics/sales?timeframe=${timeframe}`);
+  }
+
+  async adminGetUserAnalytics() {
+    return this.request("/admin/analytics/users");
+  }
+
+  async adminGetProductAnalytics() {
+    return this.request("/admin/analytics/products");
+  }
+
+  async adminGetRevenueAnalytics(params = {}) {
+    const queryString = new URLSearchParams(params).toString();
+    return this.request(`/admin/analytics/revenue?${queryString}`);
+  }
+
+  // Admin Reports
+  async adminGenerateReport(reportType, params = {}) {
+    const queryString = new URLSearchParams(params).toString();
+    return this.request(`/admin/reports/${reportType}?${queryString}`);
+  }
+
+  async adminExportData(dataType, format = 'csv') {
+    return this.request(`/admin/export/${dataType}?format=${format}`);
+  }
+
+  // Admin Settings
+  async adminGetSettings() {
+    return this.request("/admin/settings");
+  }
+
+  async adminUpdateSettings(settings) {
+    return this.request("/admin/settings", {
+      method: "PUT",
+      body: JSON.stringify(settings),
+    });
+  }
+
+  // Admin Notifications
+  async adminGetNotifications() {
+    return this.request("/admin/notifications");
+  }
+
+  async adminSendNotification(notificationData) {
+    return this.request("/admin/notifications/send", {
+      method: "POST",
+      body: JSON.stringify(notificationData),
+    });
+  }
+
+  // Admin Bulk Operations
+  async adminBulkUpdateProducts(productIds, updates) {
+    return this.request("/admin/products/bulk-update", {
+      method: "PUT",
+      body: JSON.stringify({ productIds, updates }),
+    });
+  }
+
+  async adminBulkDeleteProducts(productIds) {
+    return this.request("/admin/products/bulk-delete", {
+      method: "DELETE",
+      body: JSON.stringify({ productIds }),
+    });
+  }
+
+  async adminBulkUpdateUsers(userIds, updates) {
+    return this.request("/admin/users/bulk-update", {
+      method: "PUT",
+      body: JSON.stringify({ userIds, updates }),
+    });
+  }
+
+  // Admin Category Management
+  async adminGetCategories() {
+    return this.request("/admin/categories");
+  }
+
+  async adminCreateCategory(categoryData) {
+    return this.request("/admin/categories", {
+      method: "POST",
+      body: JSON.stringify(categoryData),
+    });
+  }
+
+  async adminUpdateCategory(id, categoryData) {
+    return this.request(`/admin/categories/${id}`, {
+      method: "PUT",
+      body: JSON.stringify(categoryData),
+    });
+  }
+
+  async adminDeleteCategory(id) {
+    return this.request(`/admin/categories/${id}`, {
+      method: "DELETE",
+    });
+  }
   // Notification endpoints
   async getNotifications(params = {}) {
     const queryString = new URLSearchParams(params).toString();

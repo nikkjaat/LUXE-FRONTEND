@@ -14,8 +14,13 @@ import {
   User,
   X,
   MapPin,
-  CreditCard
+  CreditCard,
+  ArrowLeft,
+  Download,
+  RefreshCw,
+  Edit
 } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import apiService from '../../services/api';
 
 const OrderManagement = () => {
@@ -27,6 +32,9 @@ const OrderManagement = () => {
   const [sortOrder, setSortOrder] = useState('desc');
   const [showOrderDetails, setShowOrderDetails] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState(null);
+  const [actionLoading, setActionLoading] = useState({});
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage] = useState(10);
 
   useEffect(() => {
     fetchOrders();
@@ -39,7 +47,7 @@ const OrderManagement = () => {
       setOrders(response.orders || []);
     } catch (error) {
       console.error('Failed to fetch orders:', error);
-      // Use mock data as fallback
+      // Use mock data as fallback for demonstration
       const mockOrders = [
         {
           _id: 'ORD-001',
@@ -88,6 +96,30 @@ const OrderManagement = () => {
             country: 'USA'
           },
           paymentMethod: 'PayPal'
+        },
+        {
+          _id: 'ORD-003',
+          orderNumber: 'ORD-003',
+          customer: {
+            name: 'Michael Chen',
+            email: 'michael@example.com',
+            avatar: 'https://images.pexels.com/photos/2379004/pexels-photo-2379004.jpeg?auto=compress&cs=tinysrgb&w=150'
+          },
+          status: 'shipped',
+          total: 149.99,
+          items: [
+            { name: 'Wireless Headphones', quantity: 1, price: 149.99 }
+          ],
+          createdAt: '2025-01-18',
+          shippingAddress: {
+            street: '789 Pine St',
+            city: 'Chicago',
+            state: 'IL',
+            zipCode: '60601',
+            country: 'USA'
+          },
+          paymentMethod: 'Credit Card',
+          trackingNumber: 'TRK987654321'
         }
       ];
       setOrders(mockOrders);
@@ -98,6 +130,7 @@ const OrderManagement = () => {
 
   const updateOrderStatus = async (orderId, newStatus) => {
     try {
+      setActionLoading(prev => ({ ...prev, [orderId]: 'updating' }));
       await apiService.adminUpdateOrderStatus(orderId, newStatus);
       setOrders(prev => prev.map(order => 
         order._id === orderId ? { ...order, status: newStatus } : order
@@ -105,6 +138,41 @@ const OrderManagement = () => {
     } catch (error) {
       console.error('Failed to update order status:', error);
       alert('Failed to update order status');
+    } finally {
+      setActionLoading(prev => ({ ...prev, [orderId]: null }));
+    }
+  };
+
+  const handleExportOrders = async () => {
+    try {
+      setActionLoading(prev => ({ ...prev, export: 'exporting' }));
+      
+      const csvContent = [
+        ['Order ID', 'Customer', 'Status', 'Total', 'Items', 'Date'].join(','),
+        ...filteredOrders.map(order => [
+          order.orderNumber || order._id,
+          `"${order.customer?.name || 'Unknown'}"`,
+          order.status,
+          order.total || 0,
+          order.items?.length || 0,
+          new Date(order.createdAt).toLocaleDateString()
+        ].join(','))
+      ].join('\n');
+
+      const blob = new Blob([csvContent], { type: 'text/csv' });
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `orders-${new Date().toISOString().split('T')[0]}.csv`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error('Failed to export orders:', error);
+      alert('Failed to export orders');
+    } finally {
+      setActionLoading(prev => ({ ...prev, export: null }));
     }
   };
 
@@ -140,6 +208,13 @@ const OrderManagement = () => {
     }
   });
 
+  // Pagination
+  const totalPages = Math.ceil(filteredOrders.length / itemsPerPage);
+  const paginatedOrders = filteredOrders.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
+
   const getStatusConfig = (status) => {
     const configs = {
       pending: { bg: 'bg-yellow-100', text: 'text-yellow-800', icon: Clock, label: 'Pending' },
@@ -155,6 +230,11 @@ const OrderManagement = () => {
   const totalRevenue = orders.reduce((sum, order) => sum + (order.total || 0), 0);
   const pendingOrders = orders.filter(o => o.status === 'pending' || o.status === 'processing').length;
   const completedOrders = orders.filter(o => o.status === 'delivered').length;
+  const todayOrders = orders.filter(o => {
+    const orderDate = new Date(o.createdAt);
+    const today = new Date();
+    return orderDate.toDateString() === today.toDateString();
+  }).length;
 
   if (loading) {
     return (
@@ -172,8 +252,13 @@ const OrderManagement = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">Order Management</h1>
-          <p className="text-gray-600 mt-2">Track and manage all customer orders</p>
+          <div className="flex items-center mb-2">
+            <Link to="/admin/dashboard" className="text-blue-600 hover:text-blue-700 mr-3">
+              <ArrowLeft className="h-5 w-5" />
+            </Link>
+            <h1 className="text-3xl font-bold text-gray-900">Order Management</h1>
+          </div>
+          <p className="text-gray-600">Track and manage all customer orders</p>
         </div>
 
         {/* Stats */}
@@ -218,8 +303,8 @@ const OrderManagement = () => {
 
         {/* Controls */}
         <div className="bg-white rounded-lg shadow p-6 mb-8">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-            <div className="relative">
+          <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
+            <div className="relative md:col-span-2">
               <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
               <input
                 type="text"
@@ -259,8 +344,17 @@ const OrderManagement = () => {
               <option value="customer-asc">Customer A-Z</option>
             </select>
 
-            <button className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition-colors">
-              Export Orders
+            <button 
+              onClick={handleExportOrders}
+              disabled={actionLoading.export}
+              className="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700 transition-colors flex items-center justify-center disabled:opacity-50"
+            >
+              {actionLoading.export ? (
+                <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
+              ) : (
+                <Download className="h-4 w-4 mr-2" />
+              )}
+              Export
             </button>
           </div>
         </div>
@@ -295,7 +389,7 @@ const OrderManagement = () => {
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
-                {filteredOrders.map((order) => {
+                {paginatedOrders.map((order) => {
                   const statusConfig = getStatusConfig(order.status);
                   
                   return (
@@ -357,7 +451,8 @@ const OrderManagement = () => {
                           <select
                             value={order.status}
                             onChange={(e) => updateOrderStatus(order._id, e.target.value)}
-                            className="text-xs border border-gray-300 rounded px-2 py-1 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                            disabled={actionLoading[order._id]}
+                            className="text-xs border border-gray-300 rounded px-2 py-1 focus:outline-none focus:ring-1 focus:ring-blue-500 disabled:opacity-50"
                           >
                             <option value="pending">Pending</option>
                             <option value="processing">Processing</option>
@@ -374,6 +469,56 @@ const OrderManagement = () => {
             </table>
           </div>
         </div>
+
+        {/* Pagination */}
+        {totalPages > 1 && (
+          <div className="flex justify-center items-center space-x-4 mt-8">
+            <button
+              onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+              disabled={currentPage === 1}
+              className="px-4 py-2 bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50"
+            >
+              Previous
+            </button>
+            
+            <div className="flex space-x-2">
+              {Array.from({ length: Math.min(totalPages, 5) }, (_, i) => {
+                let pageNumber;
+                if (totalPages <= 5) {
+                  pageNumber = i + 1;
+                } else if (currentPage <= 3) {
+                  pageNumber = i + 1;
+                } else if (currentPage >= totalPages - 2) {
+                  pageNumber = totalPages - 4 + i;
+                } else {
+                  pageNumber = currentPage - 2 + i;
+                }
+
+                return (
+                  <button
+                    key={pageNumber}
+                    onClick={() => setCurrentPage(pageNumber)}
+                    className={`px-3 py-2 rounded-md ${
+                      currentPage === pageNumber
+                        ? 'bg-blue-600 text-white'
+                        : 'bg-white border border-gray-300 hover:bg-gray-50'
+                    }`}
+                  >
+                    {pageNumber}
+                  </button>
+                );
+              })}
+            </div>
+
+            <button
+              onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+              disabled={currentPage === totalPages}
+              className="px-4 py-2 bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50"
+            >
+              Next
+            </button>
+          </div>
+        )}
 
         {filteredOrders.length === 0 && !loading && (
           <div className="bg-white rounded-lg shadow p-12 text-center">
@@ -487,7 +632,8 @@ const OrderManagement = () => {
                         updateOrderStatus(selectedOrder._id, e.target.value);
                         setSelectedOrder(prev => ({ ...prev, status: e.target.value }));
                       }}
-                      className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      disabled={actionLoading[selectedOrder._id]}
+                      className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50"
                     >
                       <option value="pending">Pending</option>
                       <option value="processing">Processing</option>
@@ -495,8 +641,11 @@ const OrderManagement = () => {
                       <option value="delivered">Delivered</option>
                       <option value="cancelled">Cancelled</option>
                     </select>
+                    {actionLoading[selectedOrder._id] && (
+                      <RefreshCw className="h-4 w-4 animate-spin text-blue-600" />
+                    )}
                     <span className="text-sm text-gray-600">
-                      Current status will be updated automatically
+                      Status updates are saved automatically
                     </span>
                   </div>
                 </div>

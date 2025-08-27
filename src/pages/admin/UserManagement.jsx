@@ -15,8 +15,15 @@ import {
   Trash2,
   Eye,
   Shield,
-  Store
+  Store,
+  X,
+  ArrowLeft,
+  Download,
+  RefreshCw,
+  Phone,
+  MapPin
 } from "lucide-react";
+import { Link } from "react-router-dom";
 import apiService from "../../services/api";
 
 const UserManagement = () => {
@@ -28,6 +35,9 @@ const UserManagement = () => {
   const [selectedUsers, setSelectedUsers] = useState([]);
   const [showUserDetails, setShowUserDetails] = useState(false);
   const [selectedUser, setSelectedUser] = useState(null);
+  const [actionLoading, setActionLoading] = useState({});
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage] = useState(10);
 
   useEffect(() => {
     fetchUsers();
@@ -62,8 +72,17 @@ const UserManagement = () => {
     return matchesSearch && matchesRole && matchesStatus;
   });
 
+  // Pagination
+  const totalPages = Math.ceil(filteredUsers.length / itemsPerPage);
+  const paginatedUsers = filteredUsers.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
+
   const handleUserAction = async (userId, action) => {
     try {
+      setActionLoading(prev => ({ ...prev, [userId]: action }));
+      
       if (action === "activate") {
         await apiService.adminActivateUser(userId);
       } else if (action === "suspend") {
@@ -81,6 +100,8 @@ const UserManagement = () => {
     } catch (error) {
       console.error(`Failed to ${action} user:`, error);
       alert(`Failed to ${action} user`);
+    } finally {
+      setActionLoading(prev => ({ ...prev, [userId]: null }));
     }
   };
 
@@ -88,6 +109,8 @@ const UserManagement = () => {
     if (selectedUsers.length === 0) return;
     
     try {
+      setActionLoading(prev => ({ ...prev, bulk: action }));
+      
       if (action === "delete") {
         if (!window.confirm(`Are you sure you want to delete ${selectedUsers.length} users?`)) {
           return;
@@ -107,6 +130,41 @@ const UserManagement = () => {
     } catch (error) {
       console.error(`Failed to ${action} users:`, error);
       alert(`Failed to ${action} some users`);
+    } finally {
+      setActionLoading(prev => ({ ...prev, bulk: null }));
+    }
+  };
+
+  const handleExportUsers = async () => {
+    try {
+      setActionLoading(prev => ({ ...prev, export: 'exporting' }));
+      
+      const csvContent = [
+        ['Name', 'Email', 'Role', 'Status', 'Join Date', 'Last Active'].join(','),
+        ...filteredUsers.map(user => [
+          `"${user.name}"`,
+          user.email,
+          user.role,
+          user.isActive ? 'Active' : 'Suspended',
+          new Date(user.createdAt || Date.now()).toLocaleDateString(),
+          new Date(user.lastActive || user.updatedAt || Date.now()).toLocaleDateString()
+        ].join(','))
+      ].join('\n');
+
+      const blob = new Blob([csvContent], { type: 'text/csv' });
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `users-${new Date().toISOString().split('T')[0]}.csv`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error('Failed to export users:', error);
+      alert('Failed to export users');
+    } finally {
+      setActionLoading(prev => ({ ...prev, export: null }));
     }
   };
 
@@ -119,10 +177,10 @@ const UserManagement = () => {
   };
 
   const selectAllUsers = () => {
-    if (selectedUsers.length === filteredUsers.length) {
+    if (selectedUsers.length === paginatedUsers.length) {
       setSelectedUsers([]);
     } else {
-      setSelectedUsers(filteredUsers.map(u => u._id));
+      setSelectedUsers(paginatedUsers.map(u => u._id));
     }
   };
 
@@ -187,8 +245,13 @@ const UserManagement = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">User Management</h1>
-          <p className="text-gray-600 mt-2">Manage users, vendors, and their activities</p>
+          <div className="flex items-center mb-2">
+            <Link to="/admin/dashboard" className="text-blue-600 hover:text-blue-700 mr-3">
+              <ArrowLeft className="h-5 w-5" />
+            </Link>
+            <h1 className="text-3xl font-bold text-gray-900">User Management</h1>
+          </div>
+          <p className="text-gray-600">Manage users, vendors, and their activities</p>
         </div>
 
         {/* Stats */}
@@ -265,6 +328,19 @@ const UserManagement = () => {
                 <option value="active">Active</option>
                 <option value="suspended">Suspended</option>
               </select>
+
+              <button
+                onClick={handleExportUsers}
+                disabled={actionLoading.export}
+                className="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700 transition-colors flex items-center disabled:opacity-50"
+              >
+                {actionLoading.export ? (
+                  <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
+                ) : (
+                  <Download className="h-4 w-4 mr-2" />
+                )}
+                Export
+              </button>
             </div>
 
             {selectedUsers.length > 0 && (
@@ -274,21 +350,24 @@ const UserManagement = () => {
                 </span>
                 <button
                   onClick={() => handleBulkAction("activate")}
-                  className="bg-green-600 text-white px-3 py-1 rounded text-sm hover:bg-green-700"
+                  disabled={actionLoading.bulk}
+                  className="bg-green-600 text-white px-3 py-1 rounded text-sm hover:bg-green-700 disabled:opacity-50"
                 >
-                  Activate
+                  {actionLoading.bulk === 'activate' ? 'Activating...' : 'Activate'}
                 </button>
                 <button
                   onClick={() => handleBulkAction("suspend")}
-                  className="bg-yellow-600 text-white px-3 py-1 rounded text-sm hover:bg-yellow-700"
+                  disabled={actionLoading.bulk}
+                  className="bg-yellow-600 text-white px-3 py-1 rounded text-sm hover:bg-yellow-700 disabled:opacity-50"
                 >
-                  Suspend
+                  {actionLoading.bulk === 'suspend' ? 'Suspending...' : 'Suspend'}
                 </button>
                 <button
                   onClick={() => handleBulkAction("delete")}
-                  className="bg-red-600 text-white px-3 py-1 rounded text-sm hover:bg-red-700"
+                  disabled={actionLoading.bulk}
+                  className="bg-red-600 text-white px-3 py-1 rounded text-sm hover:bg-red-700 disabled:opacity-50"
                 >
-                  Delete
+                  {actionLoading.bulk === 'delete' ? 'Deleting...' : 'Delete'}
                 </button>
               </div>
             )}
@@ -304,7 +383,7 @@ const UserManagement = () => {
                   <th className="px-6 py-3 text-left">
                     <input
                       type="checkbox"
-                      checked={selectedUsers.length === filteredUsers.length && filteredUsers.length > 0}
+                      checked={selectedUsers.length === paginatedUsers.length && paginatedUsers.length > 0}
                       onChange={selectAllUsers}
                       className="h-4 w-4 text-blue-600 border-gray-300 rounded"
                     />
@@ -330,7 +409,7 @@ const UserManagement = () => {
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
-                {filteredUsers.map((user) => (
+                {paginatedUsers.map((user) => (
                   <tr key={user._id} className="hover:bg-gray-50">
                     <td className="px-6 py-4">
                       <input
@@ -388,17 +467,29 @@ const UserManagement = () => {
                         </button>
                         <button
                           onClick={() => handleUserAction(user._id, user.isActive ? "suspend" : "activate")}
-                          className={user.isActive ? "text-yellow-600 hover:text-yellow-900" : "text-green-600 hover:text-green-900"}
+                          disabled={actionLoading[user._id]}
+                          className={`${user.isActive ? "text-yellow-600 hover:text-yellow-900" : "text-green-600 hover:text-green-900"} disabled:opacity-50`}
                           title={user.isActive ? "Suspend User" : "Activate User"}
                         >
-                          {user.isActive ? <Ban className="h-4 w-4" /> : <CheckCircle className="h-4 w-4" />}
+                          {actionLoading[user._id] ? (
+                            <RefreshCw className="h-4 w-4 animate-spin" />
+                          ) : user.isActive ? (
+                            <Ban className="h-4 w-4" />
+                          ) : (
+                            <CheckCircle className="h-4 w-4" />
+                          )}
                         </button>
                         <button
                           onClick={() => handleUserAction(user._id, "delete")}
-                          className="text-red-600 hover:text-red-900"
+                          disabled={actionLoading[user._id]}
+                          className="text-red-600 hover:text-red-900 disabled:opacity-50"
                           title="Delete User"
                         >
-                          <Trash2 className="h-4 w-4" />
+                          {actionLoading[user._id] === 'delete' ? (
+                            <RefreshCw className="h-4 w-4 animate-spin" />
+                          ) : (
+                            <Trash2 className="h-4 w-4" />
+                          )}
                         </button>
                       </div>
                     </td>
@@ -408,6 +499,56 @@ const UserManagement = () => {
             </table>
           </div>
         </div>
+
+        {/* Pagination */}
+        {totalPages > 1 && (
+          <div className="flex justify-center items-center space-x-4 mt-8">
+            <button
+              onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+              disabled={currentPage === 1}
+              className="px-4 py-2 bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50"
+            >
+              Previous
+            </button>
+            
+            <div className="flex space-x-2">
+              {Array.from({ length: Math.min(totalPages, 5) }, (_, i) => {
+                let pageNumber;
+                if (totalPages <= 5) {
+                  pageNumber = i + 1;
+                } else if (currentPage <= 3) {
+                  pageNumber = i + 1;
+                } else if (currentPage >= totalPages - 2) {
+                  pageNumber = totalPages - 4 + i;
+                } else {
+                  pageNumber = currentPage - 2 + i;
+                }
+
+                return (
+                  <button
+                    key={pageNumber}
+                    onClick={() => setCurrentPage(pageNumber)}
+                    className={`px-3 py-2 rounded-md ${
+                      currentPage === pageNumber
+                        ? 'bg-blue-600 text-white'
+                        : 'bg-white border border-gray-300 hover:bg-gray-50'
+                    }`}
+                  >
+                    {pageNumber}
+                  </button>
+                );
+              })}
+            </div>
+
+            <button
+              onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+              disabled={currentPage === totalPages}
+              className="px-4 py-2 bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50"
+            >
+              Next
+            </button>
+          </div>
+        )}
 
         {filteredUsers.length === 0 && !loading && (
           <div className="bg-white rounded-lg shadow p-12 text-center">
@@ -503,18 +644,32 @@ const UserManagement = () => {
                 <div className="flex justify-end space-x-4">
                   <button
                     onClick={() => handleUserAction(selectedUser._id, selectedUser.isActive ? "suspend" : "activate")}
-                    className={`px-4 py-2 rounded-lg font-medium ${
+                    disabled={actionLoading[selectedUser._id]}
+                    className={`px-4 py-2 rounded-lg font-medium flex items-center disabled:opacity-50 ${
                       selectedUser.isActive 
                         ? "bg-yellow-600 text-white hover:bg-yellow-700" 
                         : "bg-green-600 text-white hover:bg-green-700"
                     }`}
                   >
+                    {actionLoading[selectedUser._id] ? (
+                      <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
+                    ) : selectedUser.isActive ? (
+                      <Ban className="h-4 w-4 mr-2" />
+                    ) : (
+                      <CheckCircle className="h-4 w-4 mr-2" />
+                    )}
                     {selectedUser.isActive ? "Suspend User" : "Activate User"}
                   </button>
                   <button
                     onClick={() => handleUserAction(selectedUser._id, "delete")}
-                    className="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700"
+                    disabled={actionLoading[selectedUser._id]}
+                    className="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 flex items-center disabled:opacity-50"
                   >
+                    {actionLoading[selectedUser._id] === 'delete' ? (
+                      <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
+                    ) : (
+                      <Trash2 className="h-4 w-4 mr-2" />
+                    )}
                     Delete User
                   </button>
                 </div>

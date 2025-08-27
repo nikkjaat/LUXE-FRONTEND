@@ -16,6 +16,9 @@ import {
   XCircle,
   Calendar,
   Activity,
+  Grid,
+  Gift,
+  Settings
 } from "lucide-react";
 import { useVendors } from "../../context/VendorContext";
 import { useProducts } from "../../context/ProductContext";
@@ -408,13 +411,16 @@ const AdminDashboard = () => {
                     </p>
                   </div>
                 </Link>
-                <button className="flex items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
+                <Link
+                  to="/admin/analytics"
+                  className="flex items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
+                >
                   <TrendingUp className="h-8 w-8 text-purple-600 mr-3" />
                   <div>
                     <p className="font-medium text-gray-900">View Analytics</p>
                     <p className="text-sm text-gray-500">Sales & performance</p>
                   </div>
-                </button>
+                </Link>
               </div>
             </div>
           </div>
@@ -768,6 +774,46 @@ const AdminDashboard = () => {
               <div>
                 <p className="font-medium text-gray-900">Vendor Applications</p>
                 <p className="text-sm text-gray-500">Review applications</p>
+              </div>
+            </Link>
+            <Link
+              to="/admin/categories"
+              className="flex items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
+            >
+              <Grid className="h-8 w-8 text-indigo-600 mr-3" />
+              <div>
+                <p className="font-medium text-gray-900">Category Management</p>
+                <p className="text-sm text-gray-500">Organize categories</p>
+              </div>
+            </Link>
+            <Link
+              to="/admin/analytics"
+              className="flex items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
+            >
+              <TrendingUp className="h-8 w-8 text-pink-600 mr-3" />
+              <div>
+                <p className="font-medium text-gray-900">Analytics Dashboard</p>
+                <p className="text-sm text-gray-500">Detailed insights</p>
+              </div>
+            </Link>
+            <Link
+              to="/admin/promotions"
+              className="flex items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
+            >
+              <Gift className="h-8 w-8 text-yellow-600 mr-3" />
+              <div>
+                <p className="font-medium text-gray-900">Promotions</p>
+                <p className="text-sm text-gray-500">Manage offers</p>
+              </div>
+            </Link>
+            <Link
+              to="/admin/settings"
+              className="flex items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
+            >
+              <Settings className="h-8 w-8 text-gray-600 mr-3" />
+              <div>
+                <p className="font-medium text-gray-900">System Settings</p>
+                <p className="text-sm text-gray-500">Configure platform</p>
               </div>
             </Link>
           </div>

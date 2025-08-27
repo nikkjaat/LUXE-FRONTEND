@@ -27,6 +27,9 @@ import PromotionManagement from "./pages/admin/PromotionManagement";
 import UserManagement from "./pages/admin/UserManagement";
 import ProductManagement from "./pages/admin/ProductManagement";
 import OrderManagement from "./pages/admin/OrderManagement";
+import AnalyticsDashboard from "./pages/admin/AnalyticsDashboard";
+import CategoryManagement from "./pages/admin/CategoryManagement";
+import SystemSettings from "./pages/admin/SystemSettings";
 import VendorDashboard from "./pages/vendor/VendorDashboard";
 import AddProduct from "./pages/vendor/AddProduct";
 import RoleBasedRoute from "./components/RoleBasedRoute";
@@ -198,6 +201,30 @@ function AppContent() {
                                   element={
                                     <RoleBasedRoute allowedRoles={["admin"]}>
                                       <OrderManagement />
+                                    </RoleBasedRoute>
+                                  }
+                                />
+                                <Route
+                                  path="/admin/analytics"
+                                  element={
+                                    <RoleBasedRoute allowedRoles={["admin"]}>
+                                      <AnalyticsDashboard />
+                                    </RoleBasedRoute>
+                                  }
+                                />
+                                <Route
+                                  path="/admin/categories"
+                                  element={
+                                    <RoleBasedRoute allowedRoles={["admin"]}>
+                                      <CategoryManagement />
+                                    </RoleBasedRoute>
+                                  }
+                                />
+                                <Route
+                                  path="/admin/settings"
+                                  element={
+                                    <RoleBasedRoute allowedRoles={["admin"]}>
+                                      <SystemSettings />
                                     </RoleBasedRoute>
                                   }
                                 />
