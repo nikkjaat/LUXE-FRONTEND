@@ -216,15 +216,20 @@ const VendorDashboard = () => {
                         </p>
                       </div>
                       <div className="text-right">
-                        <p className="text-sm font-medium text-gray-900">
-                          {product.reviews[0]} reviews
-                        </p>
-                        <p className="text-sm text-gray-500">
-                          ★{" "}
-                          <p className="text-sm text-gray-500">
-                            ★ {product.rating?.average} ({product.rating?.count}{" "}
-                            reviews)
-                          </p>
+                        <div className="flex items-center">
+                          <Star className="h-4 w-4 text-yellow-400 fill-current mr-1" />
+                          <span className="text-sm">
+                            {typeof product.rating === 'object' 
+                              ? product.rating.average?.toFixed(1) || '0.0'
+                              : product.rating?.toFixed(1) || '0.0'
+                            }
+                          </span>
+                        </div>
+                        <p className="text-xs text-gray-500">
+                          {typeof product.rating === 'object' 
+                            ? product.rating.count || 0
+                            : product.reviews || 0
+                          } reviews
                         </p>
                       </div>
                     </div>
@@ -335,34 +340,32 @@ const VendorDashboard = () => {
             </div>
             <div className="p-6">
               <div className="text-center py-12">
-                <ShoppingBag className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                <h3 className="text-lg font-medium text-gray-900 mb-2">
-                  No orders yet
-                </h3>
-                <p className="text-gray-500">
-                  Orders for your products will appear here.
-                </p>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {activeTab === "analytics" && (
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            <div className="bg-white rounded-lg shadow p-6">
-              <h3 className="text-lg font-medium text-gray-900 mb-4">
-                Sales Analytics
+                <div className="text-center py-8">
+                  <ShoppingBag className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                  <h3 className="text-lg font-medium text-gray-900 mb-2">
+                    No recent orders
+                  </h3>
+                  <p className="text-gray-500 mb-4">
+                    Orders for your products will appear here.
+                  </p>
+                  <Link
+                    to="/vendor/orders"
+          <div className="bg-white rounded-lg shadow p-6">
+            <div className="text-center py-12">
+              <TrendingUp className="h-16 w-16 text-gray-400 mx-auto mb-4" />
+              <h3 className="text-lg font-medium text-gray-900 mb-2">
+                Analytics Coming Soon
               </h3>
-              <div className="h-64 bg-gray-100 rounded-lg flex items-center justify-center">
-                <p className="text-gray-500">Sales Chart Placeholder</p>
-              </div>
-            </div>
-            <div className="bg-white rounded-lg shadow p-6">
-              <h3 className="text-lg font-medium text-gray-900 mb-4">
-                Product Performance
-              </h3>
-              <div className="h-64 bg-gray-100 rounded-lg flex items-center justify-center">
-                <p className="text-gray-500">Performance Chart Placeholder</p>
+              <p className="text-gray-500 mb-6">
+                Get detailed insights about your store performance.
+              </p>
+              <Link
+                to="/vendor/analytics"
+                className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors inline-flex items-center"
+              >
+                <TrendingUp className="h-5 w-5 mr-2" />
+                View Full Analytics
+              </Link>
               </div>
             </div>
           </div>

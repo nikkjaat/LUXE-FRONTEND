@@ -595,6 +595,45 @@ class ApiService {
       method: "DELETE",
     });
   }
+
+  // Admin Notification Management
+  async adminSendNotification(notificationData) {
+    return this.request("/admin/notifications/send", {
+      method: "POST",
+      body: JSON.stringify(notificationData),
+    });
+  }
+
+  async adminDeleteNotification(id) {
+    return this.request(`/admin/notifications/${id}`, {
+      method: "DELETE",
+    });
+  }
+
+  // Admin Reports
+  async adminGenerateReport(reportType, params = {}) {
+    const queryString = new URLSearchParams(params).toString();
+    return this.request(`/admin/reports/${reportType}?${queryString}`);
+  }
+
+  // Vendor specific endpoints
+  async getVendorOrders(params = {}) {
+    const queryString = new URLSearchParams(params).toString();
+    return this.request(`/vendor/orders?${queryString}`);
+  }
+
+  async getVendorAnalytics(params = {}) {
+    const queryString = new URLSearchParams(params).toString();
+    return this.request(`/vendor/analytics?${queryString}`);
+  }
+
+  async updateVendorProfile(profileData) {
+    return this.request("/vendor/profile", {
+      method: "PUT",
+      body: JSON.stringify(profileData),
+    });
+  }
+
   // Notification endpoints
   async getNotifications(params = {}) {
     const queryString = new URLSearchParams(params).toString();
