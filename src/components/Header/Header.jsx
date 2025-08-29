@@ -14,7 +14,9 @@ import {
   Users,
   Phone,
   Info,
-  Bell,
+  Bell, 
+  FileText,
+  TrendingUp
 } from "lucide-react";
 import { useAuth } from "../../context/AuthContext";
 import { useCart } from "../../context/CartContext";
