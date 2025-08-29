@@ -18,7 +18,9 @@ import {
   Activity,
   Grid,
   Gift,
-  Settings
+  Settings,
+  Bell,
+  FileText
 } from "lucide-react";
 import { useVendors } from "../../context/VendorContext";
 import { useProducts } from "../../context/ProductContext";
