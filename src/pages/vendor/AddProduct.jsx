@@ -34,29 +34,6 @@ const AddProduct = () => {
       material: "",
       color: [],
       size: [],
-      // Category-specific fields
-      screen_size: "",
-      battery_life: "",
-      storage: "",
-      ram: "",
-      processor: "",
-      operating_system: "",
-      connectivity: "",
-      fabric: "",
-      pattern: "",
-      occasion: "",
-      fit: "",
-      age_group: "",
-      gender: "",
-      room_type: "",
-      style: "",
-      care_instructions: "",
-      skin_type: "",
-      spf: "",
-      ingredients: [],
-      sport: "",
-      activity: "",
-      level: "",
     },
     tags: [],
     badge: "",
@@ -66,7 +43,6 @@ const AddProduct = () => {
   const [tempColor, setTempColor] = useState("");
   const [tempSize, setTempSize] = useState("");
   const [tempTag, setTempTag] = useState("");
-  const [tempIngredient, setTempIngredient] = useState("");
   const [errors, setErrors] = useState({});
 
   const categories = [
@@ -90,85 +66,6 @@ const AddProduct = () => {
     "Sale",
   ];
 
-  // Category-specific specifications configuration
-  const categorySpecifications = {
-    electronics: {
-      fields: ["screen_size", "battery_life", "storage", "ram", "processor", "operating_system", "connectivity"],
-      labels: {
-        screen_size: "Screen Size (inches)",
-        battery_life: "Battery Life (hours)",
-        storage: "Storage (GB/TB)",
-        ram: "RAM (GB)",
-        processor: "Processor",
-        operating_system: "Operating System",
-        connectivity: "Connectivity"
-      }
-    },
-    women: {
-      fields: ["fabric", "pattern", "occasion", "fit"],
-      labels: {
-        fabric: "Fabric",
-        pattern: "Pattern",
-        occasion: "Occasion",
-        fit: "Fit"
-      }
-    },
-    men: {
-      fields: ["fabric", "pattern", "occasion", "fit"],
-      labels: {
-        fabric: "Fabric", 
-        pattern: "Pattern",
-        occasion: "Occasion",
-        fit: "Fit"
-      }
-    },
-    kids: {
-      fields: ["age_group", "gender", "fabric", "occasion"],
-      labels: {
-        age_group: "Age Group",
-        gender: "Gender",
-        fabric: "Fabric",
-        occasion: "Occasion"
-      }
-    },
-    home: {
-      fields: ["room_type", "style", "care_instructions"],
-      labels: {
-        room_type: "Room Type",
-        style: "Style",
-        care_instructions: "Care Instructions"
-      }
-    },
-    beauty: {
-      fields: ["skin_type", "spf", "ingredients"],
-      labels: {
-        skin_type: "Skin Type",
-        spf: "SPF",
-        ingredients: "Key Ingredients"
-      }
-    },
-    sports: {
-      fields: ["sport", "activity", "level"],
-      labels: {
-        sport: "Sport",
-        activity: "Activity",
-        level: "Skill Level"
-      }
-    },
-    accessories: {
-      fields: ["occasion", "style"],
-      labels: {
-        occasion: "Occasion",
-        style: "Style"
-      }
-    }
-  };
-
-  // Get current category specifications
-  const getCurrentCategorySpecs = () => {
-    return categorySpecifications[formData.category] || { fields: [], labels: {} };
-  };
-
   useEffect(() => {
     const fetchProductDetails = async () => {
       try {
@@ -187,29 +84,6 @@ const AddProduct = () => {
               material: data.product.specifications?.material || "",
               color: data.product.specifications?.color || [],
               size: data.product.specifications?.size || [],
-              // Category-specific fields
-              screen_size: data.product.specifications?.screen_size || "",
-              battery_life: data.product.specifications?.battery_life || "",
-              storage: data.product.specifications?.storage || "",
-              ram: data.product.specifications?.ram || "",
-              processor: data.product.specifications?.processor || "",
-              operating_system: data.product.specifications?.operating_system || "",
-              connectivity: data.product.specifications?.connectivity || "",
-              fabric: data.product.specifications?.fabric || "",
-              pattern: data.product.specifications?.pattern || "",
-              occasion: data.product.specifications?.occasion || "",
-              fit: data.product.specifications?.fit || "",
-              age_group: data.product.specifications?.age_group || "",
-              gender: data.product.specifications?.gender || "",
-              room_type: data.product.specifications?.room_type || "",
-              style: data.product.specifications?.style || "",
-              care_instructions: data.product.specifications?.care_instructions || "",
-              skin_type: data.product.specifications?.skin_type || "",
-              spf: data.product.specifications?.spf || "",
-              ingredients: data.product.specifications?.ingredients || [],
-              sport: data.product.specifications?.sport || "",
-              activity: data.product.specifications?.activity || "",
-              level: data.product.specifications?.level || "",
             },
             tags: data.product.tags || [],
             images:
@@ -256,20 +130,11 @@ const AddProduct = () => {
     // Check specifications
     const specChanges = {};
     const specFields = ["weight", "material"];
-    
-    // Add category-specific fields to check
-    const categorySpecs = getCurrentCategorySpecs();
-    const allSpecFields = [...specFields, ...categorySpecs.fields];
-    
-    allSpecFields.forEach((field) => {
-      if (field === 'ingredients') {
-        if (JSON.stringify(formData.specifications[field]) !== JSON.stringify(originalData.specifications?.[field] || [])) {
-          specChanges[field] = formData.specifications[field];
-        }
-      } else {
-        if (formData.specifications[field] !== originalData.specifications?.[field]) {
-          specChanges[field] = formData.specifications[field];
-        }
+    specFields.forEach((field) => {
+      if (
+        formData.specifications[field] !== originalData.specifications?.[field]
+      ) {
+        specChanges[field] = formData.specifications[field];
       }
     });
 
@@ -436,31 +301,6 @@ const AddProduct = () => {
     }));
   };
 
-  const addIngredient = () => {
-    if (tempIngredient && !formData.specifications.ingredients.includes(tempIngredient)) {
-      setFormData((prev) => ({
-        ...prev,
-        specifications: {
-          ...prev.specifications,
-          ingredients: [...prev.specifications.ingredients, tempIngredient],
-        },
-      }));
-      setTempIngredient("");
-    }
-  };
-
-  const removeIngredient = (ingredientToRemove) => {
-    setFormData((prev) => ({
-      ...prev,
-      specifications: {
-        ...prev.specifications,
-        ingredients: prev.specifications.ingredients.filter(
-          (ingredient) => ingredient !== ingredientToRemove
-        ),
-      },
-    }));
-  };
-
   const addTag = () => {
     if (tempTag && !formData.tags.includes(tempTag)) {
       setFormData((prev) => ({
@@ -533,15 +373,6 @@ const AddProduct = () => {
         color: formData.specifications.color,
         size: formData.specifications.size,
       };
-
-      // Add category-specific specifications
-      const categorySpecs = getCurrentCategorySpecs();
-      categorySpecs.fields.forEach(field => {
-        if (formData.specifications[field] !== undefined) {
-          specsToSend[field] = formData.specifications[field];
-        }
-      });
-
       formDataToSend.append("specifications", JSON.stringify(specsToSend));
 
       // Handle tags - ensure proper stringification
@@ -612,15 +443,6 @@ const AddProduct = () => {
         color: formData.specifications.color,
         size: formData.specifications.size,
       };
-
-      // Add category-specific specifications
-      const categorySpecs = getCurrentCategorySpecs();
-      categorySpecs.fields.forEach(field => {
-        if (formData.specifications[field] !== undefined) {
-          specsToSend[field] = formData.specifications[field];
-        }
-      });
-
       formDataToSend.append("specifications", JSON.stringify(specsToSend));
 
       // Handle tags for new product
@@ -640,91 +462,6 @@ const AddProduct = () => {
         console.error("Product creation failed:", error);
       }
     }
-  };
-
-  // Render category-specific specification fields
-  const renderCategorySpecifications = () => {
-    const categorySpecs = getCurrentCategorySpecs();
-    
-    if (categorySpecs.fields.length === 0) {
-      return null;
-    }
-
-    return (
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {categorySpecs.fields.map((field) => {
-          const label = categorySpecs.labels[field];
-          
-          // Special handling for ingredients field
-          if (field === 'ingredients') {
-            return (
-              <div key={field} className="md:col-span-2">
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  {label}
-                </label>
-                <div className="flex">
-                  <input
-                    type="text"
-                    value={tempIngredient}
-                    onChange={(e) => setTempIngredient(e.target.value)}
-                    className="flex-1 px-3 py-2 border border-gray-300 rounded-l-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    placeholder="Add ingredient"
-                    onKeyPress={(e) => e.key === "Enter" && addIngredient()}
-                  />
-                  <button
-                    type="button"
-                    onClick={addIngredient}
-                    className="px-3 py-2 bg-blue-600 text-white rounded-r-md hover:bg-blue-700"
-                  >
-                    Add
-                  </button>
-                </div>
-                {formData.specifications.ingredients.length > 0 && (
-                  <div className="mt-2 flex flex-wrap gap-2">
-                    {formData.specifications.ingredients.map((ingredient, index) => (
-                      <span
-                        key={index}
-                        className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-orange-100 text-orange-800"
-                      >
-                        {ingredient}
-                        <button
-                          type="button"
-                          onClick={() => removeIngredient(ingredient)}
-                          className="ml-1.5 inline-flex text-orange-400 hover:text-orange-600"
-                        >
-                          <X className="h-3 w-3" />
-                        </button>
-                      </span>
-                    ))}
-                  </div>
-                )}
-              </div>
-            );
-          }
-
-          // Regular input fields
-          return (
-            <div key={field}>
-              <label
-                htmlFor={`specifications.${field}`}
-                className="block text-sm font-medium text-gray-700 mb-2"
-              >
-                {label}
-              </label>
-              <input
-                type="text"
-                id={`specifications.${field}`}
-                name={`specifications.${field}`}
-                value={formData.specifications[field]}
-                onChange={handleChange}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                placeholder={`Enter ${label.toLowerCase()}`}
-              />
-            </div>
-          );
-        })}
-      </div>
-    );
   };
 
   return (
@@ -1063,187 +800,173 @@ const AddProduct = () => {
               Specifications
             </h2>
 
-            {/* General Specifications */}
-            <div className="mb-8">
-              <h3 className="text-md font-medium text-gray-800 mb-4">General Information</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                  <label
-                    htmlFor="specifications.weight"
-                    className="block text-sm font-medium text-gray-700 mb-2"
-                  >
-                    Weight (kg)
-                  </label>
-                  <input
-                    type="number"
-                    id="specifications.weight"
-                    name="specifications.weight"
-                    min="0"
-                    step="0.01"
-                    value={formData.specifications.weight}
-                    onChange={handleChange}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    placeholder="0.00"
-                  />
-                </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <label
+                  htmlFor="specifications.weight"
+                  className="block text-sm font-medium text-gray-700 mb-2"
+                >
+                  Weight (kg)
+                </label>
+                <input
+                  type="number"
+                  id="specifications.weight"
+                  name="specifications.weight"
+                  min="0"
+                  step="0.01"
+                  value={formData.specifications.weight}
+                  onChange={handleChange}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  placeholder="0.00"
+                />
+              </div>
 
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Dimensions (cm)
-                  </label>
-                  <div className="grid grid-cols-3 gap-2">
-                    <div>
-                      <input
-                        type="number"
-                        name="specifications.dimensions.length"
-                        min="0"
-                        step="0.1"
-                        value={formData.specifications.dimensions.length}
-                        onChange={handleChange}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        placeholder="Length"
-                      />
-                    </div>
-                    <div>
-                      <input
-                        type="number"
-                        name="specifications.dimensions.width"
-                        min="0"
-                        step="0.1"
-                        value={formData.specifications.dimensions.width}
-                        onChange={handleChange}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        placeholder="Width"
-                      />
-                    </div>
-                    <div>
-                      <input
-                        type="number"
-                        name="specifications.dimensions.height"
-                        min="0"
-                        step="0.1"
-                        value={formData.specifications.dimensions.height}
-                        onChange={handleChange}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        placeholder="Height"
-                      />
-                    </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Dimensions (cm)
+                </label>
+                <div className="grid grid-cols-3 gap-2">
+                  <div>
+                    <input
+                      type="number"
+                      name="specifications.dimensions.length"
+                      min="0"
+                      step="0.1"
+                      value={formData.specifications.dimensions.length}
+                      onChange={handleChange}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      placeholder="Length"
+                    />
+                  </div>
+                  <div>
+                    <input
+                      type="number"
+                      name="specifications.dimensions.width"
+                      min="0"
+                      step="0.1"
+                      value={formData.specifications.dimensions.width}
+                      onChange={handleChange}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      placeholder="Width"
+                    />
+                  </div>
+                  <div>
+                    <input
+                      type="number"
+                      name="specifications.dimensions.height"
+                      min="0"
+                      step="0.1"
+                      value={formData.specifications.dimensions.height}
+                      onChange={handleChange}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      placeholder="Height"
+                    />
                   </div>
                 </div>
+              </div>
 
-                <div>
-                  <label
-                    htmlFor="specifications.material"
-                    className="block text-sm font-medium text-gray-700 mb-2"
-                  >
-                    Material
-                  </label>
+              <div>
+                <label
+                  htmlFor="specifications.material"
+                  className="block text-sm font-medium text-gray-700 mb-2"
+                >
+                  Material
+                </label>
+                <input
+                  type="text"
+                  id="specifications.material"
+                  name="specifications.material"
+                  value={formData.specifications.material}
+                  onChange={handleChange}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  placeholder="e.g., Cotton, Wood, Metal"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Colors
+                </label>
+                <div className="flex">
                   <input
                     type="text"
-                    id="specifications.material"
-                    name="specifications.material"
-                    value={formData.specifications.material}
-                    onChange={handleChange}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    placeholder="e.g., Cotton, Wood, Metal"
+                    value={tempColor}
+                    onChange={(e) => setTempColor(e.target.value)}
+                    className="flex-1 px-3 py-2 border border-gray-300 rounded-l-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    placeholder="Add color"
+                    onKeyPress={(e) => e.key === "Enter" && addColor()}
                   />
+                  <button
+                    type="button"
+                    onClick={addColor}
+                    className="px-3 py-2 bg-blue-600 text-white rounded-r-md hover:bg-blue-700"
+                  >
+                    Add
+                  </button>
                 </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Colors
-                  </label>
-                  <div className="flex">
-                    <input
-                      type="text"
-                      value={tempColor}
-                      onChange={(e) => setTempColor(e.target.value)}
-                      className="flex-1 px-3 py-2 border border-gray-300 rounded-l-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      placeholder="Add color"
-                      onKeyPress={(e) => e.key === "Enter" && addColor()}
-                    />
-                    <button
-                      type="button"
-                      onClick={addColor}
-                      className="px-3 py-2 bg-blue-600 text-white rounded-r-md hover:bg-blue-700"
-                    >
-                      Add
-                    </button>
-                  </div>
-                  {formData.specifications.color.length > 0 && (
-                    <div className="mt-2 flex flex-wrap gap-2">
-                      {formData.specifications.color.map((color, index) => (
-                        <span
-                          key={index}
-                          className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800"
+                {formData.specifications.color.length > 0 && (
+                  <div className="mt-2 flex flex-wrap gap-2">
+                    {formData.specifications.color.map((color, index) => (
+                      <span
+                        key={index}
+                        className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800"
+                      >
+                        {color}
+                        <button
+                          type="button"
+                          onClick={() => removeColor(color)}
+                          className="ml-1.5 inline-flex text-blue-400 hover:text-blue-600"
                         >
-                          {color}
-                          <button
-                            type="button"
-                            onClick={() => removeColor(color)}
-                            className="ml-1.5 inline-flex text-blue-400 hover:text-blue-600"
-                          >
-                            <X className="h-3 w-3" />
-                          </button>
-                        </span>
-                      ))}
-                    </div>
-                  )}
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Sizes
-                  </label>
-                  <div className="flex">
-                    <input
-                      type="text"
-                      value={tempSize}
-                      onChange={(e) => setTempSize(e.target.value)}
-                      className="flex-1 px-3 py-2 border border-gray-300 rounded-l-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      placeholder="Add size"
-                      onKeyPress={(e) => e.key === "Enter" && addSize()}
-                    />
-                    <button
-                      type="button"
-                      onClick={addSize}
-                      className="px-3 py-2 bg-blue-600 text-white rounded-r-md hover:bg-blue-700"
-                    >
-                      Add
-                    </button>
+                          <X className="h-3 w-3" />
+                        </button>
+                      </span>
+                    ))}
                   </div>
-                  {formData.specifications.size.length > 0 && (
-                    <div className="mt-2 flex flex-wrap gap-2">
-                      {formData.specifications.size.map((size, index) => (
-                        <span
-                          key={index}
-                          className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800"
-                        >
-                          {size}
-                          <button
-                            type="button"
-                            onClick={() => removeSize(size)}
-                            className="ml-1.5 inline-flex text-green-400 hover:text-green-600"
-                          >
-                            <X className="h-3 w-3" />
-                          </button>
-                        </span>
-                      ))}
-                    </div>
-                  )}
+                )}
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Sizes
+                </label>
+                <div className="flex">
+                  <input
+                    type="text"
+                    value={tempSize}
+                    onChange={(e) => setTempSize(e.target.value)}
+                    className="flex-1 px-3 py-2 border border-gray-300 rounded-l-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    placeholder="Add size"
+                    onKeyPress={(e) => e.key === "Enter" && addSize()}
+                  />
+                  <button
+                    type="button"
+                    onClick={addSize}
+                    className="px-3 py-2 bg-blue-600 text-white rounded-r-md hover:bg-blue-700"
+                  >
+                    Add
+                  </button>
                 </div>
+                {formData.specifications.size.length > 0 && (
+                  <div className="mt-2 flex flex-wrap gap-2">
+                    {formData.specifications.size.map((size, index) => (
+                      <span
+                        key={index}
+                        className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800"
+                      >
+                        {size}
+                        <button
+                          type="button"
+                          onClick={() => removeSize(size)}
+                          className="ml-1.5 inline-flex text-green-400 hover:text-green-600"
+                        >
+                          <X className="h-3 w-3" />
+                        </button>
+                      </span>
+                    ))}
+                  </div>
+                )}
               </div>
             </div>
-
-            {/* Category-specific specifications */}
-            {formData.category && getCurrentCategorySpecs().fields.length > 0 && (
-              <div>
-                <h3 className="text-md font-medium text-gray-800 mb-4">
-                  {formData.category.charAt(0).toUpperCase() + formData.category.slice(1)} Specific Information
-                </h3>
-                {renderCategorySpecifications()}
-              </div>
-            )}
           </div>
 
           {/* Tags Section */}
