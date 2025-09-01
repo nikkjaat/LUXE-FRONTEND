@@ -45,6 +45,122 @@ const AddProduct = () => {
   const [tempTag, setTempTag] = useState("");
   const [errors, setErrors] = useState({});
 
+  // Dynamic specifications based on category
+  const getCategorySpecifications = (category) => {
+    const specifications = {
+      women: {
+        fields: ['size', 'color', 'material', 'careInstructions', 'fit'],
+        labels: {
+          size: 'Size (XS, S, M, L, XL, XXL)',
+          color: 'Available Colors',
+          material: 'Material/Fabric',
+          careInstructions: 'Care Instructions',
+          fit: 'Fit Type (Regular, Slim, Loose)'
+        }
+      },
+      men: {
+        fields: ['size', 'color', 'material', 'careInstructions', 'fit'],
+        labels: {
+          size: 'Size (XS, S, M, L, XL, XXL)',
+          color: 'Available Colors',
+          material: 'Material/Fabric',
+          careInstructions: 'Care Instructions',
+          fit: 'Fit Type (Regular, Slim, Loose)'
+        }
+      },
+      accessories: {
+        fields: ['color', 'material', 'dimensions', 'weight', 'compatibility'],
+        labels: {
+          color: 'Available Colors',
+          material: 'Material',
+          dimensions: 'Dimensions (L x W x H)',
+          weight: 'Weight (grams)',
+          compatibility: 'Compatibility'
+        }
+      },
+      home: {
+        fields: ['color', 'material', 'dimensions', 'weight', 'roomType'],
+        labels: {
+          color: 'Available Colors',
+          material: 'Material',
+          dimensions: 'Dimensions (L x W x H cm)',
+          weight: 'Weight (kg)',
+          roomType: 'Suitable for Room'
+        }
+      },
+      electronics: {
+        fields: ['color', 'dimensions', 'weight', 'warranty', 'connectivity'],
+        labels: {
+          color: 'Available Colors',
+          dimensions: 'Dimensions (L x W x H cm)',
+          weight: 'Weight (kg)',
+          warranty: 'Warranty Period',
+          connectivity: 'Connectivity Options'
+        }
+      },
+      beauty: {
+        fields: ['color', 'skinType', 'ingredients', 'volume', 'expiry'],
+        labels: {
+          color: 'Available Shades',
+          skinType: 'Suitable for Skin Type',
+          ingredients: 'Key Ingredients',
+          volume: 'Volume/Weight',
+          expiry: 'Shelf Life'
+        }
+      },
+      sports: {
+        fields: ['size', 'color', 'material', 'weight', 'sportType'],
+        labels: {
+          size: 'Size',
+          color: 'Available Colors',
+          material: 'Material',
+          weight: 'Weight (kg)',
+          sportType: 'Sport Category'
+        }
+      },
+      kids: {
+        fields: ['size', 'color', 'material', 'ageGroup', 'safety'],
+        labels: {
+          size: 'Size/Age Group',
+          color: 'Available Colors',
+          material: 'Material',
+          ageGroup: 'Recommended Age',
+          safety: 'Safety Certifications'
+        }
+      }
+    };
+    
+    return specifications[category] || {
+      fields: ['color', 'material', 'dimensions', 'weight'],
+      labels: {
+        color: 'Available Colors',
+        material: 'Material',
+        dimensions: 'Dimensions',
+        weight: 'Weight'
+      }
+    };
+  };
+
+  const [dynamicSpecs, setDynamicSpecs] = useState({});
+
+  // Update dynamic specifications when category changes
+  useEffect(() => {
+    if (formData.category) {
+      const categorySpecs = getCategorySpecifications(formData.category);
+      const newDynamicSpecs = {};
+      
+      categorySpecs.fields.forEach(field => {
+        if (field === 'color' || field === 'size') {
+          newDynamicSpecs[field] = formData.specifications[field] || [];
+        } else {
+          newDynamicSpecs[field] = formData.specifications[field] || '';
+        }
+      });
+      
+      setDynamicSpecs(newDynamicSpecs);
+    }
+  }, [formData.category]);
+
   const categories = [
     "accessories",
     "women",
@@ -797,174 +913,250 @@ const AddProduct = () => {
           {/* Specifications Section */}
           <div className="bg-white shadow rounded-lg p-6">
             <h2 className="text-lg font-medium text-gray-900 mb-6">
-              Specifications
+              Product Specifications
+              {formData.category && (
+                <span className="text-sm text-gray-500 ml-2">
+                  (for {formData.category.charAt(0).toUpperCase() + formData.category.slice(1)})
+                </span>
+              )}
             </h2>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div>
-                <label
-                  htmlFor="specifications.weight"
-                  className="block text-sm font-medium text-gray-700 mb-2"
-                >
-                  Weight (kg)
-                </label>
-                <input
-                  type="number"
-                  id="specifications.weight"
-                  name="specifications.weight"
-                  min="0"
-                  step="0.01"
-                  value={formData.specifications.weight}
-                  onChange={handleChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="0.00"
-                />
+            {!formData.category ? (
+              <div className="text-center py-8 text-gray-500">
+                <Package className="h-12 w-12 mx-auto mb-4 text-gray-400" />
+                <p>Please select a category first to see relevant specifications</p>
               </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Dimensions (cm)
-                </label>
-                <div className="grid grid-cols-3 gap-2">
-                  <div>
-                    <input
-                      type="number"
-                      name="specifications.dimensions.length"
-                      min="0"
-                      step="0.1"
-                      value={formData.specifications.dimensions.length}
-                      onChange={handleChange}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      placeholder="Length"
-                    />
-                  </div>
-                  <div>
-                    <input
-                      type="number"
-                      name="specifications.dimensions.width"
-                      min="0"
-                      step="0.1"
-                      value={formData.specifications.dimensions.width}
-                      onChange={handleChange}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      placeholder="Width"
-                    />
-                  </div>
-                  <div>
-                    <input
-                      type="number"
-                      name="specifications.dimensions.height"
-                      min="0"
-                      step="0.1"
-                      value={formData.specifications.dimensions.height}
-                      onChange={handleChange}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      placeholder="Height"
-                    />
-                  </div>
+            ) : (
+              <div className="space-y-6">
+                {getCategorySpecifications(formData.category).fields.map((field) => {
+                  const label = getCategorySpecifications(formData.category).labels[field];
+                  
+                  if (field === 'color') {
+                    return (
+                      <div key={field}>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                          {label}
+                        </label>
+                        <div className="flex">
+                          <input
+                            type="text"
+                            value={tempColor}
+                            onChange={(e) => setTempColor(e.target.value)}
+                            className="flex-1 px-3 py-2 border border-gray-300 rounded-l-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            placeholder="Add color"
+                            onKeyPress={(e) => e.key === "Enter" && addColor()}
+                          />
+                          <button
+                            type="button"
+                            onClick={addColor}
+                            className="px-3 py-2 bg-blue-600 text-white rounded-r-md hover:bg-blue-700"
+                          >
+                            Add
+                          </button>
+                        </div>
+                        {formData.specifications.color.length > 0 && (
+                          <div className="mt-2 flex flex-wrap gap-2">
+                            {formData.specifications.color.map((color, index) => (
+                              <span
+                                key={index}
+                                className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800"
+                              >
+                                {color}
+                                <button
+                                  type="button"
+                                  onClick={() => removeColor(color)}
+                                  className="ml-1.5 inline-flex text-blue-400 hover:text-blue-600"
+                                >
+                                  <X className="h-3 w-3" />
+                                </button>
+                              </span>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    );
+                  }
+                  
+                  if (field === 'size') {
+                    return (
+                      <div key={field}>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                          {label}
+                        </label>
+                        <div className="flex">
+                          <input
+                            type="text"
+                            value={tempSize}
+                            onChange={(e) => setTempSize(e.target.value)}
+                            className="flex-1 px-3 py-2 border border-gray-300 rounded-l-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            placeholder="Add size"
+                            onKeyPress={(e) => e.key === "Enter" && addSize()}
+                          />
+                          <button
+                            type="button"
+                            onClick={addSize}
+                            className="px-3 py-2 bg-blue-600 text-white rounded-r-md hover:bg-blue-700"
+                          >
+                            Add
+                          </button>
+                        </div>
+                        {formData.specifications.size.length > 0 && (
+                          <div className="mt-2 flex flex-wrap gap-2">
+                            {formData.specifications.size.map((size, index) => (
+                              <span
+                                key={index}
+                                className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800"
+                              >
+                                {size}
+                                <button
+                                  type="button"
+                                  onClick={() => removeSize(size)}
+                                  className="ml-1.5 inline-flex text-green-400 hover:text-green-600"
+                                >
+                                  <X className="h-3 w-3" />
+                                </button>
+                              </span>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    );
+                  }
+                  
+                  if (field === 'dimensions') {
+                    return (
+                      <div key={field}>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                          {label}
+                        </label>
+                        <div className="grid grid-cols-3 gap-2">
+                          <input
+                            type="number"
+                            name="specifications.dimensions.length"
+                            min="0"
+                            step="0.1"
+                            value={formData.specifications.dimensions.length}
+                            onChange={handleChange}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            placeholder="Length"
+                          />
+                          <input
+                            type="number"
+                            name="specifications.dimensions.width"
+                            min="0"
+                            step="0.1"
+                            value={formData.specifications.dimensions.width}
+                            onChange={handleChange}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            placeholder="Width"
+                          />
+                          <input
+                            type="number"
+                            name="specifications.dimensions.height"
+                            min="0"
+                            step="0.1"
+                            value={formData.specifications.dimensions.height}
+                            onChange={handleChange}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            placeholder="Height"
+                          />
+                        </div>
+                      </div>
+                    );
+                  }
+                  
+                  // For other dynamic fields
+                  return (
+                    <div key={field}>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        {label}
+                      </label>
+                      <input
+                        type="text"
+                        name={`specifications.${field}`}
+                        value={formData.specifications[field] || ''}
+                        onChange={handleChange}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        placeholder={`Enter ${label.toLowerCase()}`}
+                      />
+                    </div>
+                  );
+                })}
+                
+                {/* Common Weight Field */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Weight {formData.category === 'electronics' || formData.category === 'home' ? '(kg)' : '(grams)'}
+                  </label>
+                  <input
+                    type="number"
+                    name="specifications.weight"
+                    min="0"
+                    step="0.01"
+                    value={formData.specifications.weight}
+                    onChange={handleChange}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    placeholder="0.00"
+                  />
                 </div>
-              </div>
-
-              <div>
-                <label
-                  htmlFor="specifications.material"
-                  className="block text-sm font-medium text-gray-700 mb-2"
-                >
-                  Material
-                </label>
-                <input
-                  type="text"
-                  id="specifications.material"
-                  name="specifications.material"
-                  value={formData.specifications.material}
-                  onChange={handleChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="e.g., Cotton, Wood, Metal"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Colors
-                </label>
-                <div className="flex">
+                
+                {/* Common Material Field */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Material
+                  </label>
                   <input
                     type="text"
-                    value={tempColor}
-                    onChange={(e) => setTempColor(e.target.value)}
-                    className="flex-1 px-3 py-2 border border-gray-300 rounded-l-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    placeholder="Add color"
-                    onKeyPress={(e) => e.key === "Enter" && addColor()}
+                    name="specifications.material"
+                    value={formData.specifications.material}
+                    onChange={handleChange}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    placeholder={
+                      formData.category === 'women' || formData.category === 'men' 
+                        ? 'e.g., Cotton, Polyester, Silk'
+                        : formData.category === 'electronics'
+                        ? 'e.g., Aluminum, Plastic, Glass'
+                        : formData.category === 'home'
+                        ? 'e.g., Wood, Metal, Ceramic'
+                        : 'e.g., Cotton, Wood, Metal'
+                    }
                   />
-                  <button
-                    type="button"
-                    onClick={addColor}
-                    className="px-3 py-2 bg-blue-600 text-white rounded-r-md hover:bg-blue-700"
-                  >
-                    Add
-                  </button>
                 </div>
-                {formData.specifications.color.length > 0 && (
-                  <div className="mt-2 flex flex-wrap gap-2">
-                    {formData.specifications.color.map((color, index) => (
-                      <span
-                        key={index}
-                        className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800"
-                      >
-                        {color}
-                        <button
-                          type="button"
-                          onClick={() => removeColor(color)}
-                          className="ml-1.5 inline-flex text-blue-400 hover:text-blue-600"
-                        >
-                          <X className="h-3 w-3" />
-                        </button>
-                      </span>
-                    ))}
-                  </div>
-                )}
               </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Sizes
-                </label>
-                <div className="flex">
-                  <input
-                    type="text"
-                    value={tempSize}
-                    onChange={(e) => setTempSize(e.target.value)}
-                    className="flex-1 px-3 py-2 border border-gray-300 rounded-l-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    placeholder="Add size"
-                    onKeyPress={(e) => e.key === "Enter" && addSize()}
-                  />
-                  <button
-                    type="button"
-                    onClick={addSize}
-                    className="px-3 py-2 bg-blue-600 text-white rounded-r-md hover:bg-blue-700"
-                  >
-                    Add
-                  </button>
-                </div>
-                {formData.specifications.size.length > 0 && (
-                  <div className="mt-2 flex flex-wrap gap-2">
-                    {formData.specifications.size.map((size, index) => (
-                      <span
-                        key={index}
-                        className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800"
-                      >
-                        {size}
-                        <button
-                          type="button"
-                          onClick={() => removeSize(size)}
-                          className="ml-1.5 inline-flex text-green-400 hover:text-green-600"
-                        >
-                          <X className="h-3 w-3" />
-                        </button>
-                      </span>
-                    ))}
-                  </div>
-                )}
+            )}
+            
+            {formData.category && (
+              <div className="mt-4 p-4 bg-blue-50 rounded-lg">
+                <h4 className="text-sm font-medium text-blue-900 mb-2">
+                  Category-specific Guidelines:
+                </h4>
+                <ul className="text-sm text-blue-800 space-y-1">
+                  {formData.category === 'women' || formData.category === 'men' ? (
+                    <>
+                      <li>• Include size chart for clothing items</li>
+                      <li>• Specify fabric composition and care instructions</li>
+                      <li>• Mention fit type (regular, slim, loose)</li>
+                    </>
+                  ) : formData.category === 'electronics' ? (
+                    <>
+                      <li>• Include technical specifications and compatibility</li>
+                      <li>• Mention warranty period and support</li>
+                      <li>• Specify power requirements if applicable</li>
+                    </>
+                  ) : formData.category === 'beauty' ? (
+                    <>
+                      <li>• List key ingredients and benefits</li>
+                      <li>• Specify skin type suitability</li>
+                      <li>• Include usage instructions and shelf life</li>
+                    </>
+                  ) : (
+                    <>
+                      <li>• Provide accurate measurements and specifications</li>
+                      <li>• Include material composition and quality details</li>
+                      <li>• Mention any special features or benefits</li>
+                    </>
+                  )}
+                </ul>
               </div>
             </div>
           </div>

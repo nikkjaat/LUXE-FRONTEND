@@ -16,7 +16,8 @@ import {
   Info,
   Bell, 
   FileText,
-  TrendingUp
+  TrendingUp,
+  Package
 } from "lucide-react";
 import { useAuth } from "../../context/AuthContext";
 import { useCart } from "../../context/CartContext";
@@ -320,14 +321,40 @@ const Header = () => {
 
                       {/* Vendor-specific items */}
                       {user.role === "vendor" && (
-                        <Link
-                          to="/vendor/add-product"
-                          className={styles.dropdownItem}
-                          onClick={() => setIsUserMenuOpen(false)}
-                        >
-                          <Store className="h-4 w-4" />
-                          <span>Add Product</span>
-                        </Link>
+                        <>
+                          <Link
+                            to="/vendor/add-product"
+                            className={styles.dropdownItem}
+                            onClick={() => setIsUserMenuOpen(false)}
+                          >
+                            <Store className="h-4 w-4" />
+                            <span>Add Product</span>
+                          </Link>
+                          <Link
+                            to="/vendor/orders"
+                            className={styles.dropdownItem}
+                            onClick={() => setIsUserMenuOpen(false)}
+                          >
+                            <Package className="h-4 w-4" />
+                            <span>My Orders</span>
+                          </Link>
+                          <Link
+                            to="/vendor/analytics"
+                            className={styles.dropdownItem}
+                            onClick={() => setIsUserMenuOpen(false)}
+                          >
+                            <TrendingUp className="h-4 w-4" />
+                            <span>Analytics</span>
+                          </Link>
+                          <Link
+                            to="/vendor/profile"
+                            className={styles.dropdownItem}
+                            onClick={() => setIsUserMenuOpen(false)}
+                          >
+                            <User className="h-4 w-4" />
+                            <span>Store Profile</span>
+                          </Link>
+                        </>
                       )}
 
                       <div className={styles.dropdownDivider}></div>

@@ -37,6 +37,9 @@ import VendorAnalytics from "./pages/vendor/VendorAnalytics";
 import VendorProfile from "./pages/vendor/VendorProfile";
 import NotificationCenter from "./pages/admin/NotificationCenter";
 import ReportsCenter from "./pages/admin/ReportsCenter";
+import VendorOrders from "./pages/vendor/VendorOrders";
+import VendorAnalytics from "./pages/vendor/VendorAnalytics";
+import VendorProfile from "./pages/vendor/VendorProfile";
 import RoleBasedRoute from "./components/RoleBasedRoute";
 import PromotionBanner from "./components/PromotionBanner";
 import LiveChat from "./components/LiveChat";
@@ -248,6 +251,48 @@ function AppContent() {
                                   element={
                                     <RoleBasedRoute allowedRoles={["vendor"]}>
                                       <AddProduct />
+                                    </RoleBasedRoute>
+                                  }
+                                />
+                                <Route
+                                  path="/vendor/orders"
+                                  element={
+                                    <RoleBasedRoute allowedRoles={["vendor"]}>
+                                      <VendorOrders />
+                                    </RoleBasedRoute>
+                                  }
+                                />
+                                <Route
+                                  path="/vendor/analytics"
+                                  element={
+                                    <RoleBasedRoute allowedRoles={["vendor"]}>
+                                      <VendorAnalytics />
+                                    </RoleBasedRoute>
+                                  }
+                                />
+                                <Route
+                                  path="/vendor/profile"
+                                  element={
+                                    <RoleBasedRoute allowedRoles={["vendor"]}>
+                                      <VendorProfile />
+                                    </RoleBasedRoute>
+                                  }
+                                />
+
+                                {/* Admin Routes */}
+                                <Route
+                                  path="/admin/notifications"
+                                  element={
+                                    <RoleBasedRoute allowedRoles={["admin"]}>
+                                      <NotificationCenter />
+                                    </RoleBasedRoute>
+                                  }
+                                />
+                                <Route
+                                  path="/admin/reports"
+                                  element={
+                                    <RoleBasedRoute allowedRoles={["admin"]}>
+                                      <ReportsCenter />
                                     </RoleBasedRoute>
                                   }
                                 />

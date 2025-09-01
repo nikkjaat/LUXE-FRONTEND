@@ -809,6 +809,26 @@ const AdminDashboard = () => {
               </div>
             </Link>
             <Link
+              to="/admin/notifications"
+              className="flex items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
+            >
+              <Bell className="h-8 w-8 text-blue-600 mr-3" />
+              <div>
+                <p className="font-medium text-gray-900">Notification Center</p>
+                <p className="text-sm text-gray-500">Send notifications</p>
+              </div>
+            </Link>
+            <Link
+              to="/admin/reports"
+              className="flex items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
+            >
+              <FileText className="h-8 w-8 text-purple-600 mr-3" />
+              <div>
+                <p className="font-medium text-gray-900">Reports Center</p>
+                <p className="text-sm text-gray-500">Generate reports</p>
+              </div>
+            </Link>
+            <Link
               to="/admin/settings"
               className="flex items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
             >

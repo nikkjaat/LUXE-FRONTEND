@@ -515,6 +515,54 @@ class ApiService {
     return this.request(`/admin/analytics/revenue?${queryString}`);
   }
 
+  // Admin Inventory Management
+  async adminGetInventoryReport() {
+    return this.request("/admin/inventory/report");
+  }
+
+  async adminGetLowStockProducts() {
+    return this.request("/admin/inventory/low-stock");
+  }
+
+  async adminUpdateInventory(productId, stockData) {
+    return this.request(`/admin/inventory/${productId}`, {
+      method: "PUT",
+      body: JSON.stringify(stockData),
+    });
+  }
+
+  // Admin Customer Management
+  async adminGetCustomerAnalytics() {
+    return this.request("/admin/customers/analytics");
+  }
+
+  async adminGetCustomerOrders(customerId) {
+    return this.request(`/admin/customers/${customerId}/orders`);
+  }
+
+  async adminSendCustomerNotification(customerId, notificationData) {
+    return this.request(`/admin/customers/${customerId}/notify`, {
+      method: "POST",
+      body: JSON.stringify(notificationData),
+    });
+  }
+
+  // Admin Financial Reports
+  async adminGetFinancialReport(params = {}) {
+    const queryString = new URLSearchParams(params).toString();
+    return this.request(`/admin/financial/report?${queryString}`);
+  }
+
+  async adminGetTaxReport(params = {}) {
+    const queryString = new URLSearchParams(params).toString();
+    return this.request(`/admin/financial/tax-report?${queryString}`);
+  }
+
+  async adminGetVendorPayouts(params = {}) {
+    const queryString = new URLSearchParams(params).toString();
+    return this.request(`/admin/financial/vendor-payouts?${queryString}`);
+  }
+
   // Admin Reports
   async adminGenerateReport(reportType, params = {}) {
     const queryString = new URLSearchParams(params).toString();
