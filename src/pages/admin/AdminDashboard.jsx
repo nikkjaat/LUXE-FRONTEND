@@ -307,9 +307,10 @@ const AdminDashboard = () => {
           <div className="space-y-8">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
               {/* Recent Activities */}
-              <div className="bg-white rounded-lg shadow">
+              <div className="bg-white rounded-lg shadow-lg">
                 <div className="p-6 border-b border-gray-200">
-                  <h3 className="text-lg font-medium text-gray-900">
+                  <h3 className="text-lg font-medium text-gray-900 flex items-center">
+                    <Activity className="h-5 w-5 mr-2 text-blue-600" />
                     Recent Activities
                   </h3>
                 </div>
@@ -338,9 +339,10 @@ const AdminDashboard = () => {
               </div>
 
               {/* Top Products */}
-              <div className="bg-white rounded-lg shadow">
+              <div className="bg-white rounded-lg shadow-lg">
                 <div className="p-6 border-b border-gray-200">
-                  <h3 className="text-lg font-medium text-gray-900">
+                  <h3 className="text-lg font-medium text-gray-900 flex items-center">
+                    <Package className="h-5 w-5 mr-2 text-purple-600" />
                     Top Products
                   </h3>
                 </div>
@@ -380,14 +382,15 @@ const AdminDashboard = () => {
             </div>
 
             {/* Quick Actions */}
-            <div className="bg-white rounded-lg shadow p-6">
-              <h3 className="text-lg font-medium text-gray-900 mb-4">
+            <div className="bg-white rounded-lg shadow-lg p-6">
+              <h3 className="text-lg font-medium text-gray-900 mb-6 flex items-center">
+                <Zap className="h-5 w-5 mr-2 text-orange-600" />
                 Quick Actions
               </h3>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                 <Link
                   to="/admin/vendor-applications"
-                  className="flex items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
+                  className="flex items-center p-4 bg-gradient-to-r from-blue-50 to-blue-100 border border-blue-200 rounded-lg hover:from-blue-100 hover:to-blue-200 transition-all"
                 >
                   <UserCheck className="h-8 w-8 text-blue-600 mr-3" />
                   <div>
@@ -401,9 +404,9 @@ const AdminDashboard = () => {
                 </Link>
                 <Link
                   to="/admin/promotions"
-                  className="flex items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
+                  className="flex items-center p-4 bg-gradient-to-r from-green-50 to-green-100 border border-green-200 rounded-lg hover:from-green-100 hover:to-green-200 transition-all"
                 >
-                  <Package className="h-8 w-8 text-green-600 mr-3" />
+                  <Gift className="h-8 w-8 text-green-600 mr-3" />
                   <div>
                     <p className="font-medium text-gray-900">
                       Manage Promotions
@@ -415,7 +418,7 @@ const AdminDashboard = () => {
                 </Link>
                 <Link
                   to="/admin/analytics"
-                  className="flex items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
+                  className="flex items-center p-4 bg-gradient-to-r from-purple-50 to-purple-100 border border-purple-200 rounded-lg hover:from-purple-100 hover:to-purple-200 transition-all"
                 >
                   <TrendingUp className="h-8 w-8 text-purple-600 mr-3" />
                   <div>
@@ -530,12 +533,19 @@ const AdminDashboard = () => {
         )}
 
         {activeTab === "products" && (
-          <div className="bg-white rounded-lg shadow">
+          <div className="bg-white rounded-lg shadow-lg">
             <div className="p-6 border-b border-gray-200 flex justify-between items-center">
-              <h3 className="text-lg font-medium text-gray-900">
+              <h3 className="text-lg font-medium text-gray-900 flex items-center">
+                <Package className="h-5 w-5 mr-2 text-purple-600" />
                 Product Management
               </h3>
               <div className="flex items-center space-x-4">
+                <Link
+                  to="/admin/products"
+                  className="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition-colors text-sm"
+                >
+                  Manage All Products
+                </Link>
                 <span className="text-sm text-gray-500">
                   Total: {products.length} products
                 </span>
@@ -602,9 +612,10 @@ const AdminDashboard = () => {
         )}
 
         {activeTab === "users" && (
-          <div className="bg-white rounded-lg shadow">
+          <div className="bg-white rounded-lg shadow-lg">
             <div className="p-6 border-b border-gray-200">
-              <h3 className="text-lg font-medium text-gray-900">
+              <h3 className="text-lg font-medium text-gray-900 flex items-center">
+                <Users className="h-5 w-5 mr-2 text-green-600" />
                 User Management
               </h3>
             </div>
@@ -645,9 +656,17 @@ const AdminDashboard = () => {
                 </div>
               </div>
 
-              <div className="text-center py-8 text-gray-500">
-                <Users className="h-12 w-12 mx-auto mb-4 text-gray-400" />
-                <p>User management interface coming soon</p>
+              <div className="text-center py-8">
+                <Users className="h-16 w-16 mx-auto mb-4 text-gray-400" />
+                <h4 className="text-lg font-medium text-gray-900 mb-2">User Overview</h4>
+                <p className="text-gray-500 mb-4">Quick user statistics and management</p>
+                <Link
+                  to="/admin/users"
+                  className="bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 transition-colors inline-flex items-center"
+                >
+                  <Users className="h-5 w-5 mr-2" />
+                  Manage All Users
+                </Link>
               </div>
             </div>
           </div>
@@ -656,26 +675,35 @@ const AdminDashboard = () => {
         {activeTab === "analytics" && (
           <div className="space-y-8">
             {/* Analytics Controls */}
-            <div className="bg-white rounded-lg shadow p-6">
+            <div className="bg-white rounded-lg shadow-lg p-6">
               <div className="flex justify-between items-center">
-                <h3 className="text-lg font-medium text-gray-900">
+                <h3 className="text-lg font-medium text-gray-900 flex items-center">
+                  <TrendingUp className="h-5 w-5 mr-2 text-blue-600" />
                   Analytics Overview
                 </h3>
-                <select
-                  value={selectedTimeframe}
-                  onChange={(e) => setSelectedTimeframe(e.target.value)}
-                  className="border border-gray-300 rounded-md px-3 py-2"
-                >
-                  <option value="daily">Daily</option>
-                  <option value="weekly">Weekly</option>
-                  <option value="monthly">Monthly</option>
-                </select>
+                <div className="flex items-center space-x-4">
+                  <select
+                    value={selectedTimeframe}
+                    onChange={(e) => setSelectedTimeframe(e.target.value)}
+                    className="border border-gray-300 rounded-md px-3 py-2"
+                  >
+                    <option value="daily">Daily</option>
+                    <option value="weekly">Weekly</option>
+                    <option value="monthly">Monthly</option>
+                  </select>
+                  <Link
+                    to="/admin/analytics"
+                    className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors text-sm"
+                  >
+                    Detailed Analytics
+                  </Link>
+                </div>
               </div>
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
               {/* Sales Chart */}
-              <div className="bg-white rounded-lg shadow p-6">
+              <div className="bg-white rounded-lg shadow-lg p-6">
                 <h3 className="text-lg font-medium text-gray-900 mb-4">
                   Sales Analytics
                 </h3>
@@ -692,7 +720,7 @@ const AdminDashboard = () => {
               </div>
 
               {/* Visitor Analytics */}
-              <div className="bg-white rounded-lg shadow p-6">
+              <div className="bg-white rounded-lg shadow-lg p-6">
                 <h3 className="text-lg font-medium text-gray-900 mb-4">
                   Visitor Analytics
                 </h3>
@@ -709,7 +737,7 @@ const AdminDashboard = () => {
             </div>
 
             {/* Top Categories */}
-            <div className="bg-white rounded-lg shadow p-6">
+            <div className="bg-white rounded-lg shadow-lg p-6">
               <h3 className="text-lg font-medium text-gray-900 mb-4">
                 Top Categories
               </h3>
@@ -733,14 +761,15 @@ const AdminDashboard = () => {
         )}
 
         {/* Quick Navigation to Other Admin Pages */}
-        <div className="mt-8 bg-white rounded-lg shadow p-6">
-          <h3 className="text-lg font-medium text-gray-900 mb-4">
+        <div className="mt-8 bg-white rounded-lg shadow-lg p-6">
+          <h3 className="text-lg font-medium text-gray-900 mb-6 flex items-center">
+            <Grid className="h-5 w-5 mr-2 text-indigo-600" />
             Admin Tools
           </h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
             <Link
               to="/admin/users"
-              className="flex items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
+              className="flex items-center p-6 bg-gradient-to-br from-blue-50 to-blue-100 border border-blue-200 rounded-xl hover:from-blue-100 hover:to-blue-200 transition-all transform hover:scale-105"
             >
               <Users className="h-8 w-8 text-blue-600 mr-3" />
               <div>
@@ -750,7 +779,7 @@ const AdminDashboard = () => {
             </Link>
             <Link
               to="/admin/products"
-              className="flex items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
+              className="flex items-center p-6 bg-gradient-to-br from-green-50 to-green-100 border border-green-200 rounded-xl hover:from-green-100 hover:to-green-200 transition-all transform hover:scale-105"
             >
               <Package className="h-8 w-8 text-green-600 mr-3" />
               <div>
@@ -760,7 +789,7 @@ const AdminDashboard = () => {
             </Link>
             <Link
               to="/admin/orders"
-              className="flex items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
+              className="flex items-center p-6 bg-gradient-to-br from-purple-50 to-purple-100 border border-purple-200 rounded-xl hover:from-purple-100 hover:to-purple-200 transition-all transform hover:scale-105"
             >
               <ShoppingBag className="h-8 w-8 text-purple-600 mr-3" />
               <div>
@@ -770,7 +799,7 @@ const AdminDashboard = () => {
             </Link>
             <Link
               to="/admin/vendor-applications"
-              className="flex items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
+              className="flex items-center p-6 bg-gradient-to-br from-orange-50 to-orange-100 border border-orange-200 rounded-xl hover:from-orange-100 hover:to-orange-200 transition-all transform hover:scale-105"
             >
               <Store className="h-8 w-8 text-orange-600 mr-3" />
               <div>
@@ -780,7 +809,7 @@ const AdminDashboard = () => {
             </Link>
             <Link
               to="/admin/categories"
-              className="flex items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
+              className="flex items-center p-6 bg-gradient-to-br from-indigo-50 to-indigo-100 border border-indigo-200 rounded-xl hover:from-indigo-100 hover:to-indigo-200 transition-all transform hover:scale-105"
             >
               <Grid className="h-8 w-8 text-indigo-600 mr-3" />
               <div>
@@ -790,7 +819,7 @@ const AdminDashboard = () => {
             </Link>
             <Link
               to="/admin/analytics"
-              className="flex items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
+              className="flex items-center p-6 bg-gradient-to-br from-pink-50 to-pink-100 border border-pink-200 rounded-xl hover:from-pink-100 hover:to-pink-200 transition-all transform hover:scale-105"
             >
               <TrendingUp className="h-8 w-8 text-pink-600 mr-3" />
               <div>
@@ -800,7 +829,7 @@ const AdminDashboard = () => {
             </Link>
             <Link
               to="/admin/promotions"
-              className="flex items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
+              className="flex items-center p-6 bg-gradient-to-br from-yellow-50 to-yellow-100 border border-yellow-200 rounded-xl hover:from-yellow-100 hover:to-yellow-200 transition-all transform hover:scale-105"
             >
               <Gift className="h-8 w-8 text-yellow-600 mr-3" />
               <div>
@@ -810,7 +839,7 @@ const AdminDashboard = () => {
             </Link>
             <Link
               to="/admin/notifications"
-              className="flex items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
+              className="flex items-center p-6 bg-gradient-to-br from-blue-50 to-blue-100 border border-blue-200 rounded-xl hover:from-blue-100 hover:to-blue-200 transition-all transform hover:scale-105"
             >
               <Bell className="h-8 w-8 text-blue-600 mr-3" />
               <div>
@@ -820,7 +849,7 @@ const AdminDashboard = () => {
             </Link>
             <Link
               to="/admin/reports"
-              className="flex items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
+              className="flex items-center p-6 bg-gradient-to-br from-purple-50 to-purple-100 border border-purple-200 rounded-xl hover:from-purple-100 hover:to-purple-200 transition-all transform hover:scale-105"
             >
               <FileText className="h-8 w-8 text-purple-600 mr-3" />
               <div>
@@ -830,7 +859,7 @@ const AdminDashboard = () => {
             </Link>
             <Link
               to="/admin/settings"
-              className="flex items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
+              className="flex items-center p-6 bg-gradient-to-br from-gray-50 to-gray-100 border border-gray-200 rounded-xl hover:from-gray-100 hover:to-gray-200 transition-all transform hover:scale-105"
             >
               <Settings className="h-8 w-8 text-gray-600 mr-3" />
               <div>
